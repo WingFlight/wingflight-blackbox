@@ -414,7 +414,7 @@ function HeaderDialog(dialog, onSave) {
             {name: 'Temperatures', description: 'Temperatures'},
         ];
 
-        if(sysConfig.firmwareType == FIRMWARE_TYPE_ROTORFLIGHT && semver.gte(sysConfig.firmwareVersion, '4.4.0')) {
+        if((sysConfig.firmwareType == FIRMWARE_TYPE_ROTORFLIGHT || sysConfig.firmwareType == FIRMWARE_TYPE_WINGFLIGHT) && semver.gte(sysConfig.firmwareVersion, '4.4.0')) {
             fields = [...fields, ...[
                 {name: 'ESC', description: 'ESC Telemetry'},
                 {name: 'BEC', description: 'BEC Telemetry'},
@@ -644,6 +644,7 @@ function HeaderDialog(dialog, onSave) {
 
                 switch(sysConfig.firmwareType) {
                         case FIRMWARE_TYPE_ROTORFLIGHT:
+                        case FIRMWARE_TYPE_WINGFLIGHT:
                         case FIRMWARE_TYPE_BETAFLIGHT:
                         case FIRMWARE_TYPE_CLEANFLIGHT:
                                 $('.header-dialog-toggle').hide(); // selection button is not required
@@ -680,6 +681,10 @@ function HeaderDialog(dialog, onSave) {
                 } else if (sysConfig.firmwareType == FIRMWARE_TYPE_ROTORFLIGHT) {
                         PID_CONTROLLER_TYPE = ([
                                         'ROTORFLIGHT',
+                                ])
+                } else if (sysConfig.firmwareType == FIRMWARE_TYPE_WINGFLIGHT) {
+                        PID_CONTROLLER_TYPE = ([
+                                        'WINGFLIGHT',
                                 ])
                 } else {
                         PID_CONTROLLER_TYPE = ([
@@ -780,6 +785,7 @@ function HeaderDialog(dialog, onSave) {
         setParameter('yaw_deadband'                                ,sysConfig.yaw_deadband,0);
 
         if ((activeSysConfig.firmwareType == FIRMWARE_TYPE_ROTORFLIGHT) ||
+            (activeSysConfig.firmwareType == FIRMWARE_TYPE_WINGFLIGHT) ||
             (activeSysConfig.firmwareType == FIRMWARE_TYPE_BETAFLIGHT  && semver.gte(activeSysConfig.firmwareVersion, '3.4.0'))) {
             renderSelect('gyro_hardware_lpf'       ,sysConfig.gyro_lpf, GYRO_HARDWARE_LPF);
 
@@ -815,6 +821,7 @@ function HeaderDialog(dialog, onSave) {
                 setParameter('gyro_lowpass2_hz'         ,sysConfig.gyro_lowpass2_hz,0);
 
         if ((activeSysConfig.firmwareType == FIRMWARE_TYPE_ROTORFLIGHT) ||
+            (activeSysConfig.firmwareType == FIRMWARE_TYPE_WINGFLIGHT) ||
             (activeSysConfig.firmwareType == FIRMWARE_TYPE_BETAFLIGHT  && semver.gte(activeSysConfig.firmwareVersion, '4.3.0'))) {
             setParameter('dynNotchCount'           ,sysConfig.dyn_notch_count        , 0);
         } else {
@@ -885,6 +892,7 @@ function HeaderDialog(dialog, onSave) {
 
         // rate_limits
         if ((activeSysConfig.firmwareType == FIRMWARE_TYPE_ROTORFLIGHT) ||
+            (activeSysConfig.firmwareType == FIRMWARE_TYPE_WINGFLIGHT) ||
             (activeSysConfig.firmwareType == FIRMWARE_TYPE_BETAFLIGHT  && semver.gte(activeSysConfig.firmwareVersion, '4.0.0'))) {
             setParameter('rate_limits_roll'  , sysConfig.rate_limits[0], 0);
             setParameter('rate_limits_pitch' , sysConfig.rate_limits[1], 0);
@@ -1014,6 +1022,7 @@ function HeaderDialog(dialog, onSave) {
 
         // Dynamic filters of Betaflight 4.0
         if((activeSysConfig.firmwareType == FIRMWARE_TYPE_ROTORFLIGHT ||
+           activeSysConfig.firmwareType == FIRMWARE_TYPE_WINGFLIGHT ||
            activeSysConfig.firmwareType == FIRMWARE_TYPE_BETAFLIGHT && semver.gte(activeSysConfig.firmwareVersion, '4.0.0')) &&
                 (sysConfig.gyro_lowpass_dyn_hz[0] != null) && (sysConfig.gyro_lowpass_dyn_hz[0] > 0) &&
                 (sysConfig.gyro_lowpass_dyn_hz[1] > sysConfig.gyro_lowpass_dyn_hz[0])) {
@@ -1067,7 +1076,7 @@ function HeaderDialog(dialog, onSave) {
         }
 
         /* Selected Fields */
-        if(activeSysConfig.firmwareType === FIRMWARE_TYPE_BETAFLIGHT && semver.gte(activeSysConfig.firmwareVersion, '4.3.0') || activeSysConfig.firmwareType === FIRMWARE_TYPE_ROTORFLIGHT) {
+        if(activeSysConfig.firmwareType === FIRMWARE_TYPE_BETAFLIGHT && semver.gte(activeSysConfig.firmwareVersion, '4.3.0') || activeSysConfig.firmwareType === FIRMWARE_TYPE_ROTORFLIGHT || activeSysConfig.firmwareType === FIRMWARE_TYPE_WINGFLIGHT) {
             builtSelectedFieldsList(sysConfig);
             $(".disabled_fields").css("display","table-header-group");
         } else {

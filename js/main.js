@@ -719,7 +719,7 @@ function BlackboxLogViewer() {
             currentOffsetCache.log      = file.name; // store the name of the loaded log file
             currentOffsetCache.index    = null;      // and clear the index
 
-            document.title = file.name + ' - Rotorflight Blackbox';
+            document.title = file.name + ' - WingFlight Blackbox';
 
             hasLog = true; html.toggleClass("has-log", hasLog);
             html.toggleClass("has-table", hasTable);
@@ -1023,7 +1023,7 @@ function BlackboxLogViewer() {
         $("#viewer-version").text('You are using version ' + VIEWER_VERSION);
         $(".viewer-version", statusBar).text('v'+VIEWER_VERSION);
         try {
-            $.getJSON('https://api.github.com/repos/rotorflight/rotorflight-blackbox/releases/latest',{},function(data){
+            $.getJSON('https://api.github.com/repos/WingFlight/wingflight-blackbox/releases/latest',{},function(data){
                 latestVersion = data;
                 if(latestVersion) {
                     $(".btn-viewer-download").text(latestVersion.tag_name);

@@ -23,14 +23,14 @@ const APPS_DIR = './apps/';
 const DEBUG_DIR = './debug/';
 const RELEASE_DIR = './release/';
 
-const LINUX_INSTALL_DIR = '/opt/rotorflight';
+const LINUX_INSTALL_DIR = '/opt/wingflight';
 
 var nwBuilderOptions = {
     version: '0.62.2',
     files: './dist/**/*',
-    macIcns: './images/rf_icon.icns',
-    macPlist: { 'CFBundleDisplayName': 'Rotorflight Blackbox'},
-    winIco: './images/rf_icon.ico',
+    macIcns: './images/wf_icon.icns',
+    macPlist: { 'CFBundleDisplayName': 'WingFlight Blackbox'},
+    winIco: './images/wf_icon.ico',
     downloadUrl: 'https://dl.node-webkit.org/',
 };
 
@@ -469,7 +469,7 @@ function release_zip(arch, appDirectory) {
     const output = getReleaseFilename(arch, 'zip');
     const base = path.join(appDirectory, pkg.name, arch);
 
-    return compressFiles(src, base, output, 'Rotorflight Blackbox');
+    return compressFiles(src, base, output, 'WingFlight Blackbox');
 }
 
 // Compress files from srcPath, using basePath, to outputFile in the RELEASE_DIR
@@ -513,7 +513,7 @@ function release_deb(arch, appDirectory, done) {
              description: pkg.description,
              preinst: [`rm -rf ${LINUX_INSTALL_DIR}/${pkg.name}`],
              postinst: [`chown root:root ${LINUX_INSTALL_DIR}`, `chown -R root:root ${LINUX_INSTALL_DIR}/${pkg.name}`, `cp ${LINUX_INSTALL_DIR}/${pkg.name}/mime/${pkg.name}.xml /usr/share/mime/packages/`, 'update-mime-database /usr/share/mime',
-                        `cp ${LINUX_INSTALL_DIR}/${pkg.name}/icon/bf_icon_128.png /usr/share/icons/hicolor/128x128/mimetypes/application-x-blackboxlog.png`, 'gtk-update-icon-cache /usr/share/icons/hicolor -f',
+                        `cp ${LINUX_INSTALL_DIR}/${pkg.name}/icon/wf_icon_128.png /usr/share/icons/hicolor/128x128/mimetypes/application-x-blackboxlog.png`, 'gtk-update-icon-cache /usr/share/icons/hicolor -f',
                         `xdg-desktop-menu install ${LINUX_INSTALL_DIR}/${pkg.name}/${pkg.name}.desktop`],
              prerm: [`rm /usr/share/mime/packages/${pkg.name}.xml`, 'update-mime-database /usr/share/mime',
                      'rm /usr/share/icons/hicolor/128x128/mimetypes/application-x-blackboxlog.png', 'gtk-update-icon-cache /usr/share/icons/hicolor -f',
@@ -550,7 +550,7 @@ function release_rpm(arch, appDirectory, done) {
                      src: '*',
                      dest: `${LINUX_INSTALL_DIR}/${pkg.name}` } ],
              postInstallScript: [`cp ${LINUX_INSTALL_DIR}/${pkg.name}/mime/${pkg.name}.xml /usr/share/mime/packages/`, 'update-mime-database /usr/share/mime',
-                                 `cp ${LINUX_INSTALL_DIR}/${pkg.name}/icon/bf_icon_128.png /usr/share/icons/hicolor/128x128/mimetypes/application-x-blackboxlog.png`, 'gtk-update-icon-cache /usr/share/icons/hicolor -f',
+                                 `cp ${LINUX_INSTALL_DIR}/${pkg.name}/icon/wf_icon_128.png /usr/share/icons/hicolor/128x128/mimetypes/application-x-blackboxlog.png`, 'gtk-update-icon-cache /usr/share/icons/hicolor -f',
                                  `xdg-desktop-menu install ${LINUX_INSTALL_DIR}/${pkg.name}/${pkg.name}.desktop`,
                                  'xdg-desktop-menu forceupdate'],
              preUninstallScript: [`rm /usr/share/mime/packages/${pkg.name}.xml`, 'update-mime-database /usr/share/mime',
@@ -583,10 +583,10 @@ function release_osx64(appDirectory) {
             target: path.join(RELEASE_DIR, getReleaseFilename('macOS', 'dmg')),
             basepath: path.join(appDirectory, pkg.name, 'osx64'),
             specification: {
-                title: 'Rotorflight Blackbox', // <= volume name; should be smaller than 27 chars.
+                title: 'WingFlight Blackbox', // <= volume name; should be smaller than 27 chars.
                 contents: [
                     { 'x': 448, 'y': 342, 'type': 'link', 'path': '/Applications' },
-                    { 'x': 192, 'y': 344, 'type': 'file', 'path': pkg.name + '.app', 'name': 'Rotorflight Blackbox.app' }
+                    { 'x': 192, 'y': 344, 'type': 'file', 'path': pkg.name + '.app', 'name': 'WingFlight Blackbox.app' }
                 ],
                 background: path.join(__dirname, 'images/dmg-background.png'),
                 format: 'UDZO',

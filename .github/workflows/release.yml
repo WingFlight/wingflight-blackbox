@@ -42,8 +42,8 @@ jobs:
     - name: Upload Artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: rotorflight-blackbox-linux-release-${{ env.GIT_VER }}
-        path: release/rotorflight-blackbox*
+        name: wingflight-blackbox-linux-release-${{ env.GIT_VER }}
+        path: release/wingflight-blackbox*
 
 
   macos:
@@ -81,8 +81,8 @@ jobs:
     - name: Upload Artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: rotorflight-blackbox-macos-release-${{ env.GIT_VER }}
-        path: release/rotorflight-blackbox*
+        name: wingflight-blackbox-macos-release-${{ env.GIT_VER }}
+        path: release/wingflight-blackbox*
 
 
   win64:
@@ -120,8 +120,8 @@ jobs:
     - name: Upload Artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: rotorflight-blackbox-win64-release-${{ env.GIT_VER }}
-        path: release/rotorflight-blackbox*
+        name: wingflight-blackbox-win64-release-${{ env.GIT_VER }}
+        path: release/wingflight-blackbox*
 
 
   win32:
@@ -159,8 +159,8 @@ jobs:
     - name: Upload Artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: rotorflight-blackbox-win32-release-${{ env.GIT_VER }}
-        path: release/rotorflight-blackbox*
+        name: wingflight-blackbox-win32-release-${{ env.GIT_VER }}
+        path: release/wingflight-blackbox*
 
 
   release:
@@ -191,27 +191,27 @@ jobs:
     - name: Download Linux Artifacts
       uses: actions/download-artifact@v4
       with:
-        name: rotorflight-blackbox-linux-release-${{ env.GIT_VER }}
+        name: wingflight-blackbox-linux-release-${{ env.GIT_VER }}
 
     - name: Download MacOS Artifacts
       uses: actions/download-artifact@v4
       with:
-        name: rotorflight-blackbox-macos-release-${{ env.GIT_VER }}
+        name: wingflight-blackbox-macos-release-${{ env.GIT_VER }}
 
     - name: Download Win64 Artifacts
       uses: actions/download-artifact@v4
       with:
-        name: rotorflight-blackbox-win64-release-${{ env.GIT_VER }}
+        name: wingflight-blackbox-win64-release-${{ env.GIT_VER }}
 
     - name: Download Win32 Artifacts
       uses: actions/download-artifact@v4
       with:
-        name: rotorflight-blackbox-win32-release-${{ env.GIT_VER }}
+        name: wingflight-blackbox-win32-release-${{ env.GIT_VER }}
 
     - name: Create Release
       run: |
         .github/scripts/extract-release-notes.py "${{ env.GIT_VER }}" Releases.md > Notes.md
-        gh release create ${{ env.GIT_TAG }} --notes-file Notes.md --title "Rotorflight Blackbox ${{ env.GH_TYPE }} ${{ env.GIT_VER }}" rotorflight-blackbox*
+        gh release create ${{ env.GIT_TAG }} --notes-file Notes.md --title "WingFlight Blackbox ${{ env.GH_TYPE }} ${{ env.GIT_VER }}" wingflight-blackbox*
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

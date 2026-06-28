@@ -1,5 +1,5 @@
 ##
-## Makefile for Rotorflight Blackbox
+## Makefile for WingFlight Blackbox
 ##
 
 # Default version number
