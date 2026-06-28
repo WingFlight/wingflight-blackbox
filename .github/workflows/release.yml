@@ -167,6 +167,9 @@ jobs:
 
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: write
+
     needs: [linux, macos, win64, win32]
 
     steps:
