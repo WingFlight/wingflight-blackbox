@@ -674,7 +674,9 @@ function FlightLogFieldPresenter() {
 
         DEBUG_FRIENDLY_FIELD_NAMES = {...DEBUG_FRIENDLY_FIELD_NAMES_INITIAL};
 
-        if (firmwareType === FIRMWARE_TYPE_ROTORFLIGHT) {
+        // I-term Relax is a generic PID anti-windup technique, not heli-specific,
+        // and is still present in wingflight-firmware -- applies to both.
+        if (firmwareType === FIRMWARE_TYPE_ROTORFLIGHT || firmwareType === FIRMWARE_TYPE_WINGFLIGHT) {
            if (semver.gte(firmwareVersion, '4.3.0')) {
                 DEBUG_FRIENDLY_FIELD_NAMES.ITERM_RELAX = {
                     'debug[all]':'I-term Relax',
@@ -686,6 +688,11 @@ function FlightLogFieldPresenter() {
                     'debug[5]':'Relaxed I Error',
                 };
            };
+        };
+
+        // Yaw precompensation here is specifically about heli collective/cyclic
+        // deflection -- stays Rotorflight-only.
+        if (firmwareType === FIRMWARE_TYPE_ROTORFLIGHT) {
            if (semver.gte(firmwareVersion, '4.5.0')) {
                 DEBUG_FRIENDLY_FIELD_NAMES.YAW_PRECOMP = {
                     'debug[all]':'Yaw Precompensation',
@@ -1166,7 +1173,7 @@ function FlightLogFieldPresenter() {
                     }
                     break;
                 case 'ITERM_RELAX':
-                    if (flightLog.getSysConfig().firmwareType === FIRMWARE_TYPE_ROTORFLIGHT && semver.gte(flightLog.getSysConfig().firmwareVersion, '4.3.0')) {
+                    if ((flightLog.getSysConfig().firmwareType === FIRMWARE_TYPE_ROTORFLIGHT || flightLog.getSysConfig().firmwareType === FIRMWARE_TYPE_WINGFLIGHT) && semver.gte(flightLog.getSysConfig().firmwareVersion, '4.3.0')) {
                         switch (fieldName) {
 	                           case 'debug[0]': // setpoint
 	                           case 'debug[1]': // Gyro Rate

@@ -26,9 +26,9 @@ List of possible values of `<task-name>`:
 #### Setting up and building on a Mac
 
 - Install GitHub desktop application from https://desktop.github.com and open the GitHub Desktop application.
-- At https://github.com/rotorflight/rotorflight-blackbox, select Clone or Download > Open in Desktop
+- At https://github.com/WingFlight/wingflight-blackbox, select Clone or Download > Open in Desktop
 
-(The GitHub Desktop application should come to the front and create a repository (not necessarily where you want it).  The rotorflight-blackbox repository (folder) should appear under the list of local repositories.  You can find your local repository location on your mac using the 'Locate in Finder' command GitHub Desktop  It can be moved somewhere more else, but you'll then need to tell Github where you're moved it to.)
+(The GitHub Desktop application should come to the front and create a repository (not necessarily where you want it).  The wingflight-blackbox repository (folder) should appear under the list of local repositories.  You can find your local repository location on your mac using the 'Locate in Finder' command GitHub Desktop  It can be moved somewhere more else, but you'll then need to tell Github where you're moved it to.)
 
 Open Terminal.app and install or update homebrew:
 ```
@@ -38,10 +38,10 @@ install node 8.x and yarn, if already installed, agree to update them
 ```
 brew install node@8 yarn
 ```
-Change Terminal's working directory wherever you put the rotorflight-blackbox folder; easiest way is to type 'cd ' in Terminal then drag the rotorflight-blackbox folder from the Finder to the terminal window.  Or use a terminal command like
+Change Terminal's working directory wherever you put the wingflight-blackbox folder; easiest way is to type 'cd ' in Terminal then drag the wingflight-blackbox folder from the Finder to the terminal window.  Or use a terminal command like
 
 ```
-cd ~/mydirectorypath/rotorflight-blackbox
+cd ~/mydirectorypath/wingflight-blackbox
 ```
 
 install dependencies into that folder (ignoring many confusing messages) with:

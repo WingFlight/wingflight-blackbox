@@ -237,6 +237,44 @@ var
         'USER4',
     ]),
 
+    // Same bit layout as FLIGHT_LOG_FLIGHT_MODE_NAME_RF_4_6 -- wingflight-firmware
+    // kept the heli-only bits (RESCUE, GOVFALLBACK/SUSPEND/BYPASS) reserved rather
+    // than renumbering, so positions must stay identical; only their names change.
+    FLIGHT_LOG_FLIGHT_MODE_NAME_WF = makeReadOnly([
+        'ARM',
+        'ANGLE',
+        'HORIZON',
+        'TRAINER',
+        'ALTHOLD',
+        'UNUSED',
+        'GPSRESCUE',
+        'FAILSAFE',
+        'PREARM',
+        'PARALYZE',
+        'BEEPERON',
+        'BEEPERMUTE',
+        'LEDLOW',
+        'CALIB',
+        'OSD',
+        'TELEMETRY',
+        'BEEPGPSCOUNT',
+        'BLACKBOX',
+        'BLACKBOXERASE',
+        'CAMERA1',
+        'CAMERA2',
+        'CAMERA3',
+        'VTXPITMODE',
+        'VTXCONTROLDISABLE',
+        'STICKCOMMANDDISABLE',
+        'UNUSED',
+        'UNUSED',
+        'UNUSED',
+        'USER1',
+        'USER2',
+        'USER3',
+        'USER4',
+    ]),
+
     FLIGHT_LOG_FEATURES = [],
 
     FLIGHT_LOG_FEATURES_BF = makeReadOnly([
@@ -328,6 +366,43 @@ var
         'UNUSED24',
         'RX_SPI',
         'GOVERNOR',
+        'ESC_SENSOR',
+        'FREQ_SENSOR',
+        'DYN_NOTCH',
+        'RPM_FILTER',
+    ]),
+
+    // Same bit layout as FLIGHT_LOG_FEATURES_RF_4_3 -- wingflight-firmware kept
+    // the old FEATURE_GOVERNOR bit reserved as FEATURE_UNUSED_26 rather than
+    // renumbering (src/main/config/feature.h), so this must stay positional.
+    FLIGHT_LOG_FEATURES_WF = makeReadOnly([
+        'RX_PPM',
+        'UNUSED1',
+        'UNUSED2',
+        'RX_SERIAL',
+        'UNUSED4',
+        'UNUSED5',
+        'SOFTSERIAL',
+        'GPS',
+        'UNUSED8',
+        'SONAR',
+        'TELEMETRY',
+        'UNUSED11',
+        'UNUSED12',
+        'RX_PARALLEL_PWM',
+        'RX_MSP',
+        'RSSI_ADC',
+        'LED_STRIP',
+        'DISPLAY',
+        'OSD',
+        'UNUSED19',
+        'UNUSED20',
+        'UNUSED21',
+        'UNUSED22',
+        'UNUSED23',
+        'UNUSED24',
+        'RX_SPI',
+        'UNUSED26',
         'ESC_SENSOR',
         'FREQ_SENSOR',
         'DYN_NOTCH',
@@ -768,6 +843,99 @@ var
         "USER4",
     ]),
 
+    // Same positions as DEBUG_MODE_RF_4_6 -- debugType_e in wingflight-firmware's
+    // build/debug.h hasn't renumbered these slots even though the governor/rescue/
+    // cyclic code that used to populate them is gone, so the indices must stay
+    // identical; only the heli-only entries are relabeled to make clear they're
+    // dead for WingFlight logs.
+    DEBUG_MODE_WF = makeReadOnly([
+        "NONE",
+        "CYCLETIME",
+        "BATTERY",
+        "GYRO",
+        "ACCELEROMETER",
+        "PIDLOOP",
+        "GYRO_SCALED",
+        "RC_COMMAND",
+        "ANGLERATE",
+        "ESC_SENSOR",
+        "SCHEDULER",
+        "STACK",
+        "ESC_SENSOR_DATA",
+        "ESC_SENSOR_FRAME",
+        "ALTITUDE",
+        "DYN_NOTCH",
+        "DYN_NOTCH_TIME",
+        "DYN_NOTCH_FREQ",
+        "RX_FRSKY_SPI",
+        "RX_SFHSS_SPI",
+        "GYRO_RAW",
+        "DUAL_GYRO_RAW",
+        "DUAL_GYRO_DIFF",
+        "MAX7456_SIGNAL",
+        "MAX7456_SPICLOCK",
+        "SBUS",
+        "FPORT",
+        "RANGEFINDER",
+        "RANGEFINDER_QUALITY",
+        "LIDAR_TF",
+        "ADC_INTERNAL",
+        "GOVERNOR_UNUSED",
+        "SDIO",
+        "CURRENT_SENSOR",
+        "USB",
+        "SMARTAUDIO",
+        "RTH",
+        "ITERM_RELAX",
+        "ACRO_TRAINER",
+        "SETPOINT",
+        "RX_SIGNAL_LOSS",
+        "RC_RAW",
+        "RC_DATA",
+        "DYN_LPF",
+        "RX_SPECTRUM_SPI",
+        "DSHOT_RPM_TELEMETRY",
+        "RPM_FILTER",
+        "RPM_SOURCE",
+        "TTA_UNUSED",
+        "AIRBORNE",
+        "DUAL_GYRO_SCALED",
+        "DSHOT_RPM_ERRORS",
+        "CRSF_LINK_STATISTICS_UPLINK",
+        "CRSF_LINK_STATISTICS_PWR",
+        "CRSF_LINK_STATISTICS_DOWN",
+        "BARO",
+        "GPS_RESCUE_THROTTLE_PID",
+        "FREQ_SENSOR",
+        "FEEDFORWARDD_LIMIT",
+        "FEEDFORWARD",
+        "BLACKBOX_OUTPUT",
+        "GYRO_SAMPLE",
+        "RX_TIMING",
+        "D_LPF",
+        "VTX_TRAMP",
+        "GHST",
+        "SCHEDULER_DETERMINISM",
+        "TIMING_ACCURACY",
+        "RX_EXPRESSLRS_SPI",
+        "RX_EXPRESSLRS_PHASELOCK",
+        "RX_STATE_TIME",
+        "PITCH_PRECOMP",
+        "YAW_PRECOMP",
+        "RESCUE_UNUSED",
+        "RESCUE_ALTHOLD_UNUSED",
+        "CROSS_COUPLING_UNUSED",
+        "ERROR_DECAY",
+        "HS_OFFSET_UNUSED",
+        "HS_BLEED_UNUSED",
+        "GOV_MOTOR_UNUSED",
+        "POLAR_RATE_UNUSED",
+        "USER1",
+        "USER2",
+        "USER3",
+        "USER4",
+    ]),
+
     SUPER_EXPO_YAW = makeReadOnly([
         "OFF",
         "ON",
@@ -1011,6 +1179,18 @@ function adjustFieldDefsList(firmwareType, firmwareVersion) {
         else {
             FAST_PROTOCOL = FAST_PROTOCOL_RF.slice();
         }
+
+    } else if(firmwareType == FIRMWARE_TYPE_WINGFLIGHT) {
+
+        // WingFlight is a fresh fork with no version history of its own yet, so
+        // unlike Rotorflight above there's just one (current) field-def set --
+        // no per-version branching needed.
+        FLIGHT_LOG_FLIGHT_MODE_NAME = makeReadOnly(FLIGHT_LOG_FLIGHT_MODE_NAME_WF.slice());
+        FLIGHT_LOG_FEATURES = makeReadOnly(FLIGHT_LOG_FEATURES_WF.slice());
+        DEBUG_MODE = makeReadOnly(DEBUG_MODE_WF.slice());
+        FAST_PROTOCOL = FAST_PROTOCOL_RF_4_5.slice();
+        // No governor, no rescue -- FLIGHT_LOG_GOVSTATES/FLIGHT_LOG_RESCUE_STATES
+        // are left unset since those events are never emitted by this firmware.
 
     } else if((firmwareType == FIRMWARE_TYPE_BETAFLIGHT) && semver.gte(firmwareVersion, '3.3.0')) {
 

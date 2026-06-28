@@ -7,7 +7,7 @@ $(document).ready(function () {
 });
 
 function checkForConfiguratorUpdates() {
-    var releaseChecker = new ReleaseChecker('configurator', 'https://api.github.com/repos/rotorflight/rotorflight-blackbox/releases');
+    var releaseChecker = new ReleaseChecker('configurator', 'https://api.github.com/repos/WingFlight/wingflight-blackbox/releases');
 
     releaseChecker.loadReleaseData(notifyOutdatedVersion);
 }

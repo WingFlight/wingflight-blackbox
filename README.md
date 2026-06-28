@@ -1,41 +1,32 @@
-# Rotorflight Blackbox
+# WingFlight Blackbox
 
-[Rotorflight](https://github.com/rotorflight) is a Flight Control software suite designed for
-single-rotor helicopters. It consists of:
+[WingFlight](https://github.com/WingFlight) is a Flight Control software suite designed for
+fixed-wing aircraft. It consists of:
 
-- Rotorflight Flight Controller Firmware
-- Rotorflight Configurator, for flashing and configuring the flight controller
-- Rotorflight Blackbox Explorer, for analyzing blackbox flight logs (this repository)
-- Rotorflight LUA Scripts, for configuring the flight controller using a transmitter
+- WingFlight Flight Controller Firmware
+- WingFlight Configurator, for flashing and configuring the flight controller
+- WingFlight Blackbox Explorer, for analyzing blackbox flight logs (this repository)
 
-Built on Betaflight 4.3, Rotorflight incorporates numerous advanced features specifically
-tailored for helicopters. It's important to note that Rotorflight does _not_ support multi-rotor
-crafts or airplanes; it's exclusively designed for RC helicopters.
-
-This version of Rotorflight is also known as **Rotorflight 2** or **RF2**.
-
-
-## Information
-
-Tutorials, documentation, and flight videos can be found on the [Rotorflight website](https://www.rotorflight.org/).
+WingFlight is forked from [Rotorflight](https://github.com/rotorflight), which was built on
+Betaflight 4.3 and tailored for single-rotor helicopters. WingFlight repurposes that codebase for
+fixed-wing aircraft -- helicopter-only systems such as the rotor speed governor, rescue modes, and
+swashplate/cyclic mixing have been removed.
 
 
 ## Installation
 
-Please download the latest version from [github](https://github.com/rotorflight/rotorflight-blackbox/releases/).
+Please download the latest version from [github](https://github.com/WingFlight/wingflight-blackbox/releases/).
 
 
 ## Features
 
-Rotorflight has many features:
+WingFlight has many features:
 
 * Many receiver protocols: CRSF, S.BUS, F.Port, DSM, IBUS, XBUS, EXBUS, GHOST, CPPM
 * Support for various telemetry protocols: CSRF, S.Port, HoTT, etc.
 * ESC telemetry protocols: BLHeli32, Hobbywing, Scorpion, Kontronik, OMP Hobby, ZTW, APD, YGE
-* Advanced PID control tuned for helicopters
+* Advanced PID control tuned for fixed-wing aircraft
 * Stabilisation modes (6D)
-* Rotor speed governor
-* Motorised tail support with Tail Torque Assist (TTA, also known as TALY)
 * Remote configuration and tuning with the transmitter
   - With knobs / switches assigned to functions
   - With LUA scripts on EdgeTX, OpenTX and Ethos
@@ -64,7 +55,7 @@ And many more...
 
 #### Windows
 
-Rotorflight Blackbox requires Windows 10 or later. Windows 7 is not supported.
+WingFlight Blackbox requires Windows 10 or later. Windows 7 is not supported.
 
 
 ## Usage
@@ -106,30 +97,27 @@ B-frames. Do that by adding "keyint=1" into the Additional Options box.
 
 ## Contributing
 
-Rotorflight is an open-source community project. Anybody can join in and help to make it better by:
+WingFlight is an open-source community project. Anybody can join in and help to make it better by:
 
-* helping other users on Rotorflight Discord or other online forums
-* [reporting](https://github.com/rotorflight?tab=repositories) bugs and issues, and suggesting improvements
+* [reporting](https://github.com/WingFlight/wingflight-blackbox/issues) bugs and issues, and suggesting improvements
 * testing new software versions, new features and fixes; and providing feedback
 * participating in discussions on new features
-* create or update content on the [Website](https://www.rotorflight.org)
-* [contributing](https://www.rotorflight.org/docs/Contributing/intro) to the software development - fixing bugs, implementing new features and improvements
-* [translating](https://www.rotorflight.org/docs/Contributing/intro#translations) Rotorflight Configurator into a new language, or helping to maintain an existing translation
+* contributing to the software development - fixing bugs, implementing new features and improvements
 
 
 ## Origins
 
-Rotorflight is software that is **open source** and is available free of charge without warranty.
+WingFlight is software that is **open source** and is available free of charge without warranty.
 
-Rotorflight is forked from [Betaflight](https://github.com/betaflight), which in turn is forked from [Cleanflight](https://github.com/cleanflight).
-Rotorflight borrows ideas and code also from [HeliFlight3D](https://github.com/heliflight3d/), another Betaflight fork for helicopters.
+WingFlight is forked from [Rotorflight](https://github.com/rotorflight), which is itself forked from
+[Betaflight](https://github.com/betaflight), which in turn is forked from [Cleanflight](https://github.com/cleanflight).
 
 Big thanks to everyone who has contributed along the journey!
 
 
 ## Contact
 
-Team Rotorflight can be contacted by email at rotorflightfc@gmail.com.
+Questions and bug reports can be filed on the [GitHub issue tracker](https://github.com/WingFlight/wingflight-blackbox/issues).
 
 
 [Handbrake]: https://handbrake.fr/

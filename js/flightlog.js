@@ -956,6 +956,7 @@ function FlightLog(logData) {
 
         switch (this.getSysConfig().firmwareType) {
             case FIRMWARE_TYPE_ROTORFLIGHT:
+            case FIRMWARE_TYPE_WINGFLIGHT:
             case FIRMWARE_TYPE_BETAFLIGHT:
             case FIRMWARE_TYPE_INAV:
                 $(".open-header-dialog").show()
@@ -1019,6 +1020,7 @@ FlightLog.prototype.getPIDPercentage = function(value) {
 
 FlightLog.prototype.getReferenceVoltageMillivolts = function() {
     if ((this.getSysConfig().firmwareType == FIRMWARE_TYPE_ROTORFLIGHT) ||
+        (this.getSysConfig().firmwareType == FIRMWARE_TYPE_WINGFLIGHT) ||
         (this.getSysConfig().firmwareType == FIRMWARE_TYPE_BETAFLIGHT  && semver.gte(this.getSysConfig().firmwareVersion, '4.0.0'))) {
         return this.getSysConfig().vbatref * 10;
     } else if((this.getSysConfig().firmwareType == FIRMWARE_TYPE_BETAFLIGHT  && semver.gte(this.getSysConfig().firmwareVersion, '3.1.0')) ||

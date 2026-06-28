@@ -1,5 +1,5 @@
 ; ------------------------------------------
-; Installer for Rotorflight Blackbox Viewer
+; Installer for WingFlight Blackbox Viewer
 ; ------------------------------------------
 ; It receives from the command line with /D the parameters:
 ; version
@@ -9,15 +9,15 @@
 ; sourceFolder
 ; targetFolder
 
-#define ApplicationName "Rotorflight Blackbox"
-#define CompanyName "The Rotorflight open source project"
-#define CompanyUrl "https://www.rotorflight.org/"
-#define ExecutableFileName "rotorflight-blackbox.exe"
-#define GroupName "Rotorflight"
-#define InstallerFileName "rotorflight-blackbox-installer_" + version + "_" + archName
-#define SourcePath "..\..\" + sourceFolder + "\rotorflight-blackbox\" + archName
-#define TargetFolderName "Rotorflight-Blackbox"
-#define UpdatesUrl "https://github.com/rotorflight/rotorflight-blackbox/releases/"
+#define ApplicationName "WingFlight Blackbox"
+#define CompanyName "The WingFlight open source project"
+#define CompanyUrl "https://github.com/WingFlight"
+#define ExecutableFileName "wingflight-blackbox.exe"
+#define GroupName "WingFlight"
+#define InstallerFileName "wingflight-blackbox-installer_" + version + "_" + archName
+#define SourcePath "..\..\" + sourceFolder + "\wingflight-blackbox\" + archName
+#define TargetFolderName "WingFlight-Blackbox"
+#define UpdatesUrl "https://github.com/WingFlight/wingflight-blackbox/releases/"
 
 [CustomMessages]
 LaunchProgram=Start %1
@@ -66,12 +66,12 @@ MinVersion=6.2
 OutputBaseFilename={#InstallerFileName}
 OutputDir=..\..\{#targetFolder}\
 PrivilegesRequiredOverridesAllowed=commandline dialog
-SetupIconFile=rf_installer_icon.ico
+SetupIconFile=wf_installer_icon.ico
 SolidCompression=yes
 UninstallDisplayIcon={app}\{#ExecutableFileName}
 UninstallDisplayName={#ApplicationName}
-WizardImageFile=rf_installer.bmp
-WizardSmallImageFile=rf_installer_small.bmp
+WizardImageFile=wf_installer.bmp
+WizardSmallImageFile=wf_installer_small.bmp
 WizardStyle=modern
 
 [Code]

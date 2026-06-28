@@ -7,7 +7,8 @@ var FlightLogIndex,
     FIRMWARE_TYPE_CLEANFLIGHT = 2,
     FIRMWARE_TYPE_BETAFLIGHT = 3,
     FIRMWARE_TYPE_INAV = 4,
-    FIRMWARE_TYPE_ROTORFLIGHT = 5;
+    FIRMWARE_TYPE_ROTORFLIGHT = 5,
+    FIRMWARE_TYPE_WINGFLIGHT = 6;
 
 var FlightLogParser = function(logData) {
     //Private constants:
@@ -627,6 +628,7 @@ var FlightLogParser = function(logData) {
                         $('html').addClass('isCF');
                         $('html').removeClass('isBF');
                         $('html').removeClass('isRF');
+                        $('html').removeClass('isWF');
                         $('html').removeClass('isINAV');
                     break;
                     case "Rotorflight":
@@ -635,7 +637,17 @@ var FlightLogParser = function(logData) {
                         $('html').removeClass('isCF');
                         $('html').removeClass('isBF');
                         $('html').removeClass('isINAV');
+                        $('html').removeClass('isWF');
                         $('html').addClass('isRF');
+                    break;
+                    case "Wingflight":
+                        that.sysConfig.firmwareType = FIRMWARE_TYPE_WINGFLIGHT;
+                        $('html').removeClass('isBaseF');
+                        $('html').removeClass('isCF');
+                        $('html').removeClass('isBF');
+                        $('html').removeClass('isINAV');
+                        $('html').removeClass('isRF');
+                        $('html').addClass('isWF');
                     break;
                     default:
                         that.sysConfig.firmwareType = FIRMWARE_TYPE_BASEFLIGHT;
@@ -643,6 +655,7 @@ var FlightLogParser = function(logData) {
                         $('html').removeClass('isCF');
                         $('html').removeClass('isBF');
                         $('html').removeClass('isRF');
+                        $('html').removeClass('isWF');
                         $('html').removeClass('isINAV');
                 }
             break;
@@ -808,6 +821,7 @@ var FlightLogParser = function(logData) {
             case "yawRateAccelLimit":
             case "rateAccelLimit":
                 if((that.sysConfig.firmwareType == FIRMWARE_TYPE_ROTORFLIGHT) ||
+                   (that.sysConfig.firmwareType == FIRMWARE_TYPE_WINGFLIGHT) ||
                    (that.sysConfig.firmwareType == FIRMWARE_TYPE_BETAFLIGHT  && semver.gte(that.sysConfig.firmwareVersion, '3.1.0')) ||
                    (that.sysConfig.firmwareType == FIRMWARE_TYPE_CLEANFLIGHT && semver.gte(that.sysConfig.firmwareVersion, '2.0.0'))) {
                     that.sysConfig[fieldName] = parseInt(fieldValue, 10)/1000;
@@ -824,6 +838,7 @@ var FlightLogParser = function(logData) {
             case "dterm_lpf_hz":
             case "dterm_lpf2_hz":
                    if((that.sysConfig.firmwareType == FIRMWARE_TYPE_ROTORFLIGHT) ||
+                      (that.sysConfig.firmwareType == FIRMWARE_TYPE_WINGFLIGHT) ||
                       (that.sysConfig.firmwareType == FIRMWARE_TYPE_BETAFLIGHT  && semver.gte(that.sysConfig.firmwareVersion, '3.0.1')) ||
                       (that.sysConfig.firmwareType == FIRMWARE_TYPE_CLEANFLIGHT && semver.gte(that.sysConfig.firmwareVersion, '2.0.0'))) {
                     that.sysConfig[fieldName] = parseInt(fieldValue, 10);
@@ -835,6 +850,7 @@ var FlightLogParser = function(logData) {
             case "gyro_notch_hz":
             case "gyro_notch_cutoff":
                 if((that.sysConfig.firmwareType == FIRMWARE_TYPE_ROTORFLIGHT) ||
+                   (that.sysConfig.firmwareType == FIRMWARE_TYPE_WINGFLIGHT) ||
                    (that.sysConfig.firmwareType == FIRMWARE_TYPE_BETAFLIGHT  && semver.gte(that.sysConfig.firmwareVersion, '3.0.1')) ||
                    (that.sysConfig.firmwareType == FIRMWARE_TYPE_CLEANFLIGHT && semver.gte(that.sysConfig.firmwareVersion, '2.0.0'))) {
                     that.sysConfig[fieldName] = parseCommaSeparatedString(fieldValue);
@@ -973,6 +989,16 @@ var FlightLogParser = function(logData) {
                         $('html').removeClass('isCF');
                         $('html').removeClass('isBF');
                         $('html').addClass('isRF');
+                        $('html').removeClass('isWF');
+                        $('html').removeClass('isINAV');
+                    }
+                    else if (matches[1].toLowerCase() === "wingflight") {
+                        that.sysConfig.firmwareType = FIRMWARE_TYPE_WINGFLIGHT;
+                        $('html').removeClass('isBaseF');
+                        $('html').removeClass('isCF');
+                        $('html').removeClass('isBF');
+                        $('html').removeClass('isRF');
+                        $('html').addClass('isWF');
                         $('html').removeClass('isINAV');
                     }
 

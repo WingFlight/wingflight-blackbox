@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=WingFlight Blackbox
+Comment=Cross-platform blackbox analytics tool for WingFlight flight control system
+Exec=/opt/wingflight/wingflight-blackbox/wingflight-blackbox
+Icon=/opt/wingflight/wingflight-blackbox/icon/wf_icon_128.png
+Terminal=false
+Type=Application
+MimeType=application/x-blackboxlog

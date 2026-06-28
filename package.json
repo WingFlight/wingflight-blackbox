@@ -1,7 +1,7 @@
 {
-  "name": "rotorflight-blackbox",
-  "displayName": "Rotorflight Blackbox",
-  "description": "Crossplatform blackbox analytics tool for Rotorflight flight control system.",
+  "name": "wingflight-blackbox",
+  "displayName": "WingFlight Blackbox",
+  "description": "Crossplatform blackbox analytics tool for WingFlight flight control system.",
   "version": "0.0.0",
   "main": "index.html",
   "chromium-args": "--disable-features=nw2",
@@ -14,15 +14,15 @@
   "window": {
     "id": "main",
     "show": true,
-    "icon": "images/rf_icon_128.png",
+    "icon": "images/wf_icon_128.png",
     "min_width": 740,
     "min_height": 480
   },
   "repository": {
     "type": "git",
-    "url": "github.com/rotorflight/rotorflight-blackbox"
+    "url": "github.com/WingFlight/wingflight-blackbox"
   },
-  "author": "The Rotorflight open source project.",
+  "author": "The WingFlight open source project.",
   "license": "GPL-3.0",
   "dependencies": {
     "bootstrap": "~3.4.1",
