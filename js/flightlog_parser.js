@@ -335,7 +335,7 @@ var FlightLogParser = function(logData) {
             iterm_relax_type: null,                 // ITerm Relax type
             iterm_relax_cutoff: [null, null, null], // ITerm Relax cutoff
             error_limit: [null, null, null],        // Error Limit
-            error_decay: [null, null],              // Error Decay
+            iterm_decay: [null, null],              // I-term Decay
             error_decay_ground: null,               // Ground Error Decay
             cyclic_coupling: [null, null, null],          // Cyclic Cross-Coupling
             dyn_notch_range: null,                  // Dyn Notch Range (LOW, MED, HIGH or AUTO)
@@ -917,7 +917,7 @@ var FlightLogParser = function(logData) {
             case "hsi_gain":
             case "hsi_limit":
             case "cyclic_coupling":
-            case "error_decay":
+            case "iterm_decay":
             case "error_decay_ground":
             case "filter_process_denom":
             case "gyro_rpm_notch_preset":
@@ -935,6 +935,11 @@ var FlightLogParser = function(logData) {
             case "gyro_rpm_filter_bank_rpm_limit":
             case "gyro_rpm_filter_bank_notch_q":
                     that.sysConfig[fieldName] = parseCommaSeparatedString(fieldValue);
+            break;
+            case "error_decay":
+                    // Backward compatibility for logs recorded before this header
+                    // was renamed to iterm_decay.
+                    that.sysConfig.iterm_decay = parseCommaSeparatedString(fieldValue);
             break;
             case "magPID":
                 that.sysConfig.magPID = parseCommaSeparatedString(fieldValue,3); //[parseInt(fieldValue, 10), null, null];

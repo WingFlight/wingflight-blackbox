@@ -931,8 +931,8 @@ function HeaderDialog(dialog, onSave) {
         setParameter('cyclic_coupling_ratio'      , sysConfig.cyclic_coupling[1], 0);
         setParameter('cyclic_coupling_cutoff'     , sysConfig.cyclic_coupling[2], 1);
 
-        setParameter('error_decay_time'           , sysConfig.error_decay[0], 1);
-        setParameter('error_decay_rate_max'       , sysConfig.error_decay[1], 0);
+        setParameter('iterm_decay_time'           , sysConfig.iterm_decay[0], 1);
+        setParameter('iterm_decay_rate_max'       , sysConfig.iterm_decay[1], 0);
         setParameter('error_decay_ground'         , sysConfig.error_decay_ground, 1);
 
         renderSelect('unsynced_fast_pwm'                ,sysConfig.unsynced_fast_pwm, MOTOR_SYNC);
