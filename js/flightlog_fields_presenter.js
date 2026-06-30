@@ -57,14 +57,12 @@ function FlightLogFieldPresenter() {
         'rcCommand[0]': 'RC Command [roll]',
         'rcCommand[1]': 'RC Command [pitch]',
         'rcCommand[2]': 'RC Command [yaw]',
-        'rcCommand[3]': 'RC Command [collective]',
-        'rcCommand[4]': 'RC Command [throttle]',
+        'rcCommand[3]': 'RC Command [throttle]',
 
         'setpoint[all]': 'Setpoints',
         'setpoint[0]': 'Setpoint [roll]',
         'setpoint[1]': 'Setpoint [pitch]',
         'setpoint[2]': 'Setpoint [yaw]',
-        'setpoint[3]': 'Setpoint [collective]',
 
         'gyroADC[all]': 'Gyros',
         'gyroADC[0]': 'Gyro [roll]',
@@ -90,7 +88,6 @@ function FlightLogFieldPresenter() {
         'mixer[0]': 'Mixer SR [roll]',
         'mixer[1]': 'Mixer SP [pitch]',
         'mixer[2]': 'Mixer SY [yaw]',
-        'mixer[3]': 'Mixer SC [collective]',
 
         'headspeed': 'Headspeed',
         'tailspeed': 'Tailspeed',
@@ -835,9 +832,8 @@ function FlightLogFieldPresenter() {
             case 'rcCommand[0]':
             case 'rcCommand[1]':
             case 'rcCommand[2]':
-            case 'rcCommand[3]':
                 return (value / 5).toFixed(1) + ' %';
-            case 'rcCommand[4]':
+            case 'rcCommand[3]':
                 return (value / 10).toFixed(1) + " %";
 
             case 'setpoint[0]':

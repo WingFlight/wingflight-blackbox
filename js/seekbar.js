@@ -238,7 +238,7 @@ function SeekBar(canvas) {
                     }
 
                     // Activity bars
-                    if (range > 0) {
+                    if (range > 0 && activityStrength.length > 0) {
                         const activity = (activityStrength[activityIndex] - activityMin) / range * canvas.height;
 
                         activityPath.moveTo(x, canvas.height);

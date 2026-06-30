@@ -195,7 +195,7 @@ function FlightLogSticks(flightLog, rcCommandFields, canvas) {
             stickIndex,
             rcCommand = [], rcCommandLabels = [];
 
-        for (stickIndex = 0; stickIndex < 5; stickIndex++) {
+        for (stickIndex = 0; stickIndex < 4; stickIndex++) {
             //Check that stick data is present to be drawn:
             if (rcCommandFields[stickIndex] === undefined)
                 return;
@@ -221,7 +221,7 @@ function FlightLogSticks(flightLog, rcCommandFields, canvas) {
                 stickPositions[0] = yawValue / config.yawStickMax; //Yaw
                 stickPositions[1] = pitchStickCurve.lookup(-rcCommand[1]); //Pitch
                 stickPositions[2] = pitchStickCurve.lookup(rcCommand[0]); //Roll
-                stickPositions[3] = -rcCommand[3] / 500; //Collective
+                stickPositions[3] = -rcCommand[3] / 500; //Throttle
 
                 if (stickLabel != null) {
                     stickLabel[0] = rcCommandLabels[2];
@@ -235,7 +235,7 @@ function FlightLogSticks(flightLog, rcCommandFields, canvas) {
                 stickPositions[0] = pitchStickCurve.lookup(rcCommand[0]); //Roll
                 stickPositions[1] = pitchStickCurve.lookup(-rcCommand[1]); //Pitch
                 stickPositions[2] = yawValue / config.yawStickMax; //Yaw
-                stickPositions[3] = -rcCommand[3] / 500; //Collective
+                stickPositions[3] = -rcCommand[3] / 500; //Throttle
 
                 if (stickLabel != null) {
                     stickLabel[0] = rcCommandLabels[0];
@@ -247,7 +247,7 @@ function FlightLogSticks(flightLog, rcCommandFields, canvas) {
                 break;
             case STICK_MODE_4:
                 stickPositions[0] = pitchStickCurve.lookup(rcCommand[0]); //Roll
-                stickPositions[1] = -rcCommand[3] / 500; //Collective
+                stickPositions[1] = -rcCommand[3] / 500; //Throttle
                 stickPositions[2] = yawValue / config.yawStickMax; //Yaw
                 stickPositions[3] = pitchStickCurve.lookup(-rcCommand[1]); //Pitch
 
@@ -261,7 +261,7 @@ function FlightLogSticks(flightLog, rcCommandFields, canvas) {
                 break;
             default: // Mode 2
                 stickPositions[0] = yawValue / config.yawStickMax; //Yaw
-                stickPositions[1] = -rcCommand[3] / 500; //Collective
+                stickPositions[1] = -rcCommand[3] / 500; //Throttle
                 stickPositions[2] = pitchStickCurve.lookup(rcCommand[0]); //Roll
                 stickPositions[3] = pitchStickCurve.lookup(-rcCommand[1]); //Pitch
 

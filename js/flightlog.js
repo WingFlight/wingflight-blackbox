@@ -141,7 +141,6 @@ function FlightLog(logData) {
         return {
             times: directory.times,
             avgThrottle: directory.avgThrottle,
-            collective: directory.collective,
             hasEvent: directory.hasEvent,
             pidProfile: directory.pidProfile
         };

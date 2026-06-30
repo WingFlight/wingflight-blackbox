@@ -421,12 +421,12 @@ function BlackboxLogViewer() {
         $('.lograte', statusBar).text( ((sysConfig['frameIntervalPDenom']!=null && sysConfig['frameIntervalPNum']!=null)?( 'Sample Rate : ' + sysConfig['frameIntervalPNum'] +'/' + sysConfig['frameIntervalPDenom']):''));
 
         seekBar.setTimeRange(flightLog.getMinTime(), flightLog.getMaxTime(), currentBlackboxTime);
-        seekBar.setActivityRange(flightLog.getSysConfig().collectiveRange[0], flightLog.getSysConfig().collectiveRange[1]);
 
         var
             activity = flightLog.getActivitySummary();
 
-        seekBar.setActivity(activity.times, activity.collective, activity.hasEvent, activity.pidProfile);
+        // No collective stick activity track on fixed-wing logs; seek bar activity strength is left empty.
+        seekBar.setActivity(activity.times, [], activity.hasEvent, activity.pidProfile);
 
         seekBar.repaint();
     }
