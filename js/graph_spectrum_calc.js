@@ -1,7 +1,7 @@
 "use strict";
 
 const
-    FIELD_THROTTLE_NAME = 'rcCommands[3]',
+    FIELD_THROTTLE_NAME = 'rcCommand[4]',
     FREQ_VS_THR_CHUNK_TIME_MS = 300,
     FREQ_VS_THR_WINDOW_DIVISOR = 6,
     MAX_ANALYSER_LENGTH = 300 * 1000 * 1000, // 5min
