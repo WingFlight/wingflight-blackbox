@@ -421,12 +421,12 @@ function BlackboxLogViewer() {
         $('.lograte', statusBar).text( ((sysConfig['frameIntervalPDenom']!=null && sysConfig['frameIntervalPNum']!=null)?( 'Sample Rate : ' + sysConfig['frameIntervalPNum'] +'/' + sysConfig['frameIntervalPDenom']):''));
 
         seekBar.setTimeRange(flightLog.getMinTime(), flightLog.getMaxTime(), currentBlackboxTime);
-        seekBar.setActivityRange(flightLog.getSysConfig().collectiveRange[0], flightLog.getSysConfig().collectiveRange[1]);
+        seekBar.setActivityRange(0, 1000); // throttle command range
 
         var
             activity = flightLog.getActivitySummary();
 
-        seekBar.setActivity(activity.times, activity.collective, activity.hasEvent, activity.pidProfile);
+        seekBar.setActivity(activity.times, activity.throttleCmd, activity.hasEvent, activity.pidProfile);
 
         seekBar.repaint();
     }

@@ -43,7 +43,7 @@ function FlightLogIndex(logData) {
                     times: [],
                     offsets: [],
                     avgThrottle: [],
-                    collective: [],
+                    throttleCmd: [],
                     initialSlow: [],
                     initialGPSHome: [],
                     hasEvent: [],
@@ -93,7 +93,7 @@ function FlightLogIndex(logData) {
                     }
                 }
 
-                var collectiveIndex = mainFrameDef.nameToIndex["mixer[3]"] || mainFrameDef.nameToIndex["setpoint[3]"]
+                var throttleCmdIndex = mainFrameDef.nameToIndex["rcCommand[4]"]
 
                 // Do we have mag fields? If not mark that data as absent
                 if (magADC[0] === undefined) {
@@ -135,7 +135,7 @@ function FlightLogIndex(logData) {
                                         intraIndex.avgThrottle.push(Math.round(throttleTotal / motorFields.length));
                                     }
 
-                                    intraIndex.collective.push(collectiveIndex !== undefined ? frame[collectiveIndex] : 0)
+                                    intraIndex.throttleCmd.push(throttleCmdIndex !== undefined ? frame[throttleCmdIndex] : 0)
 
                                     // Store current PID profile state
                                     intraIndex.pidProfile.push(currentPIDProfile);
