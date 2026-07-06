@@ -1,3 +1,9 @@
+# 0.0.4
+
+Remove collective references from Wingflight channel handling.
+Clean up fixed-wing wording in I-term decay behavior.
+Refresh release notes for the current Wingflight snapshot.
+
 # 0.0.3
 
 ESC Programing
