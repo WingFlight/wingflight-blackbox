@@ -668,7 +668,7 @@ GraphConfig.load = function(config) {
             EXAMPLE_GRAPHS.push({label: "Governor",fields: ["govP", "govI", "govD", "govF", "govSum", "govRequest", "govTarget"]});
         }
         if (flightLog.isFieldEnabled().RPM) {
-            EXAMPLE_GRAPHS.push({label: "Rotor Speeds",fields: ["headspeed", "tailspeed"]});
+            EXAMPLE_GRAPHS.push({label: "Motor Speeds",fields: ["motor1speed", "motor2speed"]});
         }
         if (flightLog.isFieldEnabled().MOTOR) {
             EXAMPLE_GRAPHS.push({label: "Motors",fields: ["motor[all]"]});
