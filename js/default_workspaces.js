@@ -122,7 +122,7 @@ var DEFAULT_WORKSPACES = [
             {
                 "fields": [
                     {
-                        "name": "headspeed",
+                        "name": "motor1speed",
                         "smoothing": 0,
                         "curve": {
                             "power": 1,
@@ -139,7 +139,7 @@ var DEFAULT_WORKSPACES = [
                     }
                 ],
                 "height": 1,
-                "label": "Headspeed"
+                "label": "Motor1Speed"
             }
         ]
     },
@@ -849,7 +849,7 @@ var DEFAULT_WORKSPACES = [
             {
                 "fields": [
                     {
-                        "name": "headspeed",
+                        "name": "motor1speed",
                         "smoothing": 0,
                         "curve": {
                             "power": 1,
@@ -882,7 +882,7 @@ var DEFAULT_WORKSPACES = [
                     }
                 ],
                 "height": 1,
-                "label": "Headspeed and Motor"
+                "label": "Motor1Speed and Motor"
             }
         ]
     },

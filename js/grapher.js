@@ -190,7 +190,7 @@ function FlightLogGrapher(flightLog, graphConfig, canvas, stickCanvas, craftWrap
             accFields:[],
 
             servoFields:[],
-            headspeed:-1,
+            motor1speed:-1,
 
             vbatField:-1,
             numCells:-1,
@@ -257,8 +257,8 @@ function FlightLogGrapher(flightLog, graphConfig, canvas, stickCanvas, craftWrap
                     case "pitch":
                         idents.pitch = fieldIndex;
                     break;
-                    case "headspeed":
-                        idents.headspeed = fieldIndex;
+                    case "motor1speed":
+                        idents.motor1speed = fieldIndex;
                     break;
                     default:
                         idents.miscFields.push(fieldIndex);

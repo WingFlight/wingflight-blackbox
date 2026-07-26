@@ -92,8 +92,8 @@ function FlightLogFieldPresenter() {
         'mixer[2]': 'Mixer SY [yaw]',
         'mixer[3]': 'Mixer [—]',
 
-        'headspeed': 'Headspeed',
-        'tailspeed': 'Tailspeed',
+        'motor1speed': 'Motor1Speed',
+        'motor2speed': 'Motor2Speed',
 
         'altitude': 'Altitude',
         'vario': 'Variometer',
@@ -944,8 +944,8 @@ function FlightLogFieldPresenter() {
             case 'rssi':
                 return (value / 1024 * 100).toFixed(1) + "%";
 
-            case 'headspeed':
-            case 'tailspeed':
+            case 'motor1speed':
+            case 'motor2speed':
                     return (value).toFixed(0) + " rpm (" + (value / 60).toFixed(1) + " Hz)";
 
             case 'motor[0]':
