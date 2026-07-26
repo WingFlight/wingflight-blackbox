@@ -1,3 +1,7 @@
+# 0.0.10
+
+Rename blackbox log fields headspeed/tailspeed to motor1speed/motor2speed, matching wingflight-firmware's generic per-motor naming.
+
 # 0.0.9
 
 Version bump for release alignment; no blackbox-relevant changes this cycle.
