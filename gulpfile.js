@@ -263,12 +263,17 @@ function run_dev_client(done) {
         files: DEV_CLIENT_DIR + '**/*',
     }));
     builder.on('log', console.log);
-    builder.run(function (err) {
-        if (err) {
-            console.log('Error running NW.js dev client: ' + err);
-            process.exit(1);
-        }
+    // Deliberately not using builder.run(callback): nw-builder 3.7.4's callback path has an
+    // unbound `this` in its own .then()/.catch() handlers (lib/index.cjs:159/163, restoring
+    // this.options.platforms), which throws "Cannot set properties of undefined" as soon as
+    // the launched app's promise settles -- including on a normal, successful exit. Calling
+    // .run() with no callback returns the underlying promise directly and skips that broken
+    // wrapper entirely.
+    builder.run().then(function () {
         done();
+    }).catch(function (err) {
+        console.log('Error running NW.js dev client: ' + err);
+        process.exit(1);
     });
 }
 
