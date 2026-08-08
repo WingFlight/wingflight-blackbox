@@ -237,25 +237,31 @@ var
         'USER4',
     ]),
 
-    // Same bit layout as FLIGHT_LOG_FLIGHT_MODE_NAME_RF_4_6 -- wingflight-firmware
-    // kept the heli-only bits (RESCUE, GOVFALLBACK/SUSPEND/BYPASS) reserved rather
-    // than renumbering, so positions must stay identical; only their names change.
+    // Positions mirror boxId_e in wingflight-firmware's src/main/fc/rc_modes.h,
+    // which has diverged from the RF_4_6 layout above: BOXATTHOLD was inserted
+    // at bit 4 (pushing ALTHOLD to 5 and the reserved heli RESCUE slot to 6),
+    // BOXPASSTHROUGH was inserted at bit 9, BOXOSD/BOXGOVSUSPEND/BOXGOVBYPASS
+    // are reserved-but-unrenumbered (-> UNUSED), BOXGOVERNOR (bit 27) is now a
+    // real throttle-range governor engage switch rather than the old heli
+    // fallback, and BOXAUTOHOVER/BOXMANUAL/BOXAUTOTRIM were appended at the end.
     FLIGHT_LOG_FLIGHT_MODE_NAME_WF = makeReadOnly([
         'ARM',
         'ANGLE',
         'HORIZON',
         'TRAINER',
+        'ATTHOLD',
         'ALTHOLD',
         'UNUSED',
         'GPSRESCUE',
         'FAILSAFE',
+        'PASSTHROUGH',
         'PREARM',
         'PARALYZE',
         'BEEPERON',
         'BEEPERMUTE',
         'LEDLOW',
         'CALIB',
-        'OSD',
+        'UNUSED',
         'TELEMETRY',
         'BEEPGPSCOUNT',
         'BLACKBOX',
@@ -266,13 +272,16 @@ var
         'VTXPITMODE',
         'VTXCONTROLDISABLE',
         'STICKCOMMANDDISABLE',
-        'UNUSED',
+        'GOVERNOR',
         'UNUSED',
         'UNUSED',
         'USER1',
         'USER2',
         'USER3',
         'USER4',
+        'AUTOHOVER',
+        'MANUAL',
+        'AUTOTRIM',
     ]),
 
     FLIGHT_LOG_FEATURES = [],
@@ -843,11 +852,14 @@ var
         "USER4",
     ]),
 
-    // Same positions as DEBUG_MODE_RF_4_6 -- debugType_e in wingflight-firmware's
-    // build/debug.h hasn't renumbered these slots even though the governor/rescue/
-    // cyclic code that used to populate them is gone, so the indices must stay
-    // identical; only the heli-only entries are relabeled to make clear they're
-    // dead for WingFlight logs.
+    // Positions mirror debugType_e in wingflight-firmware's build/debug.h, not
+    // DEBUG_MODE_RF_4_6: the "Remove OSD" refactor deleted DEBUG_MAX7456_SIGNAL/
+    // SPICLOCK outright (no reserved placeholder), renumbering every slot from
+    // SBUS onward, and appended GYRO_CALIBRATION/AUTOHOVER/ATTHOLD at the end
+    // (there is no POLAR_RATE or USER1-4 debug mode in this firmware). The
+    // governor/rescue/cyclic slots that lost their populating code keep their
+    // old positions and are relabeled here to make clear they're dead for
+    // WingFlight logs.
     DEBUG_MODE_WF = makeReadOnly([
         "NONE",
         "CYCLETIME",
@@ -872,8 +884,6 @@ var
         "GYRO_RAW",
         "DUAL_GYRO_RAW",
         "DUAL_GYRO_DIFF",
-        "MAX7456_SIGNAL",
-        "MAX7456_SPICLOCK",
         "SBUS",
         "FPORT",
         "RANGEFINDER",
@@ -929,11 +939,9 @@ var
         "HS_OFFSET_UNUSED",
         "HS_BLEED_UNUSED",
         "GOV_MOTOR_UNUSED",
-        "POLAR_RATE_UNUSED",
-        "USER1",
-        "USER2",
-        "USER3",
-        "USER4",
+        "GYRO_CALIBRATION",
+        "AUTOHOVER",
+        "ATTHOLD",
     ]),
 
     SUPER_EXPO_YAW = makeReadOnly([
