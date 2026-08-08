@@ -1167,7 +1167,7 @@ progress {
 .navbar-logo {
 	position: absolute;
 	display:block;
-	left: -40px;
+	left: 50px;
 }
 
 /* Always WingFlight-branded, regardless of which firmware recorded the loaded log --
