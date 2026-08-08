@@ -164,11 +164,6 @@ a.disabled {
         height: 25px;
     }
 
-    div.navbar-logo span {
-        top: 25px;
-        line-height: 1.5;
-    }
-
     html.has-log button.log-jump-start,
     html.has-log button.log-jump-back,
     html.has-log button.log-jump-forward,
@@ -1173,12 +1168,13 @@ progress {
 /* Always WingFlight-branded, regardless of which firmware recorded the loaded log --
    deliberately not per-firmware (unlike .view-*/switch/graph-header rules elsewhere in this
    file, which do still vary with html.isCF/isBF/isRF/isINAV/isWF for legitimate per-firmware
-   UI differences). Values below match the former html.isWF overrides. */
+   UI differences). No adjacent "Blackbox Explorer" text anymore either (removed from
+   index.html) -- the logo has the whole .navbar-logo box to itself, sized up accordingly. */
 .navbar-logo img {
 	position:relative;
 	content: url(".././images/wf_logo_white.svg");
-	height: 40px;
-	width: 138px;
+	height: 45px;
+	width: 155px;
 	margin-top: 5px !important;
 	margin-left: 5px !important;
 	padding: 0;
@@ -1191,14 +1187,6 @@ progress {
     top: 32%;
     left: 75%;
     width: 100%;
-}
-
-.navbar-logo span {
-	padding-left: 0;
-    position: relative;
-	left: -150px;
-	top: 30px;
-	color: antiquewhite;
 }
 
 html.has-video .navbar-static-top,
