@@ -1185,7 +1185,15 @@ progress {
     padding: 0;
     position: absolute;
     top: 32%;
-    left: 75%;
+    /* Fixed, not a %: .navbar-logo has no explicit width, so it shrink-to-fits around its
+       content, and this <a> is itself one of the absolutely-positioned children that gets
+       excluded from that shrink-to-fit calculation -- a % here was computed against
+       whatever the *other* sibling (the logo image, plus the "Blackbox Explorer" text that
+       used to sit next to it) happened to add up to, which is exactly why removing that
+       text pulled this back into range and made it overlap the now-wider logo. left: 180px
+       clears the logo image's own right edge (margin-left 5px + width 155px = 160px) with
+       a fixed 20px gap that doesn't depend on sibling content width at all. */
+    left: 180px;
     width: 100%;
 }
 
