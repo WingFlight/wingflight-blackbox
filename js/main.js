@@ -131,6 +131,14 @@ function BlackboxLogViewer() {
 
         function createNewBlackboxWindow(fileToOpen) {
 
+            if (!window.isNWjs()) {
+                // No desktop shell to host a second native window -- open a fresh browser
+                // tab/window instead. (fileToOpen is only ever passed by the OS file-
+                // association handler below, which never runs outside NW.js.)
+                window.open(INITIAL_APP_PAGE, '_blank');
+                return;
+            }
+
             const gui = require('nw.gui');
             gui.Window.open(INITIAL_APP_PAGE,
             {
@@ -2080,7 +2088,7 @@ function BlackboxLogViewer() {
             // Chrome or opening a file association
             if ((typeof argv !== 'undefined') && (argv.length > 0)) {
                 fullPath = argv[0];
-            } else {
+            } else if (window.isNWjs()) {
                 const gui = require('nw.gui');
                 if (gui.App.argv.length > 0) {
                     fullPath = gui.App.argv[0];
@@ -2094,7 +2102,8 @@ function BlackboxLogViewer() {
         }
         checkIfFileAsParameter();
 
-        // File extension association
+        // File extension association -- OS-level "open with" support, only meaningful for
+        // the NW.js desktop build; there is no equivalent for a page running in a browser tab.
         function onOpenFileAssociation() {
 
             const gui = require('nw.gui');
@@ -2120,7 +2129,9 @@ function BlackboxLogViewer() {
             });
 
         }
-        onOpenFileAssociation();
+        if (window.isNWjs()) {
+            onOpenFileAssociation();
+        }
 
         /* drag and drop support */
 

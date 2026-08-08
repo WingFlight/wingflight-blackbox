@@ -1,42 +1,74 @@
-##
-## Makefile for WingFlight Blackbox
-##
+# ========================================
+# VARIABLES
+# ========================================
 
-# Default version number
-SEMVER ?= 0.0.0
+.DELETE_ON_ERROR:
+.ONESHELL:
+.SHELLFLAGS       := -eu -c
+.DEFAULT_GOAL     := help
 
+SEMVER            ?= 0.0.0
+WEB_PORT          ?= 8080
 
-## Rules
+# ========================================
+# RULES
+# ========================================
 
-.PHONY: all init apps debug release version clean realclean distclean
-
-
-all: apps
-
-init:
+.PHONY: init
+init: ## Install development dependencies
 	yarn install
 
-apps:
-	yarn gulp apps
-
-debug:
-	yarn gulp debug
-
-release:
-	yarn gulp release
-
-version:
+.PHONY: version
+version: ## Set application version to $SEMVER
 	sed -i -e 's/\("version":[ \t]*\)".*"/\1"$(SEMVER)"/' package.json
 
+.PHONY: apps
+apps: ## Build NW.js desktop apps for all platforms
+	yarn gulp apps
 
-## Cleaning
+.PHONY: debug
+debug: ## Run debug build and launch it (NW.js desktop)
+	yarn gulp debug
 
-clean:
+.PHONY: release
+release: ## Build installers for all platforms (NW.js desktop)
+	yarn gulp release
+
+.PHONY: web
+web: ## Serve the app as a plain static site, for testing the browser build
+	npx --yes serve -l $(WEB_PORT) .
+
+.PHONY: all
+all: apps
+
+.PHONY: clean
+clean: ## Remove apps/debug/release build output
 	rm -fr apps debug release
 
-realclean: clean
+.PHONY: realclean
+realclean: clean ## Also remove the intermediate dist/ copy
 	rm -fr dist
 
-distclean: realclean
+.PHONY: distclean
+distclean: realclean ## Also remove the cached NW.js runtime and node_modules
 	rm -fr cache node_modules
 
+# ========================================
+# HELP
+# ========================================
+
+blue      := $(shell tput setaf 4)
+grey500   := $(shell tput setaf 244)
+grey300   := $(shell tput setaf 240)
+bold      := $(shell tput bold)
+underline := $(shell tput smul)
+reset     := $(shell tput sgr0)
+
+.PHONY: help
+help: ## Display this help
+	@printf '\n'
+	@printf '  $(underline)$(grey500)Targets$(reset)\n\n'
+	@awk 'BEGIN {FS = ":.*##"} /^[a-zA-Z_-]+:.*?##/ \
+		{ printf "  $(grey300)make$(reset) $(bold)$(blue)%-20s$(reset) $(grey500)%s$(reset)\n", $$1, $$2 }' \
+		$(MAKEFILE_LIST)
+	@printf '\n'
