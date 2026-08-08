@@ -22,6 +22,10 @@ const DIST_DIR = './dist/';
 const APPS_DIR = './apps/';
 const DEBUG_DIR = './debug/';
 const RELEASE_DIR = './release/';
+const DEV_CLIENT_DIR = './dev-client/';
+
+// Must match vite.config.mjs's server.port.
+const VITE_DEV_SERVER_URL = 'http://localhost:8080/';
 
 const LINUX_INSTALL_DIR = '/opt/wingflight';
 
@@ -43,7 +47,7 @@ const SELECTED_PLATFORMS = getInputPlatforms();
 //Tasks
 //-----------------
 
-gulp.task('clean', gulp.parallel(clean_dist, clean_apps, clean_debug, clean_release));
+gulp.task('clean', gulp.parallel(clean_dist, clean_apps, clean_debug, clean_release, clean_dev_client));
 
 gulp.task('clean-dist', clean_dist);
 
@@ -55,6 +59,8 @@ gulp.task('clean-release', clean_release);
 
 gulp.task('clean-cache', clean_cache);
 
+gulp.task('clean-dev-client', clean_dev_client);
+
 const distRebuild = gulp.series(clean_dist, dist);
 gulp.task('dist', distRebuild);
 
@@ -65,6 +71,13 @@ const debugAppsBuild = gulp.series(gulp.parallel(clean_debug, distRebuild), debu
 
 const debugBuild = gulp.series(dist, debug, gulp.parallel(listPostBuildTasks(DEBUG_DIR)), start_debug);
 gulp.task('debug', debugBuild);
+
+// Launches the real NW.js desktop shell pointed at the Vite dev server (`yarn dev` /
+// `make dev-server`) instead of a packaged dist/debug copy, so source changes just need a
+// save + reload in the running window -- no rebuild each time. Requires the dev server to
+// already be running. Mirrors wingflight-configurator's `dev_client` gulp task.
+const devClientBuild = gulp.series(dev_client_manifest, run_dev_client);
+gulp.task('dev-client', devClientBuild);
 
 const releaseBuild = gulp.series(gulp.parallel(clean_release, appsBuild), gulp.parallel(listReleaseTasks(APPS_DIR)));
 gulp.task('release', releaseBuild);
@@ -204,9 +217,51 @@ function clean_release() {
     return del([RELEASE_DIR + '**'], { force: true }); 
 };
 
-function clean_cache() { 
-    return del(['./cache/**'], { force: true }); 
+function clean_cache() {
+    return del(['./cache/**'], { force: true });
 };
+
+function clean_dev_client() {
+    return del([DEV_CLIENT_DIR + '**'], { force: true });
+};
+
+// A minimal NW.js manifest whose "main" points at the running Vite dev server, instead of
+// a bundled index.html -- everything else is copied from package.json (window size, icon,
+// etc.) so the dev-client window matches the real app.
+function dev_client_manifest(done) {
+    var manifest = Object.assign({}, pkg, {
+        main: VITE_DEV_SERVER_URL,
+    });
+
+    fs.mkdirSync(DEV_CLIENT_DIR, { recursive: true });
+    fs.writeFileSync(DEV_CLIENT_DIR + 'package.json', JSON.stringify(manifest, null, 2));
+    done();
+}
+
+function run_dev_client(done) {
+    var platforms = getPlatforms();
+
+    if (platforms.length !== 1) {
+        console.log('dev-client only supports a single platform, got: ' + platforms);
+        done();
+        return;
+    }
+
+    var builder = new NwBuilder(Object.assign({}, nwBuilderOptions, {
+        buildDir: DEBUG_DIR,
+        platforms: platforms,
+        flavor: 'sdk',
+        files: DEV_CLIENT_DIR + '**/*',
+    }));
+    builder.on('log', console.log);
+    builder.run(function (err) {
+        if (err) {
+            console.log('Error running NW.js dev client: ' + err);
+            process.exit(1);
+        }
+        done();
+    });
+}
 
 // Real work for dist task. Done in another task to call it via
 // run-sequence.

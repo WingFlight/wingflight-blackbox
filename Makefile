@@ -40,12 +40,16 @@ dev-server: ## Run development server (Vite -- serves the app with reload-on-sav
 .PHONY: web
 web: dev-server ## Alias for dev-server
 
+.PHONY: dev-client
+dev-client: ## Launch the real NW.js desktop shell pointed at dev-server (start dev-server first)
+	yarn gulp dev-client
+
 .PHONY: all
 all: apps
 
 .PHONY: clean
-clean: ## Remove apps/debug/release build output
-	rm -fr apps debug release
+clean: ## Remove apps/debug/release/dev-client build output
+	rm -fr apps debug release dev-client
 
 .PHONY: realclean
 realclean: clean ## Also remove the intermediate dist/ copy
