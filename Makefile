@@ -34,9 +34,12 @@ debug: ## Run debug build and launch it (NW.js desktop)
 release: ## Build installers for all platforms (NW.js desktop)
 	yarn gulp release
 
-.PHONY: web
-web: ## Serve the app as a plain static site, for testing the browser build
+.PHONY: dev-server
+dev-server: ## Run development server (static web build -- no bundler, so save + reload is the loop)
 	npx --yes serve -l $(WEB_PORT) .
+
+.PHONY: web
+web: dev-server ## Alias for dev-server
 
 .PHONY: all
 all: apps
