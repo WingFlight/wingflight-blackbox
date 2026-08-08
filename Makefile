@@ -8,7 +8,6 @@
 .DEFAULT_GOAL     := help
 
 SEMVER            ?= 0.0.0
-WEB_PORT          ?= 8080
 
 # ========================================
 # RULES
@@ -35,8 +34,8 @@ release: ## Build installers for all platforms (NW.js desktop)
 	yarn gulp release
 
 .PHONY: dev-server
-dev-server: ## Run development server (static web build -- no bundler, so save + reload is the loop)
-	npx --yes serve -l $(WEB_PORT) .
+dev-server: ## Run development server (Vite -- serves the app with reload-on-save)
+	yarn vite
 
 .PHONY: web
 web: dev-server ## Alias for dev-server
