@@ -1170,53 +1170,17 @@ progress {
 	left: -40px;
 }
 
-html.isCF .navbar-logo {
-    left: 16px;
-}
-
-html.isINAV .navbar-logo {
-    left: 34px;
-}
-
-html.isCF .navbar-logo img {
-	content: url(".././images/cf_logo_white.svg");
-	width: 160px;
-}
-
-html.isBF .navbar-logo img {
-    content: url(".././images/light-wide-2.svg");
-    width: 282px;
-    height: 50px;
-    margin-left: 0 !important;
-}
-
-html.isRF .navbar-logo img {
-    content: url(".././images/rf_logo_white.svg");
-    width: 250px;
-    height: 35px;
-    margin-top: 5px !important;
-    margin-left: 5px !important;
-}
-
-html.isWF .navbar-logo img {
-    content: url(".././images/wf_logo_white.svg");
-    width: 138px;
-    height: 40px;
-    margin-top: 5px !important;
-    margin-left: 5px !important;
-}
-
-html.isINAV .navbar-logo img {
-	content: url(".././images/inav_logo_white.png");
-	width: auto;
-	left: -16px;
-	top: 3px;
-}
-
+/* Always WingFlight-branded, regardless of which firmware recorded the loaded log --
+   deliberately not per-firmware (unlike .view-*/switch/graph-header rules elsewhere in this
+   file, which do still vary with html.isCF/isBF/isRF/isINAV/isWF for legitimate per-firmware
+   UI differences). Values below match the former html.isWF overrides. */
 .navbar-logo img {
 	position:relative;
-	height: 35px;
-	width: 210px;
+	content: url(".././images/wf_logo_white.svg");
+	height: 40px;
+	width: 138px;
+	margin-top: 5px !important;
+	margin-left: 5px !important;
 	padding: 0;
 	display:block;
 }
@@ -1233,23 +1197,8 @@ html.isINAV .navbar-logo img {
 	padding-left: 0;
     position: relative;
 	left: -150px;
-	top: 20px;
+	top: 30px;
 	color: antiquewhite;
-}
-
-html.isBF .navbar-logo span {
-    left: -181px;
-    top: 30px;
-}
-
-html.isRF .navbar-logo span {
-    left: -160px;
-    top: 30px;
-}
-
-html.isWF .navbar-logo span {
-    left: -150px;
-    top: 30px;
 }
 
 html.has-video .navbar-static-top,
