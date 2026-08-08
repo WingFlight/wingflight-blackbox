@@ -233,6 +233,15 @@ function dev_client_manifest(done) {
         main: VITE_DEV_SERVER_URL,
     });
 
+    // default_locale tells NW.js's Chrome-extension-style manifest loader to expect a
+    // _locales/<lang>/messages.json directory sitting right next to this package.json --
+    // true for the real app (see js/localization.js's chrome.i18n.getMessage() calls), but
+    // dev-client/ only ever contains this generated manifest. The actual locale data is
+    // still served live over HTTP by Vite (main points there), so this field would only
+    // make NW.js fail to load the app with "Default locale was specified, but _locales
+    // subtree is missing" -- drop it.
+    delete manifest.default_locale;
+
     fs.mkdirSync(DEV_CLIENT_DIR, { recursive: true });
     fs.writeFileSync(DEV_CLIENT_DIR + 'package.json', JSON.stringify(manifest, null, 2));
     done();
