@@ -15,7 +15,7 @@ SEMVER            ?= 0.0.0
 
 .PHONY: init
 init: ## Install development dependencies
-	yarn install
+	pnpm install --frozen-lockfile
 
 .PHONY: version
 version: ## Set application version to $SEMVER
@@ -23,26 +23,26 @@ version: ## Set application version to $SEMVER
 
 .PHONY: apps
 apps: ## Build NW.js desktop apps for all platforms
-	yarn gulp apps
+	pnpm gulp apps
 
 .PHONY: debug
 debug: ## Run debug build and launch it (NW.js desktop)
-	yarn gulp debug
+	pnpm gulp debug
 
 .PHONY: release
 release: ## Build installers for all platforms (NW.js desktop)
-	yarn gulp release
+	pnpm gulp release
 
 .PHONY: dev-server
 dev-server: ## Run development server (Vite -- serves the app with reload-on-save)
-	yarn vite
+	pnpm vite
 
 .PHONY: web
 web: dev-server ## Alias for dev-server
 
 .PHONY: dev-client
 dev-client: ## Launch the real NW.js desktop shell pointed at dev-server (start dev-server first)
-	yarn gulp dev-client
+	pnpm gulp dev-client
 
 .PHONY: all
 all: apps

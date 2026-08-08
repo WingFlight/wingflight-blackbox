@@ -1,0 +1,15 @@
+# nw-builder@3.7.4 (the old, pinned version used for NW.js desktop packaging) has a
+# transitive dependency resolved via a git URL rather than the registry. pnpm's default
+# supply-chain protection refuses to install any subdependency it can't trace to a trusted
+# source; this is a legitimate pre-existing part of nw-builder's own dependency tree, not a
+# compromised package, so it's safe to allow rather than work around by vendoring/overriding.
+blockExoticSubdeps: false
+
+# Packages with install/build scripts pnpm otherwise refuses to run unattended. Both are
+# well-known, already-trusted packages -- yarn is a direct devDependency here (needed so
+# gulp-yarn's internal `yarn install` step, used to package the desktop app, resolves it
+# locally without requiring a system-wide yarn install) and es5-ext is a common transitive
+# utility library.
+allowBuilds:
+  es5-ext: true
+  yarn: true
