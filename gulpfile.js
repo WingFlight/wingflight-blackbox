@@ -4,6 +4,7 @@ const pkg = require('./package.json');
 
 const fs = require('fs');
 const path = require('path');
+const spawn = require('child_process').spawn;
 
 const zip = require('gulp-zip');
 const del = require('del');
@@ -263,18 +264,49 @@ function run_dev_client(done) {
         files: DEV_CLIENT_DIR + '**/*',
     }));
     builder.on('log', console.log);
-    // Deliberately not using builder.run(callback): nw-builder 3.7.4's callback path has an
-    // unbound `this` in its own .then()/.catch() handlers (lib/index.cjs:159/163, restoring
-    // this.options.platforms), which throws "Cannot set properties of undefined" as soon as
-    // the launched app's promise settles -- including on a normal, successful exit. Calling
-    // .run() with no callback returns the underlying promise directly and skips that broken
-    // wrapper entirely.
-    builder.run().then(function () {
-        done();
-    }).catch(function (err) {
-        console.log('Error running NW.js dev client: ' + err);
-        process.exit(1);
-    });
+
+    // Deliberately not using builder.run()/runApp(): nw-builder 3.7.4's runApp() spawns
+    // nw.exe with { detached: true, windowsHide: true } (lib/index.cjs:949-956).
+    // windowsHide maps to Windows' CREATE_NO_WINDOW flag, and combined with detached that
+    // reliably launches nw.exe with no visible window on Windows -- confirmed by finding
+    // multiple orphaned, windowless nw.exe processes still running after "successful"
+    // dev-client runs. (runApp's callback path is also separately broken -- see the
+    // dev-client: work around nw-builder 3.7.4's broken run(callback) path commit.)
+    //
+    // So: reuse nw-builder's own download/cache pipeline (this part works fine -- it
+    // correctly fetches and caches the NW.js SDK build), then spawn the cached executable
+    // ourselves with plain, visible-window-safe options instead of calling runApp().
+    builder.checkFiles()
+        .then(builder.resolveLatestVersion.bind(builder))
+        .then(builder.checkVersion.bind(builder))
+        .then(builder.platformFilesForVersion.bind(builder))
+        .then(builder.downloadNwjs.bind(builder))
+        .then(function () {
+            var currentPlatform = builder.options.currentPlatform;
+            var platform = builder._platforms[currentPlatform];
+            var runnable = currentPlatform.indexOf('win') === 0 ? 'nw.exe'
+                : currentPlatform.indexOf('osx') === 0 ? 'nwjs.app/Contents/MacOS/nwjs'
+                : 'nw';
+            var executable = path.resolve(platform.cache, runnable);
+            var parentDirectory = (Array.isArray(builder.options.files) ? builder.options.files[0] : builder.options.files)
+                .replace(/\*[/*]*/, '');
+
+            console.log('Launching App: ' + executable);
+
+            var nwProcess = spawn(executable, [parentDirectory], {
+                detached: true,
+                stdio: 'ignore',
+            });
+            // Let the app keep running after this gulp task (and `make dev-client`) exits,
+            // instead of blocking the terminal until the window is closed.
+            nwProcess.unref();
+
+            done();
+        })
+        .catch(function (err) {
+            console.log('Error running NW.js dev client: ' + err);
+            process.exit(1);
+        });
 }
 
 // Real work for dist task. Done in another task to call it via
