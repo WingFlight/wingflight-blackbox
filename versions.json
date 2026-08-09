@@ -1,3 +1,9 @@
 {
-  "entries": []
+  "entries": [
+    {
+      "type": "branch",
+      "name": "feature-web-browser-compat",
+      "path": "./feature-web-browser-compat/"
+    }
+  ]
 }
