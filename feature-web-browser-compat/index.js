@@ -6,8 +6,8 @@ $(document).ready(function () {
     localize();
 });
 
-function checkForConfiguratorUpdates() {
-    var releaseChecker = new ReleaseChecker('configurator', 'https://api.github.com/repos/WingFlight/wingflight-blackbox/releases');
+function checkForBlackboxUpdates() {
+    var releaseChecker = new ReleaseChecker('blackbox', 'https://api.github.com/repos/WingFlight/wingflight-blackbox/releases');
 
     releaseChecker.loadReleaseData(notifyOutdatedVersion);
 }
@@ -15,7 +15,7 @@ function checkForConfiguratorUpdates() {
 function notifyOutdatedVersion(releaseData) {
     chrome.storage.local.get('checkForUnstableVersions', function (result) {
         var showUnstableReleases = false;
-        if (result.checkForConfiguratorUnstableVersions) {
+        if (result.checkForUnstableVersions) {
             showUnstableReleases = true;
         }
         var versions = releaseData.filter(function (version) {
@@ -53,7 +53,7 @@ function notifyOutdatedVersion(releaseData) {
     });
 }
 
-checkForConfiguratorUpdates();
+checkForBlackboxUpdates();
 
 function openLinksInExternalBrowserByDefault() {
 
