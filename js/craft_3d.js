@@ -37,11 +37,10 @@ class Craft3D {
     const loader = new THREE.GLTFLoader();
     loader.load("/resources/models/model.gltf", (gltf) => {
       this.model = gltf.scene;
-      // Same model file and the same 15x scale wingflight-configurator's own 3D view
-      // (src/js/model.js) applies -- but that view uses a different camera (FOV 50,
-      // z=125) than this one (FOV 75, z=200 above), so the model may not read as the
-      // same on-screen size here and could need its own tuning.
-      this.model.scale.set(15, 15, 15);
+      // wingflight-configurator's own 3D view (src/js/model.js) uses 15x for this same
+      // model file, but under a different camera (FOV 50, z=125) than this one (FOV 75,
+      // z=200 above); tuned up from that starting point to read as a reasonable size here.
+      this.model.scale.set(21, 21, 21);
       this.modelWrapper.add(this.model);
       this.render();
     });
