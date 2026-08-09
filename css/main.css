@@ -1185,6 +1185,7 @@ progress {
     padding: 0;
     position: absolute;
     top: 32%;
+    font-size: 15px;
     /* Fixed, not a %: .navbar-logo has no explicit width, so it shrink-to-fits around its
        content, and this <a> is itself one of the absolutely-positioned children that gets
        excluded from that shrink-to-fit calculation -- a % here was computed against
