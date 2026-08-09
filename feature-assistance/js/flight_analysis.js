@@ -71,6 +71,7 @@ var FlightAnalysis = (function() {
 
     var WANTED_FIELDS = [
         "motor1speed", "motor2speed",
+        "headspeed", "tailspeed", // pre-rename field names -- still show up in real logs from before the motor1/2speed rename
         "govTarget", "govRequest",
         "setpoint[0]", "setpoint[1]", "setpoint[2]",
         "axisError[0]", "axisError[1]", "axisError[2]",
@@ -78,7 +79,12 @@ var FlightAnalysis = (function() {
         "gyroADC[0]", "gyroADC[1]", "gyroADC[2]",
         "Vbat", "Ibat",
         "EscV", "EscI", "EscThr", "EscCap",
-        "motor[0]"
+        "motor[0]",
+        "tvAxisP[0]", "tvAxisP[1]", "tvAxisP[2]",
+        "tvAxisI[0]", "tvAxisI[1]", "tvAxisI[2]",
+        "tvAxisD[0]", "tvAxisD[1]", "tvAxisD[2]",
+        "tvAxisF[0]", "tvAxisF[1]", "tvAxisF[2]",
+        "tvAxisB[0]", "tvAxisB[1]", "tvAxisB[2]"
     ];
 
     function readColumns(flightLog) {
@@ -125,7 +131,29 @@ var FlightAnalysis = (function() {
     // labs below aren't scored on spool-up/down or target-change transients.
     // ------------------------------------------------------------------
 
-    function detectStableFlightPhase(time, motorSpeed, governorTarget) {
+    function movingAverage(values, windowSamples) {
+        var n = values.length;
+        var result = new Array(n);
+        var sum = 0;
+        var half = Math.max(1, Math.floor(windowSamples / 2));
+
+        for (var i = 0; i < n; i++) {
+            var lo = Math.max(0, i - half), hi = Math.min(n - 1, i + half);
+            // Recompute the window sum directly -- simplest correct approach;
+            // this only runs once per log load, not per frame render.
+            sum = 0;
+            for (var k = lo; k <= hi; k++) sum += values[k];
+            result[i] = sum / (hi - lo + 1);
+        }
+        return result;
+    }
+
+    function percentile(sortedValues, fraction) {
+        var idx = Math.min(sortedValues.length - 1, Math.max(0, Math.floor(fraction * (sortedValues.length - 1))));
+        return sortedValues[idx];
+    }
+
+    function detectStableFlightPhase(time, motorSpeed, governorTarget, gyroActivity) {
         var n = time.length;
 
         if (n < 50 || time[n - 1] - time[0] <= 0) {
@@ -136,43 +164,73 @@ var FlightAnalysis = (function() {
         if (motorSpeed) {
             for (var h = 0; h < n; h++) if (motorSpeed[h] > 500) { hasMotorSpeed = true; break; }
         }
-        if (!hasMotorSpeed) {
-            return { stableIndexes: [], stableSampleCount: 0, reason: "No motor-speed (motor1speed) data logged, so a steady-flight window can't be identified." };
-        }
 
         var sampleRateHz = n / (time[n - 1] - time[0]);
         var windowSamples = Math.max(1, Math.round(sampleRateHz * 2)); // +-2s
 
         var candidate = new Array(n);
         var i, lo, hi;
+        var basis;
 
-        for (i = 0; i < n; i++) {
-            var speed = motorSpeed[i];
-            candidate[i] = false;
-            if (speed < 500) continue;
+        if (hasMotorSpeed) {
+            // Preferred basis: an aircraft with a speed-governed motor gives
+            // a direct, precise read on "steady" (target barely moving,
+            // actual speed tracking it closely); without a target, fall back
+            // to a plateau check on the speed signal itself.
+            basis = "motor-speed";
 
-            lo = Math.max(0, i - windowSamples);
-            hi = Math.min(n - 1, i + windowSamples);
+            for (i = 0; i < n; i++) {
+                var speed = motorSpeed[i];
+                candidate[i] = false;
+                if (speed < 500) continue;
 
-            if (governorTarget && governorTarget[i] > 500) {
-                var targetSpread = spread(governorTarget, lo, hi);
-                var trackingError = Math.abs(governorTarget[i] - speed) / governorTarget[i];
-                candidate[i] = targetSpread < 20 && trackingError <= 0.08;
-            } else {
-                var speedSpread = spread(motorSpeed, lo, hi);
-                candidate[i] = speedSpread < Math.max(40, speed * 0.03);
-            }
-        }
+                lo = Math.max(0, i - windowSamples);
+                hi = Math.min(n - 1, i + windowSamples);
 
-        // Blank out +-2s windows around governor-target steps
-        if (governorTarget) {
-            for (i = 1; i < n; i++) {
-                if (Math.abs(governorTarget[i] - governorTarget[i - 1]) > 20) {
-                    lo = Math.max(0, i - windowSamples);
-                    hi = Math.min(n - 1, i + windowSamples);
-                    for (var j = lo; j <= hi; j++) candidate[j] = false;
+                if (governorTarget && governorTarget[i] > 500) {
+                    var targetSpread = spread(governorTarget, lo, hi);
+                    var trackingError = Math.abs(governorTarget[i] - speed) / governorTarget[i];
+                    candidate[i] = targetSpread < 20 && trackingError <= 0.08;
+                } else {
+                    var speedSpread = spread(motorSpeed, lo, hi);
+                    candidate[i] = speedSpread < Math.max(40, speed * 0.03);
                 }
             }
+
+            // Blank out +-2s windows around governor-target steps
+            if (governorTarget) {
+                for (i = 1; i < n; i++) {
+                    if (Math.abs(governorTarget[i] - governorTarget[i - 1]) > 20) {
+                        lo = Math.max(0, i - windowSamples);
+                        hi = Math.min(n - 1, i + windowSamples);
+                        for (var j = lo; j <= hi; j++) candidate[j] = false;
+                    }
+                }
+            }
+        } else if (gyroActivity) {
+            // No motor-speed telemetry at all (common on simple throttle-only
+            // setups) -- fall back to airframe motion: a period where the
+            // aircraft is flying level/steady (not actively maneuvering)
+            // shows up as a sustained low-and-flat patch on summed |gyro|.
+            basis = "gyro-activity";
+
+            var smoothed = movingAverage(gyroActivity, Math.round(sampleRateHz));
+            var sorted = smoothed.slice(0).sort(function(a, b) { return a - b; });
+            // Anchor on a low percentile of the *whole* flight as the calm
+            // floor -- robust regardless of how much of the flight is spent
+            // maneuvering (a high/low percentile split like quiet-vs-busy
+            // breaks down when the busy fraction is small, since a "busy"
+            // percentile then just lands back in the calm band). A generous
+            // multiplicative + absolute margin absorbs normal noise in the
+            // calm band without needing a separate busy reference at all.
+            var calmFloor = percentile(sorted, 0.1);
+            var threshold = calmFloor * 1.8 + 2;
+
+            for (i = 0; i < n; i++) {
+                candidate[i] = smoothed[i] <= threshold;
+            }
+        } else {
+            return { stableIndexes: [], stableSampleCount: 0, reason: "No motor-speed or gyro data logged, so a steady-flight window can't be identified." };
         }
 
         // Keep only contiguous runs of >=3s, trimming 3s off each end
@@ -198,6 +256,7 @@ var FlightAnalysis = (function() {
             stableIndexes: stableIndexes,
             stableSampleCount: stableIndexes.length,
             sampleRateHz: sampleRateHz,
+            basis: basis,
             reason: stableIndexes.length ? null : "No steady flight segment of 3s or more was found — try a longer or steadier flight."
         };
     }
@@ -210,7 +269,7 @@ var FlightAnalysis = (function() {
         var motorSpeed = ctx.columns.motor1speed;
         var target = ctx.columns.govTarget || ctx.columns.govRequest;
 
-        if (!motorSpeed) return insufficient("No motor-speed (motor1speed) data was logged for this flight.");
+        if (!motorSpeed) return insufficient("No motor-speed data was logged for this flight.");
         if (ctx.stable.stableSampleCount < MIN_STABLE_SAMPLES) return insufficient(ctx.stable.reason);
 
         var idx = ctx.stable.stableIndexes;
@@ -515,6 +574,80 @@ var FlightAnalysis = (function() {
     }
 
     // ------------------------------------------------------------------
+    // Thrust Vector lab — informational only (no good/watch/attention
+    // thresholds yet: this is a brand-new firmware feature with no flight
+    // data to calibrate against). Reports how hard the independent TV PID
+    // loop is working and whether its I-term is carrying a steady bias,
+    // which is worth a look regardless of any threshold.
+    // ------------------------------------------------------------------
+
+    var TV_TERMS = ["P", "I", "D", "F", "B"];
+
+    function analyzeThrustVectorLab(ctx) {
+        var haveTv = false;
+        for (var a = 0; a < 3; a++) if (ctx.columns["tvAxisP[" + a + "]"]) haveTv = true;
+        if (!haveTv) return insufficient("No Thrust Vector data was logged for this flight (feature not enabled, or this firmware doesn't log it yet).");
+        if (ctx.stable.stableSampleCount < MIN_STABLE_SAMPLES) return insufficient(ctx.stable.reason);
+
+        var idx = ctx.stable.stableIndexes;
+        var axisResults = [];
+        var worstOutput = -1, worstAxis = null;
+
+        for (var axis = 0; axis < 3; axis++) {
+            var termField = {};
+            var haveAxis = true;
+            for (var t = 0; t < TV_TERMS.length; t++) {
+                var field = ctx.columns["tvAxis" + TV_TERMS[t] + "[" + axis + "]"];
+                if (!field) { haveAxis = false; break; }
+                termField[TV_TERMS[t]] = field;
+            }
+            if (!haveAxis) continue;
+
+            var outputSum = new Array(idx.length);
+            var iTermStable = new Array(idx.length);
+            for (var i = 0; i < idx.length; i++) {
+                var sample = idx[i];
+                outputSum[i] = termField.P[sample] + termField.I[sample] + termField.D[sample] + termField.F[sample] + termField.B[sample];
+                iTermStable[i] = termField.I[sample];
+            }
+
+            var rmsOutput = rms(outputSum);
+            var avgITerm = average(iTermStable);
+
+            if (rmsOutput > worstOutput) {
+                worstOutput = rmsOutput;
+                worstAxis = AXIS_NAMES[axis];
+            }
+
+            axisResults.push({ axis: AXIS_NAMES[axis], rmsOutput: rmsOutput, avgITerm: avgITerm });
+        }
+
+        if (!axisResults.length) return insufficient("Thrust Vector fields were present but incomplete for every axis.");
+
+        var story = "Thrust Vector loop was active during stable flight — " + worstAxis + " carried the most output (" +
+            rmsOutputPercent(worstOutput) + "% RMS). A large steady I-term while holding level flight can mean the loop " +
+            "is fighting a trim offset rather than a maneuver — check the per-axis I-term figures below if any look large and one-sided.";
+
+        return {
+            status: "info",
+            story: story,
+            metrics: axisResults.map(function(r) {
+                return {
+                    label: r.axis + " (TV)",
+                    value: rmsOutputPercent(r.rmsOutput) + "% RMS output, " + rmsOutputPercent(r.avgITerm) + "% avg I-term"
+                };
+            })
+        };
+    }
+
+    // PID terms are logged in the same fixed-point scale as the main loop
+    // (raw * 1000, decoded elsewhere as raw/10 = percent) -- see
+    // FlightLog.prototype.getPIDPercentage and blackbox.c's tvAxisPID_* encode.
+    function rmsOutputPercent(rawValue) {
+        return (rawValue / 10).toFixed(1);
+    }
+
+    // ------------------------------------------------------------------
     // PID tracking lab (lightweight — see plan's scope notes: this is a
     // simplified RMS-tracking-error + PID-sum-saturation check, not a full
     // step-response/overshoot/ringing analysis).
@@ -679,7 +812,33 @@ var FlightAnalysis = (function() {
         var sysConfig = flightLog.getSysConfig();
         var extracted = readColumns(flightLog);
 
-        var stable = detectStableFlightPhase(extracted.time, extracted.columns.motor1speed, extracted.columns.govTarget || extracted.columns.govRequest);
+        // Real logs still show up with the pre-rename field names (older
+        // firmware builds logged "headspeed"/"tailspeed" before they became
+        // "motor1speed"/"motor2speed") -- normalize once here so every lab
+        // below just sees motor1speed/motor2speed regardless of which the
+        // log actually used.
+        if (!extracted.columns.motor1speed && extracted.columns.headspeed) {
+            extracted.columns.motor1speed = extracted.columns.headspeed;
+        }
+        if (!extracted.columns.motor2speed && extracted.columns.tailspeed) {
+            extracted.columns.motor2speed = extracted.columns.tailspeed;
+        }
+
+        // Only needed as a fallback when there's no motor-speed telemetry at
+        // all (simple throttle-only setups) -- summed |gyro| as a proxy for
+        // "is the airframe actively maneuvering right now".
+        var gyroActivity = null;
+        if (!extracted.columns.motor1speed) {
+            var gx = extracted.columns["gyroADC[0]"], gy = extracted.columns["gyroADC[1]"], gz = extracted.columns["gyroADC[2]"];
+            if (gx && gy && gz) {
+                gyroActivity = new Array(extracted.time.length);
+                for (var gi = 0; gi < gyroActivity.length; gi++) {
+                    gyroActivity[gi] = Math.abs(gx[gi]) + Math.abs(gy[gi]) + Math.abs(gz[gi]);
+                }
+            }
+        }
+
+        var stable = detectStableFlightPhase(extracted.time, extracted.columns.motor1speed, extracted.columns.govTarget || extracted.columns.govRequest, gyroActivity);
 
         var ctx = { time: extracted.time, columns: extracted.columns, stable: stable };
 
@@ -688,6 +847,7 @@ var FlightAnalysis = (function() {
             esc: analyzeEscLab(ctx),
             battery: analyzeBatteryLab(ctx, flightLog),
             vibration: analyzeVibrationLab(ctx, flightLog),
+            thrustVector: analyzeThrustVectorLab(ctx),
             pid: analyzePidLab(ctx, flightLog)
         };
 
