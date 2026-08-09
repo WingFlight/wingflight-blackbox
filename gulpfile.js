@@ -40,6 +40,7 @@ const APP_ASSET_SOURCES = [
 
     // JavaScript
     './index.js',
+    './js/browser_compat.js',
     './js/cache.js',
     './js/complex.js',
     './js/configuration.js',
