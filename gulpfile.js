@@ -373,9 +373,8 @@ function dist() {
         './js/screenshot.js',
         './js/default_workspaces.js',
 
-        './resources/models/bell_cw.gltf',
-        './resources/models/bell_cw.png',
-        './resources/models/bell_cw.bin',
+        './resources/models/model.gltf',
+        './resources/models/model.bin',
 
         // everything else
         './package.json', // For NW.js
