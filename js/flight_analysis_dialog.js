@@ -20,6 +20,7 @@ function FlightAnalysisDialog(dialog) {
         { key: "esc", title: "Power / ESC" },
         { key: "battery", title: "Battery" },
         { key: "vibration", title: "Vibration" },
+        { key: "thrustVector", title: "Thrust Vector" },
         { key: "pid", title: "PID Tracking" }
     ];
 
