@@ -35,7 +35,11 @@ class Craft3D {
     this.scene.add(this.modelWrapper);
 
     const loader = new THREE.GLTFLoader();
-    loader.load("/resources/models/model.gltf", (gltf) => {
+    // Deliberately relative (not "/resources/..."): the web deploy serves every branch/tag
+    // build from its own subpath (e.g. blackbox.wingflight.org/feature-x/), and a leading "/"
+    // would always resolve against the domain root instead, 404ing everywhere but a build
+    // deployed at the site root.
+    loader.load("resources/models/model.gltf", (gltf) => {
       this.model = gltf.scene;
       // wingflight-configurator's own 3D view (src/js/model.js) uses 15x for this same
       // model file, but under a different camera (FOV 50, z=125) than this one (FOV 75,
