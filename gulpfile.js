@@ -410,12 +410,18 @@ function dist() {
 
 // Static web build: the same app assets as dist(), but pulls its third-party JS/CSS
 // (bootstrap, html2canvas, webm-writer, lodash) straight from the already-installed root
-// node_modules/ instead of running a nested yarn install inside the output directory --
-// there's no NW.js manifest to package for a browser deploy, so package.json/yarn.lock are
-// dropped too. Mirrors the exact node_modules/... paths index.html's own <link>/<script>
-// tags already reference, so nothing in index.html needs to change for this to work.
+// node_modules/ instead of running a nested yarn install inside the output directory -- and
+// skips yarn.lock, which nothing in a browser deploy ever reads. Mirrors the exact
+// node_modules/... paths index.html's own <link>/<script> tags already reference, so nothing
+// in index.html needs to change for this to work.
+//
+// package.json IS still included here, unlike yarn.lock -- not for NW.js packaging (there's
+// no manifest to package for a browser deploy), but because js/browser_compat.js's
+// chrome.runtime.getManifest() shim fetches it over HTTP to report the app version in a
+// plain browser tab the same way NW.js does natively.
 function webDist() {
     var webDistSources = APP_ASSET_SOURCES.concat([
+        './package.json',
         './node_modules/bootstrap/dist/**/*',
         './node_modules/html2canvas/dist/html2canvas.min.js',
         './node_modules/webm-writer/*.js',
