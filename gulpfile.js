@@ -24,6 +24,79 @@ const APPS_DIR = './apps/';
 const DEBUG_DIR = './debug/';
 const RELEASE_DIR = './release/';
 const DEV_CLIENT_DIR = './dev-client/';
+const WEB_DIST_DIR = './web-dist/';
+
+// Every plain-<script> source file, stylesheet, 3D model asset, HTML page, image, and
+// locale bundle the app actually loads at runtime -- shared between the NW.js dist() build
+// and the static webDist() build below, since both are just "assemble what index.html
+// references into one folder", they only differ in how they source their third-party deps.
+const APP_ASSET_SOURCES = [
+    // CSS files
+    './css/header_dialog.css',
+    './css/jquery.nouislider.min.css',
+    './css/keys_dialog.css',
+    './css/main.css',
+    './css/user_settings_dialog.css',
+
+    // JavaScript
+    './index.js',
+    './js/cache.js',
+    './js/complex.js',
+    './js/configuration.js',
+    './js/craft_3d.js',
+    './js/datastream.js',
+    './js/decoders.js',
+    './js/expo.js',
+    './js/flightlog.js',
+    './js/flightlog_fielddefs.js',
+    './js/flightlog_fields_presenter.js',
+    './js/flightlog_index.js',
+    './js/flightlog_parser.js',
+    './js/flightlog_video_renderer.js',
+    './js/graph_config.js',
+    './js/graph_config_dialog.js',
+    './js/graph_legend.js',
+    './js/workspace_selection.js',
+    './js/graph_spectrum.js',
+    './js/graph_spectrum_calc.js',
+    './js/graph_spectrum_plot.js',
+    './js/grapher.js',
+    './js/sticks.js',
+    './js/gui.js',
+    './js/header_dialog.js',
+    './js/keys_dialog.js',
+    './js/laptimer.js',
+    './js/localization.js',
+    './js/main.js',
+    './js/pref_storage.js',
+    './js/release_checker.js',
+    './js/seekbar.js',
+    './js/tools.js',
+    './js/user_settings_dialog.js',
+    './js/video_export_dialog.js',
+    './js/csv-exporter.js',
+    './js/webworkers/csv-export-worker.js',
+    './js/vendor/FileSaver.js',
+    './js/vendor/jquery-1.11.3.min.js',
+    './js/vendor/jquery-ui-1.11.4.min.js',
+    './js/vendor/jquery.ba-throttle-debounce.js',
+    './js/vendor/jquery.nouislider.all.min.js',
+    './js/vendor/modernizr-2.6.2-respond-1.1.0.min.js',
+    './js/vendor/semver.js',
+    './js/vendor/three.js',
+    './js/vendor/three.min.js',
+    './js/vendor/GLTFLoader.js',
+    './js/screenshot.js',
+    './js/default_workspaces.js',
+
+    './resources/models/model.gltf',
+    './resources/models/model.bin',
+
+    // everything else
+    './*.html',
+    './images/**/*',
+    './_locales/**/*',
+];
 
 // Must match vite.config.mjs's server.port.
 const VITE_DEV_SERVER_URL = 'http://localhost:8080/';
@@ -48,7 +121,7 @@ const SELECTED_PLATFORMS = getInputPlatforms();
 //Tasks
 //-----------------
 
-gulp.task('clean', gulp.parallel(clean_dist, clean_apps, clean_debug, clean_release, clean_dev_client));
+gulp.task('clean', gulp.parallel(clean_dist, clean_apps, clean_debug, clean_release, clean_dev_client, clean_web_dist));
 
 gulp.task('clean-dist', clean_dist);
 
@@ -62,8 +135,13 @@ gulp.task('clean-cache', clean_cache);
 
 gulp.task('clean-dev-client', clean_dev_client);
 
+gulp.task('clean-web-dist', clean_web_dist);
+
 const distRebuild = gulp.series(clean_dist, dist);
 gulp.task('dist', distRebuild);
+
+const webDistBuild = gulp.series(clean_web_dist, webDist);
+gulp.task('web-dist', webDistBuild);
 
 const appsBuild = gulp.series(gulp.parallel(clean_apps, distRebuild), apps, gulp.parallel(listPostBuildTasks(APPS_DIR)));
 gulp.task('apps', appsBuild);
@@ -227,6 +305,10 @@ function clean_dev_client() {
     return del([DEV_CLIENT_DIR + '**'], { force: true });
 };
 
+function clean_web_dist() {
+    return del([WEB_DIST_DIR + '**'], { force: true });
+};
+
 // A minimal NW.js manifest whose "main" points at the running Vite dev server, instead of
 // a bundled index.html -- everything else is copied from package.json (window size, icon,
 // etc.) so the dev-client window matches the real app.
@@ -313,81 +395,33 @@ function run_dev_client(done) {
 // Real work for dist task. Done in another task to call it via
 // run-sequence.
 function dist() {
-    var distSources = [
-        // CSS files
-        './css/header_dialog.css',
-        './css/jquery.nouislider.min.css',
-        './css/keys_dialog.css',
-        './css/main.css',
-        './css/user_settings_dialog.css',
-
-        // JavaScript
-        './index.js',
-        './js/cache.js',
-        './js/complex.js',
-        './js/configuration.js',
-        './js/craft_3d.js',
-        './js/datastream.js',
-        './js/decoders.js',
-        './js/expo.js',
-        './js/flightlog.js',
-        './js/flightlog_fielddefs.js',
-        './js/flightlog_fields_presenter.js',
-        './js/flightlog_index.js',
-        './js/flightlog_parser.js',
-        './js/flightlog_video_renderer.js',
-        './js/graph_config.js',
-        './js/graph_config_dialog.js',
-        './js/graph_legend.js',
-        './js/workspace_selection.js',
-        './js/graph_spectrum.js',
-        './js/graph_spectrum_calc.js',
-        './js/graph_spectrum_plot.js',
-        './js/grapher.js',
-        './js/sticks.js',
-        './js/gui.js',
-        './js/header_dialog.js',
-        './js/keys_dialog.js',
-        './js/laptimer.js',
-        './js/localization.js',
-        './js/main.js',
-        './js/pref_storage.js',
-        './js/release_checker.js',
-        './js/seekbar.js',
-        './js/tools.js',
-        './js/user_settings_dialog.js',
-        './js/video_export_dialog.js',
-        './js/csv-exporter.js',
-        './js/webworkers/csv-export-worker.js',
-        './js/vendor/FileSaver.js',
-        './js/vendor/jquery-1.11.3.min.js',
-        './js/vendor/jquery-ui-1.11.4.min.js',
-        './js/vendor/jquery.ba-throttle-debounce.js',
-        './js/vendor/jquery.nouislider.all.min.js',
-        './js/vendor/modernizr-2.6.2-respond-1.1.0.min.js',
-        './js/vendor/semver.js',
-        './js/vendor/three.js',
-        './js/vendor/three.min.js',
-        './js/vendor/GLTFLoader.js',
-        './js/screenshot.js',
-        './js/default_workspaces.js',
-
-        './resources/models/model.gltf',
-        './resources/models/model.bin',
-
-        // everything else
+    var distSources = APP_ASSET_SOURCES.concat([
         './package.json', // For NW.js
         './yarn.lock',
-        './*.html',
-        './images/**/*',
-        './_locales/**/*',
-    ];
+    ]);
     return gulp.src(distSources, { base: '.' })
         .pipe(gulp.dest(DIST_DIR))
         .pipe(yarn({
             production: true,
             ignoreScripts: true
         }));;
+};
+
+// Static web build: the same app assets as dist(), but pulls its third-party JS/CSS
+// (bootstrap, html2canvas, webm-writer, lodash) straight from the already-installed root
+// node_modules/ instead of running a nested yarn install inside the output directory --
+// there's no NW.js manifest to package for a browser deploy, so package.json/yarn.lock are
+// dropped too. Mirrors the exact node_modules/... paths index.html's own <link>/<script>
+// tags already reference, so nothing in index.html needs to change for this to work.
+function webDist() {
+    var webDistSources = APP_ASSET_SOURCES.concat([
+        './node_modules/bootstrap/dist/**/*',
+        './node_modules/html2canvas/dist/html2canvas.min.js',
+        './node_modules/webm-writer/*.js',
+        './node_modules/lodash/lodash.min.js',
+    ]);
+    return gulp.src(webDistSources, { base: '.' })
+        .pipe(gulp.dest(WEB_DIST_DIR));
 };
 
 // Create runable app directories in ./apps
