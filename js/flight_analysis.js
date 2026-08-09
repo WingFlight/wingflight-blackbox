@@ -167,6 +167,10 @@ var FlightAnalysis = (function() {
         if (motorSpeed) {
             for (var h = 0; h < n; h++) if (motorSpeed[h] > 500) { hasMotorSpeed = true; break; }
         }
+        var hasGovernorTarget = false;
+        if (governorTarget) {
+            for (var g = 0; g < n; g++) if (governorTarget[g] > 500) { hasGovernorTarget = true; break; }
+        }
 
         var sampleRateHz = n / (time[n - 1] - time[0]);
         var windowSamples = Math.max(1, Math.round(sampleRateHz * 2)); // +-2s
@@ -175,46 +179,44 @@ var FlightAnalysis = (function() {
         var i, lo, hi;
         var basis;
 
-        if (hasMotorSpeed) {
-            // Preferred basis: an aircraft with a speed-governed motor gives
-            // a direct, precise read on "steady" (target barely moving,
-            // actual speed tracking it closely); without a target, fall back
-            // to a plateau check on the speed signal itself.
+        if (hasMotorSpeed && hasGovernorTarget) {
+            // Best case: an actively governed motor gives a direct, precise
+            // read on "steady" -- target barely moving, actual speed
+            // tracking it closely.
             basis = "motor-speed";
 
             for (i = 0; i < n; i++) {
                 var speed = motorSpeed[i];
                 candidate[i] = false;
-                if (speed < 500) continue;
+                if (speed < 500 || governorTarget[i] <= 500) continue;
 
                 lo = Math.max(0, i - windowSamples);
                 hi = Math.min(n - 1, i + windowSamples);
 
-                if (governorTarget && governorTarget[i] > 500) {
-                    var targetSpread = spread(governorTarget, lo, hi);
-                    var trackingError = Math.abs(governorTarget[i] - speed) / governorTarget[i];
-                    candidate[i] = targetSpread < 20 && trackingError <= 0.08;
-                } else {
-                    var speedSpread = spread(motorSpeed, lo, hi);
-                    candidate[i] = speedSpread < Math.max(40, speed * 0.03);
-                }
+                var targetSpread = spread(governorTarget, lo, hi);
+                var trackingError = Math.abs(governorTarget[i] - speed) / governorTarget[i];
+                candidate[i] = targetSpread < 20 && trackingError <= 0.08;
             }
 
             // Blank out +-2s windows around governor-target steps
-            if (governorTarget) {
-                for (i = 1; i < n; i++) {
-                    if (Math.abs(governorTarget[i] - governorTarget[i - 1]) > 20) {
-                        lo = Math.max(0, i - windowSamples);
-                        hi = Math.min(n - 1, i + windowSamples);
-                        for (var j = lo; j <= hi; j++) candidate[j] = false;
-                    }
+            for (i = 1; i < n; i++) {
+                if (Math.abs(governorTarget[i] - governorTarget[i - 1]) > 20) {
+                    lo = Math.max(0, i - windowSamples);
+                    hi = Math.min(n - 1, i + windowSamples);
+                    for (var j = lo; j <= hi; j++) candidate[j] = false;
                 }
             }
         } else if (gyroActivity) {
-            // No motor-speed telemetry at all (common on simple throttle-only
-            // setups) -- fall back to airframe motion: a period where the
-            // aircraft is flying level/steady (not actively maneuvering)
-            // shows up as a sustained low-and-flat patch on summed |gyro|.
+            // The normal case: no governor target logged (current WingFlight
+            // firmware doesn't log one at all -- see analyzeGovernorLab), and
+            // an ungoverned prop's RPM naturally wanders with throttle/pitch
+            // even during smooth, level cruise, so a plateau check on motor
+            // speed itself is the wrong signal here regardless of whether
+            // motor speed is logged. Airframe motion is the right one: a
+            // period where the aircraft is flying level/steady (not actively
+            // maneuvering) shows up as a sustained low-and-flat patch on
+            // summed |gyro|, which works the same whether or not there's a
+            // motor-speed sensor at all.
             basis = "gyro-activity";
 
             var smoothed = movingAverage(gyroActivity, Math.round(sampleRateHz));
@@ -231,6 +233,21 @@ var FlightAnalysis = (function() {
 
             for (i = 0; i < n; i++) {
                 candidate[i] = smoothed[i] <= threshold;
+            }
+        } else if (hasMotorSpeed) {
+            // Last resort: no gyro data to fall back on, so use a plateau
+            // check on motor speed itself. Weaker signal for an ungoverned
+            // prop (see above), but better than nothing.
+            basis = "motor-speed-plateau";
+
+            for (i = 0; i < n; i++) {
+                var s = motorSpeed[i];
+                candidate[i] = false;
+                if (s < 500) continue;
+
+                lo = Math.max(0, i - windowSamples);
+                hi = Math.min(n - 1, i + windowSamples);
+                candidate[i] = spread(motorSpeed, lo, hi) < Math.max(40, s * 0.03);
             }
         } else {
             return { stableIndexes: [], stableSampleCount: 0, reason: "No motor-speed or gyro data logged, so a steady-flight window can't be identified." };
@@ -892,17 +909,18 @@ var FlightAnalysis = (function() {
             extracted.columns.motor2speed = extracted.columns.tailspeed;
         }
 
-        // Only needed as a fallback when there's no motor-speed telemetry at
-        // all (simple throttle-only setups) -- summed |gyro| as a proxy for
-        // "is the airframe actively maneuvering right now".
+        // Used as the primary stable-phase basis whenever there's no
+        // governor target logged (the normal case -- see analyzeGovernorLab)
+        // regardless of whether motor speed itself is present, since an
+        // ungoverned prop's RPM isn't a reliable "steady" signal on its own.
+        // Summed |gyro| stands in for "is the airframe actively maneuvering
+        // right now".
         var gyroActivity = null;
-        if (!extracted.columns.motor1speed) {
-            var gx = extracted.columns["gyroADC[0]"], gy = extracted.columns["gyroADC[1]"], gz = extracted.columns["gyroADC[2]"];
-            if (gx && gy && gz) {
-                gyroActivity = new Array(extracted.time.length);
-                for (var gi = 0; gi < gyroActivity.length; gi++) {
-                    gyroActivity[gi] = Math.abs(gx[gi]) + Math.abs(gy[gi]) + Math.abs(gz[gi]);
-                }
+        var gx = extracted.columns["gyroADC[0]"], gy = extracted.columns["gyroADC[1]"], gz = extracted.columns["gyroADC[2]"];
+        if (gx && gy && gz) {
+            gyroActivity = new Array(extracted.time.length);
+            for (var gi = 0; gi < gyroActivity.length; gi++) {
+                gyroActivity[gi] = Math.abs(gx[gi]) + Math.abs(gy[gi]) + Math.abs(gz[gi]);
             }
         }
 
