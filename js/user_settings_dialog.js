@@ -192,7 +192,7 @@ function UserSettingsDialog(dialog, onLoad, onSave) {
                 motor_list_e.append(motors_e);
             } else {
                     for(var i=0; i<mixerList[mixerConfiguration-1].defaultMotorOrder.length; i++) {
-                            var motors_e = $('<tr>' +
+                            motors_e = $('<tr>' +
                                                                                 '<td colspan="2"><label>Motor ' + (i+1) + '</label><select class="motor_' + i + '_"><!-- list generated here --></select></td>' +
                                                                         '</tr>');
                         var select_e = $('select', motors_e);
@@ -275,7 +275,7 @@ function UserSettingsDialog(dialog, onLoad, onSave) {
         }
     });
 
-    $(".user-settings-dialog-save").click(function(e) {
+    $(".user-settings-dialog-save").click(function(_e) {
             onSave(convertUIToSettings());
     });
 

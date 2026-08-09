@@ -6,10 +6,6 @@ function VideoExportDialog(dialog, onSave) {
         DIALOG_MODE_IN_PROGRESS = 1,
         DIALOG_MODE_COMPLETE = 2,
 
-        currentGraphConfig,
-        flightLogDataArray,
-        dialogMode,
-
         videoRenderer = false,
 
         videoDuration = $(".video-duration", dialog),
@@ -36,11 +32,11 @@ function VideoExportDialog(dialog, onSave) {
     }
 
     function formatTime(secs) {
-        var
-            mins = Math.floor(secs / 60),
-            secs = secs % 60,
+        var mins = Math.floor(secs / 60);
 
-            hours = Math.floor(mins / 60);
+        secs = secs % 60;
+
+        var hours = Math.floor(mins / 60);
 
         mins = mins % 60;
 
@@ -59,8 +55,6 @@ function VideoExportDialog(dialog, onSave) {
     }
 
     function setDialogMode(mode) {
-        dialogMode = mode;
-
         var
             settingClasses = [
                 "video-export-mode-settings",
@@ -229,7 +223,7 @@ function VideoExportDialog(dialog, onSave) {
         e.preventDefault();
     });
 
-    $(".video-export-dialog-cancel").click(function(e) {
+    $(".video-export-dialog-cancel").click(function(_e) {
         if (videoRenderer) {
             videoRenderer.cancel();
         }

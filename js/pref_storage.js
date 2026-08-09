@@ -26,7 +26,8 @@ function PrefStorage(keyPrefix) {
 
                 try {
                     parsed = JSON.parse(window.localStorage[name]);
-                } catch (e) {
+                } catch (_e) {
+                    // No valid stored value -- parsed stays null.
                 }
 
                 onGet(parsed);

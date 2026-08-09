@@ -26,7 +26,7 @@
         try {
             require('nw.gui');
             return true;
-        } catch (e) {
+        } catch (_e) {
             return false;
         }
     };

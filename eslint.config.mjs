@@ -42,6 +42,7 @@ export default [
           vars: "local",
           argsIgnorePattern: "^_",
           varsIgnorePattern: "^_",
+          caughtErrorsIgnorePattern: "^_",
         },
       ],
 

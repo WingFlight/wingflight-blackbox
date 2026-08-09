@@ -5,7 +5,6 @@ function HeaderDialog(dialog, onSave) {
         // Private Variables
 
 
-        var that = this;                 // generic pointer back to this function
         var activeSysConfig;        // pointer to the current system configuration
 
         /** By default, all parameters are shown on the header
@@ -234,7 +233,7 @@ function HeaderDialog(dialog, onSave) {
 
         }
 
-    function setParameterFloat(name, data, decimalPlaces) {
+    function _setParameterFloat(name, data, decimalPlaces) {
         var parameterElem = $('.parameter td[name="' + name + '"]');
         var nameElem = $('input', parameterElem);
         if(data!=null) {
@@ -284,7 +283,7 @@ function HeaderDialog(dialog, onSave) {
             });
         }
 
-        function isFeatureEnabled(name, list, value) {
+        function _isFeatureEnabled(name, list, value) {
                 for (var i = 0; i < list.length; i++) {
                         if (list[i].name == name && (value & 1<<list[i].bit)) {
                                 return true;
@@ -369,7 +368,7 @@ function HeaderDialog(dialog, onSave) {
                         });
                 }
 
-                for (var i = 0; i < radioGroups.length; i++) {
+                for (i = 0; i < radioGroups.length; i++) {
                         var group = radioGroups[i];
                         var controls_e = $('input[name="' + group + '"].feature');
 
@@ -465,7 +464,7 @@ function HeaderDialog(dialog, onSave) {
                         } else {
                                 $('.unknown').hide();
                         }
-                } catch(e) {
+                } catch(_e) {
                         $('.unknown').hide();
                 }
         }
@@ -509,13 +508,13 @@ function HeaderDialog(dialog, onSave) {
 
         var $table = $('.rpm_notches table tbody').empty();
         let elem = "";
-        for (const [src, item] of Object.entries(pitchItems)) {
+        for (const [_src, item] of Object.entries(pitchItems)) {
             elem += `<tr><td>Pitch</td><td>${item.source}</td><td>${item.type}</td><td>${item.harmonic}</td><td>${item.q}</td></tr>`;
         }
-        for (const [src, item] of Object.entries(rollItems)) {
+        for (const [_src, item] of Object.entries(rollItems)) {
             elem += `<tr><td>Roll</td><td>${item.source}</td><td>${item.type}</td><td>${item.harmonic}</td><td>${item.q}</td></tr>`;
         }
-        for (const [src, item] of Object.entries(yawItems)) {
+        for (const [_src, item] of Object.entries(yawItems)) {
             elem += `<tr><td>Yaw</td><td>${item.source}</td><td>${item.type}</td><td>${item.harmonic}</td><td>${item.q}</td></tr>`;
         }
 
@@ -598,7 +597,7 @@ function HeaderDialog(dialog, onSave) {
 
         var $table = $('.rpm_filters table tbody').empty();
         let elem = "";
-        for (const [src, item] of Object.entries(items)) {
+        for (const [_src, item] of Object.entries(items)) {
             elem += `<tr><td>${item.source}</td><td>${item.type}</td><td>${item.harmonic}</td><td>${item.q}</td><td>${item.limit}</td></tr>`;
         }
         $table.append(elem);
@@ -1193,7 +1192,7 @@ function HeaderDialog(dialog, onSave) {
 
          // Buttons
 
-    $(".header-dialog-save").click(function(e) {
+    $(".header-dialog-save").click(function(_e) {
         onSave(convertUIToSysConfig());
     });
 }

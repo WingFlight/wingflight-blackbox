@@ -171,11 +171,12 @@ function getRunDebugAppCommand(arch) {
     let command;
 
     switch (arch) {
-    case 'osx64':
+    case 'osx64': {
         const pkgName = `${pkg.name}.app`;
         command = `open ${path.join(DEBUG_DIR, pkg.name, arch, pkgName)}`;
 
         break;
+    }
 
     case 'linux64':
     case 'linux32':
@@ -346,13 +347,11 @@ function dist() {
         './js/sticks.js',
         './js/gui.js',
         './js/header_dialog.js',
-        './js/imu.js',
         './js/keys_dialog.js',
         './js/laptimer.js',
         './js/localization.js',
         './js/main.js',
         './js/pref_storage.js',
-        './js/real.js',
         './js/release_checker.js',
         './js/seekbar.js',
         './js/tools.js',
@@ -398,7 +397,7 @@ function apps(done) {
     buildNWApps(platforms, 'normal', APPS_DIR, done);
 };
 
-function listPostBuildTasks(folder, done) {
+function listPostBuildTasks(folder, _done) {
 
     var platforms = getPlatforms();
 
@@ -448,8 +447,8 @@ function post_build(arch, folder, done) {
         var launcherDir = path.join(folder, pkg.name, arch);
 
        // Copy ffmpeg codec library into Linux app
-        var libSrc = './library/' + arch + '/libffmpeg.so';
-        var libDest = path.join(launcherDir, 'lib');
+        libSrc = './library/' + arch + '/libffmpeg.so';
+        libDest = path.join(launcherDir, 'lib');
 
         console.log('Copy Ubuntu launcher scripts to ' + launcherDir);        
         gulp.src('assets/linux/**')                   
@@ -473,8 +472,8 @@ function post_build(arch, folder, done) {
             var webKitVersion = files[0];
             console.log('Found nwjs version: ' + webKitVersion);
             // Copy ffmpeg codec library into macOS app
-            var libSrc = './library/osx64/libffmpeg.dylib';
-            var libDest = path.join(pathToVersions, webKitVersion) + '/';
+            libSrc = './library/osx64/libffmpeg.dylib';
+            libDest = path.join(pathToVersions, webKitVersion) + '/';
             console.log('Copy ffmpeg library to macOS app (' + libSrc + ' to ' + libDest + ')');
             return gulp.src(libSrc)
                        .pipe(gulp.dest(libDest));
@@ -662,7 +661,7 @@ function release_rpm(arch, appDirectory, done) {
              rpmDest: RELEASE_DIR
     };
 
-    buildRpm(options, function(err, rpm) {
+    buildRpm(options, function(err, _rpm) {
         if (err) {
           console.error("Error generating rpm package: " + err);
         }

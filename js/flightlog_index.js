@@ -5,7 +5,6 @@ function FlightLogIndex(logData) {
     var
         that = this,
         logBeginOffsets = false,
-        logCount = false,
         intraframeDirectories = false;
 
     function buildLogOffsetsIndex() {
@@ -52,13 +51,9 @@ function FlightLogIndex(logData) {
                     maxTime: false
                 },
 
-                gyroADC, accADC, magADC,
-
                 iframeCount = 0,
                 motorFields = [],
-                matches,
                 throttleTotal,
-                eventInThisChunk = null,
                 currentPIDProfile = 0,
                 parsedHeader,
                 sawEndMarker = false;
@@ -76,12 +71,7 @@ function FlightLogIndex(logData) {
             // Only attempt to parse the log if the header wasn't corrupt
             if (parsedHeader) {
                 var
-                    sysConfig = parser.sysConfig,
                     mainFrameDef = parser.frameDefs.I,
-
-                    gyroADC = [mainFrameDef.nameToIndex["gyroADC[0]"], mainFrameDef.nameToIndex["gyroADC[1]"], mainFrameDef.nameToIndex["gyroADC[2]"]],
-                    accADC = [mainFrameDef.nameToIndex["accADC[0]"], mainFrameDef.nameToIndex["accADC[1]"], mainFrameDef.nameToIndex["accADC[2]"]],
-                    magADC = [mainFrameDef.nameToIndex["magADC[0]"], mainFrameDef.nameToIndex["magADC[1]"], mainFrameDef.nameToIndex["magADC[2]"]],
 
                     lastSlow = [],
                     lastGPSHome = [];
@@ -95,12 +85,7 @@ function FlightLogIndex(logData) {
 
                 var throttleCmdIndex = mainFrameDef.nameToIndex["rcCommand[4]"];
 
-                // Do we have mag fields? If not mark that data as absent
-                if (magADC[0] === undefined) {
-                    magADC = false;
-                }
-
-                parser.onFrameReady = function(frameValid, frame, frameType, frameOffset, frameSize) {
+                parser.onFrameReady = function(frameValid, frame, frameType, frameOffset, _frameSize) {
                     if (!frameValid) {
                         return;
                     }
@@ -207,7 +192,7 @@ function FlightLogIndex(logData) {
     }
 
     //Public:
-    this.loadFromJSON = function(json) {
+    this.loadFromJSON = function(_json) {
 
     };
 
@@ -221,7 +206,6 @@ function FlightLogIndex(logData) {
             var
                 lastTime, lastLastTime,
                 lastOffset, lastLastOffset,
-                lastThrottle,
 
                 sourceIndex = intraframeDirectories[i],
 

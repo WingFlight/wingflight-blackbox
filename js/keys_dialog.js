@@ -2,12 +2,9 @@
 
 function KeysDialog(dialog) {
 
-        // Private Variables
-        var that = this; // generic pointer back to this function
-
         // Public variables
 
-    this.show = function(sysConfig) {
+    this.show = function(_sysConfig) {
             dialog.modal('show');
     };
 

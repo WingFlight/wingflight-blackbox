@@ -115,8 +115,8 @@ void function (namespace) {
                                 var r1_r = i1_r - i3_i;
                                 var r1_i = i1_i + i3_r;
                         } else {
-                                var r1_r = i1_r + i3_i;
-                                var r1_i = i1_i - i3_r;
+                                r1_r = i1_r + i3_i;
+                                r1_i = i1_i - i3_r;
                         }
 
                         var r2_r = i0_r - i2_r, r2_i = i0_i - i2_i;
@@ -125,8 +125,8 @@ void function (namespace) {
                                 var r3_r = i1_r + i3_i;
                                 var r3_i = i1_i - i3_r;
                         } else {
-                                var r3_r = i1_r - i3_i;
-                                var r3_i = i1_i + i3_r;
+                                r3_r = i1_r - i3_i;
+                                r3_i = i1_i + i3_r;
                         }
 
                         output[2 * ((outputOffset) + (outputStride) * (i))] = r0_r, output[2 * ((outputOffset) + (outputStride) * (i)) + 1] = r0_i;
@@ -145,10 +145,10 @@ void function (namespace) {
                                 scratch[2 * (q1)] = x0_r, scratch[2 * (q1) + 1] = x0_i;
                         }
 
-                        for (var q1 = 0, k = u; q1 < p; q1++, k += m) {
+                        for (q1 = 0, k = u; q1 < p; q1++, k += m) {
                                 var tOffset = 0;
 
-                                var x0_r = scratch[2 * (0)], x0_i = scratch[2 * (0) + 1];
+                                x0_r = scratch[2 * (0)], x0_i = scratch[2 * (0) + 1];
                                 output[2 * ((outputOffset) + (outputStride) * (k))] = x0_r, output[2 * ((outputOffset) + (outputStride) * (k)) + 1] = x0_i;
 
                                 for (var q = 1; q < p; q++) {
@@ -177,7 +177,7 @@ void function (namespace) {
                                 output[2 * ((outputOffset) + (outputStride) * (i))] = x0_r, output[2 * ((outputOffset) + (outputStride) * (i)) + 1] = x0_i;
                         }
                 } else {
-                        for (var i = 0; i < p; i++) {
+                        for (i = 0; i < p; i++) {
                                 work(output, outputOffset + outputStride * i * m, outputStride, f, fOffset + i * fStride * inputStride, fStride * p, inputStride, factors.slice(), state);
                         }
                 }
@@ -195,7 +195,7 @@ void function (namespace) {
                         throw new RangeError("You didn't pass enough arguments, passed `" + arguments.length + "'");
                 }
 
-                var n = ~~n, inverse = !!inverse;
+                n = ~~n, inverse = !!inverse;
 
                 if (n < 1) {
                         throw new RangeError("n is outside range, should be positive integer, was `" + n + "'");
@@ -216,7 +216,7 @@ void function (namespace) {
                         if (inverse) {
                                 var phase =  theta * i;
                         } else {
-                                var phase = -theta * i;
+                                phase = -theta * i;
                         }
 
                         t[2 * (i)] = Math.cos(phase);
@@ -252,7 +252,7 @@ void function (namespace) {
         };
 
         complex.prototype.process = function(output, outputOffset, outputStride, input, inputOffset, inputStride, t) {
-                var outputStride = ~~outputStride, inputStride = ~~inputStride;
+                outputStride = ~~outputStride, inputStride = ~~inputStride;
 
                 var type = t == 'real' ? t : 'complex';
 
@@ -277,8 +277,8 @@ void function (namespace) {
                         if (input == output) {
                                 work(this.state.scratch, 0, 1, input, inputOffset, 1, inputStride, this.state.factors.slice(), this.state);
 
-                                for (var i = 0; i < this.state.n; i++) {
-                                        var x0_r = this.state.scratch[2 * (i)], x0_i = this.state.scratch[2 * (i) + 1];
+                                for (i = 0; i < this.state.n; i++) {
+                                        x0_r = this.state.scratch[2 * (i)], x0_i = this.state.scratch[2 * (i) + 1];
 
                                         output[2 * ((outputOffset) + (outputStride) * (i))] = x0_r, output[2 * ((outputOffset) + (outputStride) * (i)) + 1] = x0_i;
                                 }

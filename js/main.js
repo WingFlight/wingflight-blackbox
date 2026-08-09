@@ -63,6 +63,11 @@ function BlackboxLogViewer() {
 
         prefs = new PrefStorage(),
 
+        // Assigned (see `new Configuration(...)` below, which itself has side effects: it
+        // loads/renders the associated dump file) but the reference is never subsequently read.
+        // Not touching the multiple assignment sites in this file given the risk of disturbing
+        // app init/file-loading behavior.
+        // eslint-disable-next-line no-unused-vars
         configuration = null,                                                          // is their an associated dump file ?
         configurationDefaults = new ConfigurationDefaults(prefs),  // configuration defaults
 
@@ -91,10 +96,8 @@ function BlackboxLogViewer() {
 
         hasVideo = false, hasLog = false, hasMarker = false, // add measure feature
         hasTable = true, hasAnalyser, hasAnalyserFullscreen,
-        hasAnalyserSticks = false, viewVideo = true, hasTableOverlay = false, hadTable,
+        viewVideo = true, hasTableOverlay = false,
         hasConfig = false, hasConfigOverlay = false,
-
-        isFullscreen = false, // New fullscreen feature (to hide table)
 
         video = $(".log-graph video")[0],
         canvas = $("#graphCanvas")[0],
@@ -113,6 +116,9 @@ function BlackboxLogViewer() {
 
         markerTime = 0, // New marker time
 
+        // Incremented elsewhere (see line ~288-ish, `graphRendersCount++;`) but never read; not
+        // touching that call site, see `configuration` above.
+        // eslint-disable-next-line no-unused-vars
         graphRendersCount = 0,
 
         seekBarCanvas = $(".log-seek-bar canvas")[0],
@@ -707,7 +713,7 @@ function BlackboxLogViewer() {
                        html.toggleClass("has-config", hasConfig);
                    }
 
-                   } catch(e) {
+                   } catch(_e) {
                        configuration = null;
                        hasConfig = false;
                    }
@@ -772,7 +778,7 @@ function BlackboxLogViewer() {
         setPlaybackRate(playbackRate, true);
     }
 
-    function videoLoaded(e) {
+    function videoLoaded(_e) {
         hasVideo = true;
         html.toggleClass("has-video", hasVideo);
 
@@ -810,11 +816,6 @@ function BlackboxLogViewer() {
         html.toggleClass("has-marker",state);
     }
 
-    function setFullscreen(state) { // update fullscreen status
-        isFullscreen = state;
-        html.toggleClass("is-fullscreen",state);
-    }
-
     this.getMarker = function() { // get marker field
         return {
             state:hasMarker,
@@ -836,7 +837,7 @@ function BlackboxLogViewer() {
                             }
                     }
                     return bookmarks;
-            } catch(e) {
+            } catch(_e) {
                     return null;
             }
     };
@@ -1024,7 +1025,7 @@ function BlackboxLogViewer() {
         $('[data-toggle="tooltip"]').tooltip({trigger: "hover", placement: "auto bottom"}); // initialise tooltips
         $('[data-toggle="dropdown"]').dropdown(); // initialise menus
         $('a.auto-hide-menu').click(function() {
-            var test = $(this).closest('.dropdown').children().first().dropdown("toggle");
+            $(this).closest('.dropdown').children().first().dropdown("toggle");
         });
 
         // Get Latest Version Information
@@ -1040,7 +1041,7 @@ function BlackboxLogViewer() {
                     $(".viewer-download").hide();
                 }
                 });
-        } catch (e)
+        } catch (_e)
         {
             console.log('Cannot get latest version information');
             $(".viewer-download").hide();
@@ -1072,7 +1073,7 @@ function BlackboxLogViewer() {
         hasAnalyser = false;
         html.toggleClass("has-analyser", hasAnalyser);
 
-        $(".btn-new-window").click(function(e) {
+        $(".btn-new-window").click(function(_e) {
             createNewBlackboxWindow();
         });
 
@@ -1282,7 +1283,7 @@ function BlackboxLogViewer() {
             if (hasMarker && hasVideo && hasLog) { // adjust the video sync offset and remove marker
                 try {
                     setVideoOffset(videoOffset + (stringTimetoMsec($(".marker-offset", statusBar).text()) / 1000000), true);
-                } catch (e) {
+                } catch (_e) {
                     console.log('Failed to set video offset');
                 }
             }
@@ -1447,7 +1448,7 @@ function BlackboxLogViewer() {
             userSettingsDialog.show(flightLog, userSettings);
         });
 
-        $(".marker-offset", statusBar).click(function(e) {
+        $(".marker-offset", statusBar).click(function(_e) {
                 setCurrentBlackboxTime(markerTime);
                 invalidateGraph();
         });
@@ -1516,7 +1517,7 @@ function BlackboxLogViewer() {
 
         $(window).resize(function() { updateCanvasSize(); /*updateHeaderSize()*/ });
 
-        function updateHeaderSize() {
+        function _updateHeaderSize() {
             var newHeight = $(".video-top-controls").height() - 20; // 23px offset
             $(".log-graph").css("top", newHeight+"px");
             $(".log-graph-config").css("top", newHeight+"px");
@@ -1910,7 +1911,7 @@ function BlackboxLogViewer() {
                                         }
                                         $('.bookmark-'+(e.which-48), statusBar).css('visibility', ((bookmarkTimes[e.which-48]!=null)?('visible'):('hidden')) );
                                         var countBookmarks = 0;
-                                        for(var i=0; i<=9; i++) {
+                                        for(i=0; i<=9; i++) {
                                                 countBookmarks += (bookmarkTimes[i]!=null)?1:0;
                                         }
                                         $('.bookmark-clear', statusBar).css('visibility', ((countBookmarks>0)?('visible'):('hidden')) );
@@ -1919,7 +1920,7 @@ function BlackboxLogViewer() {
                                             invalidateGraph();
                                         }
                                 }
-                        } catch(e) {
+                        } catch(_e) {
                             console.log('Workspace feature not functioning');
                         }
                         e.preventDefault();
@@ -1933,7 +1934,7 @@ function BlackboxLogViewer() {
                             } else {
                                     (graphZoom==GRAPH_MIN_ZOOM)?setGraphZoomLevel(null, true):setGraphZoomLevel(GRAPH_MIN_ZOOM, true);
                             }
-                        } catch(e) {
+                        } catch(_e) {
                             console.log('Workspace toggle feature not functioning');
                         }
                         e.preventDefault();
@@ -1947,7 +1948,7 @@ function BlackboxLogViewer() {
                             } else if (e.altKey) {
                                 makeScreenshot();
                             }
-                        } catch(e) {
+                        } catch(_e) {
                             console.log('Smoothing override toggle feature not functioning');
                         }
                         e.preventDefault();
@@ -1959,7 +1960,7 @@ function BlackboxLogViewer() {
                                 toggleOverrideStatus('graphExpoOverride', 'has-expo-override' );
                                 e.preventDefault();
                             }
-                        } catch(e) {
+                        } catch(_e) {
                             console.log('Expo override toggle feature not functioning');
                         }
                         e.preventDefault();
@@ -1971,7 +1972,7 @@ function BlackboxLogViewer() {
                                 toggleOverrideStatus('graphGridOverride', 'has-grid-override' );
                                 e.preventDefault();
                             }
-                        } catch(e) {
+                        } catch(_e) {
                             console.log('Grid override toggle feature not functioning');
                         }
                         e.preventDefault();
@@ -2095,7 +2096,7 @@ function BlackboxLogViewer() {
                 }
             }
             if (fullPath != null) {
-                const filename = fullPath.replace(/^.*[\\\/]/, '');
+                const filename = fullPath.replace(/^.*[\\/]/, '');
                 const file = new File(fullPath, filename);
                 loadFiles([file]);
             }

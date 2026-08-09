@@ -61,7 +61,7 @@ function ExpoCurve(offset, power, inputRange, outputRange, steps) {
         return result;
     }
 
-    function lookupMathPow(input) {
+    function _lookupMathPow(input) {
         input += offset;
 
         var

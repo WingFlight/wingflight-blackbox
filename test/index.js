@@ -27,19 +27,20 @@ function testExpoStraightLine() {
 }
 
 function benchExpoCurve() {
-    var 
+    var
         trial, i,
         curve = new ExpoCurve(0, 0.700, 750, 1.0, 10),
         acc = 0,
-        endTime, results = "";
-    
+        results = "";
+
     for (trial = 0; trial < 10; trial++) {
-        var 
+        var
             start = Date.now(),
             end;
-        
+
         for (i = 0; i < 10000000; i++) {
-            acc += curve.lookup(Math.random() * 750); 
+            // eslint-disable-next-line no-unused-vars -- accumulating into acc (never read) stops the JIT from optimizing the benchmarked loop away entirely
+            acc += curve.lookup(Math.random() * 750);
         }
         
         end = Date.now();

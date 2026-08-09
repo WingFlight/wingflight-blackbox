@@ -154,7 +154,7 @@ function FlightLog(logData) {
         return fieldNameToIndex[name];
     };
 
-    this.getMainFieldIndexes = function(name) {
+    this.getMainFieldIndexes = function(_name) {
         return fieldNameToIndex;
     };
 
@@ -251,9 +251,7 @@ function FlightLog(logData) {
     function estimateNumCells() {
         var
             i,
-            fieldNames = that.getMainFieldNames(),
-            sysConfig = that.getSysConfig(),
-            found = false;
+            sysConfig = that.getSysConfig();
 
         var refVoltage;
         if(firmwareGreaterOrEqual(sysConfig, '3.1.0', '2.0.0')) {
@@ -362,7 +360,7 @@ function FlightLog(logData) {
                     slowFrameLength = parser.frameDefs.S ? parser.frameDefs.S.count : 0,
                     lastSlow = parser.frameDefs.S ? iframeDirectory.initialSlow[chunkIndex].slice(0) : [];
 
-                parser.onFrameReady = function(frameValid, frame, frameType, frameOffset, frameSize) {
+                parser.onFrameReady = function(frameValid, frame, frameType, _frameOffset, _frameSize) {
                     var
                         destFrame;
 
@@ -395,11 +393,11 @@ function FlightLog(logData) {
                                 }
 
                                 // Then merge in the last seen slow-frame data
-                                for (var i = 0; i < slowFrameLength; i++) {
+                                for (i = 0; i < slowFrameLength; i++) {
                                     destFrame[i + frame.length] = lastSlow[i] === undefined ? null : lastSlow[i];
                                 }
 
-                                for (var i = 0; i < eventNeedsTimestamp.length; i++) {
+                                for (i = 0; i < eventNeedsTimestamp.length; i++) {
                                     eventNeedsTimestamp[i].time = frame[FlightLogParser.prototype.FLIGHT_LOG_FIELD_INDEX_TIME];
                                 }
                                 eventNeedsTimestamp.length = 0;
@@ -426,7 +424,7 @@ function FlightLog(logData) {
                                 chunk.events.push(frame);
                             break;
                             case 'S':
-                                for (var i = 0; i < frame.length; i++) {
+                                for (i = 0; i < frame.length; i++) {
                                     lastSlow[i] = frame[i];
                                 }
                             break;
@@ -510,17 +508,12 @@ function FlightLog(logData) {
     function injectComputedFields(sourceChunks, destChunks) {
 
         let gyroADC = [fieldNameToIndex["gyroADC[0]"], fieldNameToIndex["gyroADC[1]"], fieldNameToIndex["gyroADC[2]"]];
-        let accADC = [fieldNameToIndex["accADC[0]"], fieldNameToIndex["accADC[1]"], fieldNameToIndex["accADC[2]"]];
-        let magADC = [fieldNameToIndex["magADC[0]"], fieldNameToIndex["magADC[1]"], fieldNameToIndex["magADC[2]"]];
-        let rcCommand = [fieldNameToIndex["rcCommand[0]"], fieldNameToIndex["rcCommand[1]"], fieldNameToIndex["rcCommand[2]"], fieldNameToIndex["rcCommand[3]"], fieldNameToIndex["rcCommand[4]"]];
         let setpoint = [fieldNameToIndex["setpoint[0]"], fieldNameToIndex["setpoint[1]"], fieldNameToIndex["setpoint[2]"], fieldNameToIndex["setpoint[3]"]];
 
         let axisPID = [[fieldNameToIndex["axisP[0]"], fieldNameToIndex["axisI[0]"], fieldNameToIndex["axisD[0]"], fieldNameToIndex["axisF[0]"], fieldNameToIndex["axisB[0]"], fieldNameToIndex["axisO[0]"]],
                        [fieldNameToIndex["axisP[1]"], fieldNameToIndex["axisI[1]"], fieldNameToIndex["axisD[1]"], fieldNameToIndex["axisF[1]"], fieldNameToIndex["axisB[1]"], fieldNameToIndex["axisO[1]"]],
                        [fieldNameToIndex["axisP[2]"], fieldNameToIndex["axisI[2]"], fieldNameToIndex["axisD[2]"], fieldNameToIndex["axisF[2]"], fieldNameToIndex["axisB[2]"], fieldNameToIndex["axisO[2]"]],
         ];
-
-        let motor = [fieldNameToIndex["motor[0]"], fieldNameToIndex["motor[1]"], fieldNameToIndex["motor[2]"], fieldNameToIndex["motor[3]"]];
 
         let sourceChunkIndex;
         let destChunkIndex;
@@ -532,20 +525,8 @@ function FlightLog(logData) {
         }
 
         // Do we have mag fields? If not mark that data as absent
-        if (!magADC[0]) {
-            magADC = false;
-        }
-
         if (!gyroADC[0]) {
             gyroADC = false;
-        }
-
-        if (!accADC[0]) {
-            accADC = false;
-        }
-
-        if (!rcCommand[0]) {
-            rcCommand = false;
         }
 
         if (!setpoint[0]) {
@@ -554,10 +535,6 @@ function FlightLog(logData) {
 
         if (!axisPID[0]) {
             axisPID = false;
-        }
-
-        if (!motor[0]) {
-            motor = false;
         }
 
         sourceChunkIndex = 0;
@@ -604,7 +581,7 @@ function FlightLog(logData) {
                         }
 
                         // Calculate PD Sum
-                        for (var axis = 0; axis < 3; axis++) {
+                        for (axis = 0; axis < 3; axis++) {
                             let pidPD =
                                 (axisPID[axis][0] !== undefined ? srcFrame[axisPID[axis][0]] : 0) +
                                 (axisPID[axis][2] !== undefined ? srcFrame[axisPID[axis][2]] : 0);
@@ -615,7 +592,7 @@ function FlightLog(logData) {
 
                     // Calculate the PID Error
                     if (setpoint && gyroADC) {
-                        for (var axis = 0; axis < 3; axis++) {
+                        for (axis = 0; axis < 3; axis++) {
                             let gyroADCdeg = (gyroADC[axis] !== undefined) ? srcFrame[gyroADC[axis]] : 0;
                             destFrame[fieldIndex++] = srcFrame[setpoint[axis]] - gyroADCdeg;
                         }
@@ -676,7 +653,7 @@ function FlightLog(logData) {
     /*
      * Double check that the indexes of each chunk in the array are in increasing order (bugcheck).
      */
-    function verifyChunkIndexes(chunks) {
+    function verifyChunkIndexes(_chunks) {
         // Uncomment for debugging...
         /*
         for (var i = 0; i < chunks.length - 1; i++) {
@@ -780,7 +757,7 @@ function FlightLog(logData) {
                         events: sourceChunk.events
                     };
 
-                    for (var j = 0; j < resultChunk.frames.length; j++) {
+                    for (j = 0; j < resultChunk.frames.length; j++) {
                         resultChunk.frames[j] = sourceChunk.frames[j].slice(0);
                     }
                 }

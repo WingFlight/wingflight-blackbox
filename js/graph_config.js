@@ -102,7 +102,7 @@ function GraphConfig(graphConfig) {
                 if ((matches = field.name.match(/^(.+)\[all\]$/))) {
                     var
                         nameRoot = matches[1],
-                        nameRegex = new RegExp("^" + nameRoot + "\[[0-9]+\]$"),
+                        nameRegex = new RegExp("^" + nameRoot + "[[0-9]+]$"),
                         colorIndexOffset = 0;
 
                     for (var k = 0; k < logFieldNames.length; k++) {
@@ -187,7 +187,7 @@ GraphConfig.load = function(config) {
             } else {
                 return 0;
             }
-        } catch (e) { return 0;}
+        } catch (_e) { return 0;}
     };
 
 
@@ -622,7 +622,7 @@ GraphConfig.load = function(config) {
             // if not found above then
             // Scale and center the field based on the whole-log observed ranges for that field
             return getCurveForMinMaxFields(fieldName);
-        } catch(e) {
+        } catch(_e) {
             return {
                 offset: 0,
                 power: 1.0,

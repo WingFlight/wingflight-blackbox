@@ -14,7 +14,7 @@
  */
 let CsvExporter = function(flightLog, opts={}) {
 
-    var opts = _.merge({
+    opts = _.merge({
         columnDelimiter: ",",
         stringDelimiter: "\"",
         quoteStrings: true,

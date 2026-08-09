@@ -13,7 +13,6 @@ var FlightLogIndex,
 var FlightLogParser = function(logData) {
     //Private constants:
     var
-        FLIGHT_LOG_MAX_FIELDS = 128,
         FLIGHT_LOG_MAX_FRAME_LENGTH = 256,
 
         //Assume that even in the most woeful logging situation, we won't miss 10 seconds of frames
@@ -72,8 +71,6 @@ var FlightLogParser = function(logData) {
         FLIGHT_LOG_FIELD_ENCODING_TAG8_4S16       = 8,
         FLIGHT_LOG_FIELD_ENCODING_NULL            = 9, // Nothing is written to the file, take value to be zero
         FLIGHT_LOG_FIELD_ENCODING_TAG2_3SVARIABLE = 10,
-
-        FLIGHT_LOG_EVENT_LOG_END = 255,
 
         EOF = ArrayDataStream.prototype.EOF,
         NEWLINE  = '\n'.charCodeAt(0),
@@ -298,7 +295,6 @@ var FlightLogParser = function(logData) {
             gyro_cal_on_first_arm:null,             // Gyro Calibrate on first arm
             piro_compensation:null,                 // Pirouette Compensation
             pitch_compensation:null,                // Collective to Pitch Compensation
-            rate_limits:[null, null, null],         // RC Rate limits
             rc_smoothing:null,                      // RC Control Smoothing
             rc_interpolation:null,                  // RC Control Interpolation type
             rc_interpolation_channels:null,         // RC Control Interpotlation channels
@@ -565,8 +561,7 @@ var FlightLogParser = function(logData) {
 
             fieldName, fieldValue,
             lineStart, lineEnd, separatorPos = false,
-            matches,
-            i, c;
+            matches;
 
         if (stream.peekChar() != ' ')
             return;
@@ -712,7 +707,6 @@ var FlightLogParser = function(logData) {
             case "rc_smoothing_auto_factor_throttle":
             case "rc_smoothing_feedforward_hz":
             case "rc_smoothing_setpoint_hz":
-            case "rc_smoothing_feedforward_hz":
             case "rc_smoothing_throttle_hz":
             case "superExpoYawMode":
             case "features":
@@ -786,18 +780,18 @@ var FlightLogParser = function(logData) {
             case "simplified_pitch_d_gain":
             case "simplified_pitch_pi_gain":
             case "simplified_master_multiplier":
-
+            // falls through
             case "simplified_dterm_filter":
             case "simplified_dterm_filter_multiplier":
             case "simplified_gyro_filter":
             case "simplified_gyro_filter_multiplier":
-
+            // falls through
             case "motor_output_limit":
             case "throttle_limit_type":
             case "throttle_limit_percent":
             case "throttle_boost":
             case "throttle_boost_cutoff":
-
+            // falls through
             case "motor_poles":
                 that.sysConfig[fieldName] = parseInt(fieldValue, 10);
             break;
@@ -861,6 +855,7 @@ var FlightLogParser = function(logData) {
 
             case "digitalIdleOffset":
                     that.sysConfig[fieldName] = parseInt(fieldValue, 10) / 100.0;
+            break;
 
             /**  Cleanflight Only log headers **/
             case "dterm_cut_hz":
@@ -898,7 +893,6 @@ var FlightLogParser = function(logData) {
             case "yawBW":
             case "motorOutput":
             case "collectiveRange":
-            case "rate_limits":
             case "accel_limit":
             case "response_time":
             case "rc_smoothing_cutoffs":
@@ -976,7 +970,7 @@ var FlightLogParser = function(logData) {
                 //TODO Unify this somehow...
 
                 // Extract the firmware revision in case of Rotorflight/Betaflight/Raceflight/Cleanfligh 2.x/Other
-                var matches = fieldValue.match(/(.*flight).* (\d+)\.(\d+)(\.(\d+))*/i);
+                matches = fieldValue.match(/(.*flight).* (\d+)\.(\d+)(\.(\d+))*/i);
                 if(matches!=null) {
 
                     // Detecting requires looking at the revision string
@@ -1016,7 +1010,7 @@ var FlightLogParser = function(logData) {
                     /*
                      * Try to detect INAV
                      */
-                    var matches = fieldValue.match(/(INAV).* (\d+)\.(\d+).(\d+)*/i);
+                    matches = fieldValue.match(/(INAV).* (\d+)\.(\d+).(\d+)*/i);
                     if(matches!=null) {
                         that.sysConfig.firmwareType  = FIRMWARE_TYPE_INAV;
                         that.sysConfig.firmware      = parseFloat(matches[2] + '.' + matches[3]);
@@ -1241,7 +1235,6 @@ var FlightLogParser = function(logData) {
                             current[i] = applyPrediction(i, raw ? FLIGHT_LOG_FIELD_PREDICTOR_0 : predictor[i], values[j], current, previous, previous2);
 
                         continue;
-                    break;
                     case FLIGHT_LOG_FIELD_ENCODING_TAG2_3S32:
                         stream.readTag2_3S32(values);
 
@@ -1250,7 +1243,6 @@ var FlightLogParser = function(logData) {
                             current[i] = applyPrediction(i, raw ? FLIGHT_LOG_FIELD_PREDICTOR_0 : predictor[i], values[j], current, previous, previous2);
 
                         continue;
-                    break;
                     case FLIGHT_LOG_FIELD_ENCODING_TAG2_3SVARIABLE:
                         stream.readTag2_3SVariable(values);
 
@@ -1259,7 +1251,6 @@ var FlightLogParser = function(logData) {
                             current[i] = applyPrediction(i, raw ? FLIGHT_LOG_FIELD_PREDICTOR_0 : predictor[i], values[j], current, previous, previous2);
 
                         continue;
-                    break;
                     case FLIGHT_LOG_FIELD_ENCODING_TAG8_8SVB:
                         //How many fields are in this encoded group? Check the subsequent field encodings:
                         for (j = i + 1; j < i + 8 && j < frameDef.count; j++)
@@ -1274,7 +1265,6 @@ var FlightLogParser = function(logData) {
                             current[i] = applyPrediction(i, raw ? FLIGHT_LOG_FIELD_PREDICTOR_0 : predictor[i], values[j], current, previous, previous2);
 
                         continue;
-                    break;
                     case FLIGHT_LOG_FIELD_ENCODING_NULL:
                         //Nothing to read
                         value = 0;
@@ -1300,7 +1290,7 @@ var FlightLogParser = function(logData) {
         parseFrame(that.frameDefs.I, current, previous, null, 0, raw);
     }
 
-    function completeGPSHomeFrame(frameType, frameStart, frameEnd, raw) {
+    function completeGPSHomeFrame(frameType, frameStart, frameEnd, _raw) {
         updateFieldStatistics(frameType, gpsHomeHistory[0]);
 
         that.setGPSHomeHistory(gpsHomeHistory[0]);
@@ -1312,7 +1302,7 @@ var FlightLogParser = function(logData) {
         return true;
     }
 
-    function completeGPSFrame(frameType, frameStart, frameEnd, raw) {
+    function completeGPSFrame(frameType, frameStart, frameEnd, _raw) {
         if (gpsHomeIsValid) {
             updateFieldStatistics(frameType, lastGPS);
         }
@@ -1324,7 +1314,7 @@ var FlightLogParser = function(logData) {
         return true;
     }
 
-    function completeSlowFrame(frameType, frameStart, frameEnd, raw) {
+    function completeSlowFrame(frameType, frameStart, frameEnd, _raw) {
         updateFieldStatistics(frameType, lastSlow);
 
         if (that.onFrameReady) {
@@ -1529,7 +1519,7 @@ var FlightLogParser = function(logData) {
         }
     }
 
-    function completeEventFrame(frameType, frameStart, frameEnd, raw) {
+    function completeEventFrame(frameType, frameStart, frameEnd, _raw) {
         if (lastEvent) {
             switch (lastEvent.event) {
                 case FlightLogEvent.LOGGING_RESUME:
@@ -1552,7 +1542,7 @@ var FlightLogParser = function(logData) {
         return false;
     }
 
-    function parseEventFrame(raw) {
+    function parseEventFrame(_raw) {
         var
             END_OF_LOG_MESSAGE = "End of log\0",
 
@@ -1778,9 +1768,11 @@ var FlightLogParser = function(logData) {
      */
     this.parseLogData = function(raw, startOffset, endOffset) {
         var
+            // eslint-disable-next-line no-useless-assignment -- default value, always overwritten before use in the loop below
             looksLikeFrameCompleted = false,
             prematureEof = false,
             frameStart = 0,
+            // eslint-disable-next-line no-useless-assignment -- default value, always overwritten before use in the loop below
             frameType = null,
             lastFrameType = null;
 

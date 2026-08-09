@@ -7,8 +7,14 @@ function WorkspaceSelection(targetElem, workspaces, onSelectionChange, onSaveWor
         buttonElem = null,
         menuElem = null,
         editButton = null,
-        workspaces = [],
         activeId = 1;
+
+    // The `workspaces` constructor parameter above is discarded here rather than used --
+    // this only works because the sole caller (js/main.js) immediately follows `new
+    // WorkspaceSelection(...)` with a call to onSwitchWorkspace(), which calls
+    // this.setWorkspaces() (below) with the real data right away. Any future caller that
+    // doesn't do that same follow-up call would silently get an empty workspace list.
+    workspaces = [];
 
     function buildUI() {
 
