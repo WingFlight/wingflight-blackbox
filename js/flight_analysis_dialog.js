@@ -45,7 +45,11 @@ function FlightAnalysisDialog(dialog) {
                 (ctx.firmwareVersion ? '<span>Firmware ' + escapeHtml(ctx.firmwareVersion) + '</span>' : "") +
                 '<span>Flight length ' + formatSeconds(ctx.durationSeconds) + '</span>' +
                 '<span>' + formatSeconds(ctx.stableSeconds) + ' identified as steady, governed flight</span>' +
-            '</div>'
+            '</div>' +
+            (ctx.capped
+                ? '<p class="flight-analysis-capped-note">This flight is long enough that analyzing all of it would take several minutes ' +
+                  'to decode, so this covers the steadiest ' + formatSeconds(ctx.analyzedSeconds) + ' found rather than the whole flight.</p>'
+                : "")
         );
     }
 
