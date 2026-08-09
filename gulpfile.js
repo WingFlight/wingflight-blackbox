@@ -32,6 +32,7 @@ const WEB_DIST_DIR = './web-dist/';
 // references into one folder", they only differ in how they source their third-party deps.
 const APP_ASSET_SOURCES = [
     // CSS files
+    './css/flight_analysis_dialog.css',
     './css/header_dialog.css',
     './css/jquery.nouislider.min.css',
     './css/keys_dialog.css',
@@ -48,6 +49,8 @@ const APP_ASSET_SOURCES = [
     './js/datastream.js',
     './js/decoders.js',
     './js/expo.js',
+    './js/flight_analysis.js',
+    './js/flight_analysis_dialog.js',
     './js/flightlog.js',
     './js/flightlog_fielddefs.js',
     './js/flightlog_fields_presenter.js',
