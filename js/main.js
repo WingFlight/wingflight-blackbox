@@ -1705,6 +1705,11 @@ function BlackboxLogViewer() {
 
         function saveOneUserSetting(name, value) {
             prefs.get('userSettings', function(data) {
+                // Unlike every other prefs.get() callback in this file, this one indexes
+                // straight into its result -- fine normally, but data is undefined on a fresh
+                // profile with no userSettings ever saved yet (nothing else here treats that
+                // as an error; it just means "nothing stored").
+                data = data || {};
                 data[name] = value;
                 prefs.set('userSettings', data);
             });
