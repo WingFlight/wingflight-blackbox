@@ -135,16 +135,11 @@ function BlackboxLogViewer() {
         graphZoom = GRAPH_DEFAULT_ZOOM,
         lastGraphZoom = GRAPH_DEFAULT_ZOOM; // QuickZoom function.
 
+        // Opens a second native window for a file handed to us via the OS's "open with"
+        // file association -- only reachable from onOpenFileAssociation() below, which is
+        // itself only wired up under window.isNWjs(). There's no browser-page equivalent of
+        // an OS file association, so this doesn't need a browser fallback.
         function createNewBlackboxWindow(fileToOpen) {
-
-            if (!window.isNWjs()) {
-                // No desktop shell to host a second native window -- open a fresh browser
-                // tab/window instead. (fileToOpen is only ever passed by the OS file-
-                // association handler below, which never runs outside NW.js.)
-                window.open(INITIAL_APP_PAGE, '_blank');
-                return;
-            }
-
             const gui = require('nw.gui');
             gui.Window.open(INITIAL_APP_PAGE,
             {
@@ -154,11 +149,8 @@ function BlackboxLogViewer() {
                 'min_height' : INNER_BOUNDS_HEIGHT,
             },
             function (createdWindow) {
-                if (fileToOpen !== undefined) {
-                    createdWindow.window.argv = fileToOpen;
-                }
+                createdWindow.window.argv = fileToOpen;
             });
-
         }
 
     function blackboxTimeFromVideoTime() {
@@ -1072,10 +1064,6 @@ function BlackboxLogViewer() {
         // Reset the analyser window on application startup.
         hasAnalyser = false;
         html.toggleClass("has-analyser", hasAnalyser);
-
-        $(".btn-new-window").click(function(_e) {
-            createNewBlackboxWindow();
-        });
 
         $(".file-open").change(function(e) {
             var
