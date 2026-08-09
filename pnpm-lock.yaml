@@ -4,6 +4,9 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+overrides:
+  lodash.template: ^4.5.0
+
 importers:
 
   .:
@@ -23,7 +26,7 @@ importers:
     devDependencies:
       '@eslint/js':
         specifier: ^10.0.1
-        version: 10.0.1(eslint@10.8.1(supports-color@7.2.0))
+        version: 10.0.1(eslint@10.8.1)
       '@quanle94/innosetup':
         specifier: ^6.0.2
         version: 6.0.2
@@ -35,13 +38,13 @@ importers:
         version: 5.1.0
       eslint:
         specifier: ^10.8.1
-        version: 10.8.1(supports-color@7.2.0)
+        version: 10.8.1
       globals:
         specifier: ^17.9.0
         version: 17.9.0
       gulp:
         specifier: ^4.0.1
-        version: 4.0.2(supports-color@7.2.0)
+        version: 4.0.2
       gulp-debian:
         specifier: ~0.1.8
         version: 0.1.9
@@ -56,13 +59,13 @@ importers:
         version: 3.0.0
       gulp-zip:
         specifier: ^5.0.0
-        version: 5.1.0(gulp@4.0.2(supports-color@7.2.0))
+        version: 5.1.0(gulp@4.0.2)
       inflection:
         specifier: 1.12.0
         version: 1.12.0
       nw-builder:
         specifier: ~3.7.4
-        version: 3.7.4(supports-color@7.2.0)
+        version: 3.7.4
       os: {specifier: ^0.1.1, version: 0.1.2}
       rpm-builder:
         specifier: ^1.0.0
@@ -1807,21 +1810,6 @@ packages:
     resolution: {integrity: sha512-iPZK6eYjbxRu3uB4/WZ3EsEIMJFMqAoopl3R+zuq0UjcAm/MO6KCweDgPfP3elTztoKP3KtnVHxTn2NHBSDVUw==}
     engines: {node: '>=10'}
 
-  lodash._basecopy@3.0.1:
-    resolution: {integrity: sha512-rFR6Vpm4HeCK1WPGvjZSJ+7yik8d8PVUdCJx5rT2pogG4Ve/2ZS7kfmO5l5T2o5V2mqlNIfSF5MZlr1+xOoYQQ==}
-
-  lodash._basetostring@3.0.1:
-    resolution: {integrity: sha512-mTzAr1aNAv/i7W43vOR/uD/aJ4ngbtsRaCubp2BfZhlGU/eORUjg/7F6X0orNMdv33JOrdgGybtvMN/po3EWrA==}
-
-  lodash._basevalues@3.0.0:
-    resolution: {integrity: sha512-H94wl5P13uEqlCg7OcNNhMQ8KvWSIyqXzOPusRgHC9DK3o54P6P3xtbXlVbRABG4q5gSmp7EDdJ0MSuW9HX6Mg==}
-
-  lodash._getnative@3.9.1:
-    resolution: {integrity: sha512-RrL9VxMEPyDMHOd9uFbvMe8X55X16/cGM5IgOKgRElQZutpX89iS6vwl64duTV1/16w5JY7tuFNXqoekmh1EmA==}
-
-  lodash._isiterateecall@3.0.9:
-    resolution: {integrity: sha512-De+ZbrMu6eThFti/CSzhRvTKMgQToLxbij58LMfM8JnYDNSOjkjTCIaa8ixglOeGh2nyPlakbt5bJWJ7gvpYlQ==}
-
   lodash._reescape@3.0.0:
     resolution: {integrity: sha512-Sjlavm5y+FUVIF3vF3B75GyXrzsfYV8Dlv3L4mEpuB9leg8N6yf/7rU06iLPx9fY0Mv3khVp9p7Dx0mGV6V5OQ==}
 
@@ -1831,42 +1819,24 @@ packages:
   lodash._reinterpolate@3.0.0:
     resolution: {integrity: sha512-xYHt68QRoYGjeeM/XOE1uJtvXQAgvszfBhjV4yvsQH0u2i9I6cI6c6/eG4Hh3UAOVn0y/xAXwmTzEay49Q//HA==}
 
-  lodash._root@3.0.1:
-    resolution: {integrity: sha512-O0pWuFSK6x4EXhM1dhZ8gchNtG7JMqBtrHdoUFUWXD7dJnNSUze1GuyQr5sOs0aCvgGeI3o/OJW8f4ca7FDxmQ==}
-
   lodash.defaults@4.2.0:
     resolution: {integrity: sha512-qjxPLHd3r5DnsdGacqOMU6pb/avJzdh9tFX2ymgoZE27BmjXrNy/y4LoaiTeAb+O3gL8AfpJGtqfX/ae2leYYQ==}
 
   lodash.difference@4.5.0:
     resolution: {integrity: sha512-dS2j+W26TQ7taQBGN8Lbbq04ssV3emRw4NY58WErlTO29pIqS0HmoT5aJ9+TUQ1N3G+JOZSji4eugsWwGp9yPA==}
 
-  lodash.escape@3.2.0:
-    resolution: {integrity: sha512-n1PZMXgaaDWZDSvuNZ/8XOcYO2hOKDqZel5adtR30VKQAtoWs/5AOeFA0vPV8moiPzlqe7F4cP2tzpFewQyelQ==}
-
   lodash.flatten@4.4.0:
     resolution: {integrity: sha512-C5N2Z3DgnnKr0LOpv/hKCgKdb7ZZwafIrsesve6lmzvZIRZRGaZ/l6Q8+2W7NaT+ZwO3fFlSCzCzrDCFdJfZ4g==}
-
-  lodash.isarguments@3.1.0:
-    resolution: {integrity: sha512-chi4NHZlZqZD18a0imDHnZPrDeBbTtVN7GXMwuGdRH9qotxAjYs3aVLKc7zNOG9eddR5Ksd8rvFEBc9SsggPpg==}
-
-  lodash.isarray@3.0.4:
-    resolution: {integrity: sha512-JwObCrNJuT0Nnbuecmqr5DgtuBppuCvGD9lxjFpAzwnVtdGoDQ1zig+5W8k5/6Gcn0gZ3936HDAlGd28i7sOGQ==}
 
   lodash.isplainobject@4.0.6:
     resolution: {integrity: sha512-oSXzaWypCMHkPC3NvBEaPHf0KsA5mvPrOPgQWDsbg8n7orZ290M0BmC/jgRZ4vcJ6DTAhjrsSYgdsW/F+MFOBA==}
 
-  lodash.keys@3.1.2:
-    resolution: {integrity: sha512-CuBsapFjcubOGMn3VD+24HOAPxM79tH+V6ivJL3CHYjtrawauDJHUk//Yew9Hvc6e9rbCrURGk8z6PC+8WJBfQ==}
-
-  lodash.restparam@3.6.1:
-    resolution: {integrity: sha512-L4/arjjuq4noiUJpt3yS6KIKDtJwNe2fIYgMqyYYKoeIfV1iEqvPwhCx23o+R9dzouGihDAPN1dTIRWa7zk8tw==}
-
-  lodash.template@3.6.2:
-    resolution: {integrity: sha512-0B4Y53I0OgHUJkt+7RmlDFWKjVAI/YUpWNiL9GQz5ORDr4ttgfQGo+phBWKFLJbBdtOwgMuUkdOHOnPg45jKmQ==}
+  lodash.template@4.18.1:
+    resolution: {integrity: sha512-5urZrLnV/VD6zHK5KsVtZgt7H19v51mIzoS0aBNH8yp3I8tbswrEjOABOPY8m8uB7NuibubLrMX+Y0PXsU9X+w==}
     deprecated: This package is deprecated. Use https://socket.dev/npm/package/eta instead.
 
-  lodash.templatesettings@3.1.1:
-    resolution: {integrity: sha512-TcrlEr31tDYnWkHFWDCV3dHYroKEXpJZ2YJYvJdhN+y4AkWMDZ5I4I8XDtUKqSAyG81N7w+I1mFEJtcED+tGqQ==}
+  lodash.templatesettings@4.2.0:
+    resolution: {integrity: sha512-stgLz+i3Aa9mZgnjr/O+v9ruKZsPsndy7qPZOchbqk2cnTU1ZaldKK+v7m54WoKIyxiuMZTKT2H81F8BeAc3ZQ==}
 
   lodash.union@4.6.0:
     resolution: {integrity: sha512-c4pB2CdGrGdjMKYLA+XiRDO7Y0PRQbm/Gzg8qMj+QH+pFVAoTp5sBpO0odL3FjoPCGjK96p6qsP+yQoiLoOBcw==}
@@ -2673,7 +2643,7 @@ packages:
     engines: {node: '>=6.0.0'}
 
   temp@https://codeload.github.com/adam-lynch/node-temp/tar.gz/279c1350cb7e4f02515d91da9e35d39a40774016:
-    resolution: {gitHosted: true, tarball: https://codeload.github.com/adam-lynch/node-temp/tar.gz/279c1350cb7e4f02515d91da9e35d39a40774016}
+    resolution: {gitHosted: true, integrity: sha512-8Sepsrv8qFm3ei61h06vle5ODX3ZQnGlC4tyfikL7FWPRp1HnSiVAcVO/NiBPeVOWP+uPZftMUvYCUMPobiKuQ==, tarball: https://codeload.github.com/adam-lynch/node-temp/tar.gz/279c1350cb7e4f02515d91da9e35d39a40774016}
     version: 0.8.3
     engines: {'0': node >=4.0.0}
 
@@ -3016,17 +2986,17 @@ packages:
 
 snapshots:
 
-  '@eslint-community/eslint-utils@4.10.1(eslint@10.8.1(supports-color@7.2.0))':
+  '@eslint-community/eslint-utils@4.10.1(eslint@10.8.1)':
     dependencies:
-      eslint: 10.8.1(supports-color@7.2.0)
+      eslint: 10.8.1
       eslint-visitor-keys: 3.4.3
 
   '@eslint-community/regexpp@4.12.2': {}
 
-  '@eslint/config-array@0.23.5(supports-color@7.2.0)':
+  '@eslint/config-array@0.23.5':
     dependencies:
       '@eslint/object-schema': 3.0.5
-      debug: 4.4.3(supports-color@7.2.0)
+      debug: 4.4.3
       minimatch: 10.2.6
     transitivePeerDependencies:
       - supports-color
@@ -3039,9 +3009,9 @@ snapshots:
     dependencies:
       '@types/json-schema': 7.0.15
 
-  '@eslint/js@10.0.1(eslint@10.8.1(supports-color@7.2.0))':
+  '@eslint/js@10.0.1(eslint@10.8.1)':
     optionalDependencies:
-      eslint: 10.8.1(supports-color@7.2.0)
+      eslint: 10.8.1
 
   '@eslint/object-schema@3.0.5': {}
 
@@ -3216,9 +3186,9 @@ snapshots:
 
   any-promise@1.3.0: {}
 
-  anymatch@2.0.0(supports-color@7.2.0):
+  anymatch@2.0.0:
     dependencies:
-      micromatch: 3.1.10(supports-color@7.2.0)
+      micromatch: 3.1.10
       normalize-path: 2.1.1
     transitivePeerDependencies:
       - supports-color
@@ -3448,7 +3418,7 @@ snapshots:
     dependencies:
       balanced-match: 4.0.4
 
-  braces@2.3.2(supports-color@7.2.0):
+  braces@2.3.2:
     dependencies:
       arr-flatten: 1.1.0
       array-unique: 0.3.2
@@ -3456,7 +3426,7 @@ snapshots:
       fill-range: 4.0.0
       isobject: 3.0.1
       repeat-element: 1.1.4
-      snapdragon: 0.8.2(supports-color@7.2.0)
+      snapdragon: 0.8.2
       snapdragon-node: 2.1.1
       split-string: 3.1.0
       to-regex: 3.0.2
@@ -3544,18 +3514,18 @@ snapshots:
       ansi-styles: 4.3.0
       supports-color: 7.2.0
 
-  chokidar@2.1.8(supports-color@7.2.0):
+  chokidar@2.1.8:
     dependencies:
-      anymatch: 2.0.0(supports-color@7.2.0)
+      anymatch: 2.0.0
       async-each: 1.0.6
-      braces: 2.3.2(supports-color@7.2.0)
+      braces: 2.3.2
       glob-parent: 3.1.0
       inherits: 2.0.4
       is-binary-path: 1.0.1
       is-glob: 4.0.3
       normalize-path: 3.0.0
       path-is-absolute: 1.0.1
-      readdirp: 2.2.1(supports-color@7.2.0)
+      readdirp: 2.2.1
       upath: 1.2.0
     optionalDependencies:
       fsevents: 1.2.13
@@ -3724,17 +3694,13 @@ snapshots:
 
   dateformat@2.2.0: {}
 
-  debug@2.6.9(supports-color@7.2.0):
+  debug@2.6.9:
     dependencies:
       ms: 2.0.0
-    optionalDependencies:
-      supports-color: 7.2.0
 
-  debug@4.4.3(supports-color@7.2.0):
+  debug@4.4.3:
     dependencies:
       ms: 2.1.3
-    optionalDependencies:
-      supports-color: 7.2.0
 
   decamelize@1.2.0: {}
 
@@ -3909,11 +3875,11 @@ snapshots:
 
   eslint-visitor-keys@5.0.1: {}
 
-  eslint@10.8.1(supports-color@7.2.0):
+  eslint@10.8.1:
     dependencies:
-      '@eslint-community/eslint-utils': 4.10.1(eslint@10.8.1(supports-color@7.2.0))
+      '@eslint-community/eslint-utils': 4.10.1(eslint@10.8.1)
       '@eslint-community/regexpp': 4.12.2
-      '@eslint/config-array': 0.23.5(supports-color@7.2.0)
+      '@eslint/config-array': 0.23.5
       '@eslint/config-helpers': 0.7.0
       '@eslint/core': 1.2.1
       '@eslint/plugin-kit': 0.7.2
@@ -3923,7 +3889,7 @@ snapshots:
       '@types/estree': 1.0.9
       ajv: 6.15.0
       cross-spawn: 7.0.6
-      debug: 4.4.3(supports-color@7.2.0)
+      debug: 4.4.3
       escape-string-regexp: 4.0.0
       eslint-scope: 9.1.2
       eslint-visitor-keys: 5.0.1
@@ -3985,14 +3951,14 @@ snapshots:
       strip-eof: 1.0.0
     optional: true
 
-  expand-brackets@2.1.4(supports-color@7.2.0):
+  expand-brackets@2.1.4:
     dependencies:
-      debug: 2.6.9(supports-color@7.2.0)
+      debug: 2.6.9
       define-property: 0.2.5
       extend-shallow: 2.0.1
       posix-character-classes: 0.1.1
       regex-not: 1.0.2
-      snapdragon: 0.8.2(supports-color@7.2.0)
+      snapdragon: 0.8.2
       to-regex: 3.0.2
     transitivePeerDependencies:
       - supports-color
@@ -4016,22 +3982,22 @@ snapshots:
 
   extend@3.0.2: {}
 
-  extglob@2.0.4(supports-color@7.2.0):
+  extglob@2.0.4:
     dependencies:
       array-unique: 0.3.2
       define-property: 1.0.0
-      expand-brackets: 2.1.4(supports-color@7.2.0)
+      expand-brackets: 2.1.4
       extend-shallow: 2.0.1
       fragment-cache: 0.2.1
       regex-not: 1.0.2
-      snapdragon: 0.8.2(supports-color@7.2.0)
+      snapdragon: 0.8.2
       to-regex: 3.0.2
     transitivePeerDependencies:
       - supports-color
 
-  extract-zip@2.0.1(supports-color@7.2.0):
+  extract-zip@2.0.1:
     dependencies:
-      debug: 4.4.3(supports-color@7.2.0)
+      debug: 4.4.3
       get-stream: 5.2.0
       yauzl: 2.10.0
     optionalDependencies:
@@ -4109,20 +4075,20 @@ snapshots:
       locate-path: 6.0.0
       path-exists: 4.0.0
 
-  findup-sync@2.0.0(supports-color@7.2.0):
+  findup-sync@2.0.0:
     dependencies:
       detect-file: 1.0.0
       is-glob: 3.1.0
-      micromatch: 3.1.10(supports-color@7.2.0)
+      micromatch: 3.1.10
       resolve-dir: 1.0.1
     transitivePeerDependencies:
       - supports-color
 
-  findup-sync@3.0.0(supports-color@7.2.0):
+  findup-sync@3.0.0:
     dependencies:
       detect-file: 1.0.0
       is-glob: 4.0.3
-      micromatch: 3.1.10(supports-color@7.2.0)
+      micromatch: 3.1.10
       resolve-dir: 1.0.1
     transitivePeerDependencies:
       - supports-color
@@ -4292,11 +4258,11 @@ snapshots:
       to-absolute-glob: 2.0.2
       unique-stream: 2.4.0
 
-  glob-watcher@5.0.5(supports-color@7.2.0):
+  glob-watcher@5.0.5:
     dependencies:
-      anymatch: 2.0.0(supports-color@7.2.0)
+      anymatch: 2.0.0
       async-done: 1.3.2
-      chokidar: 2.1.8(supports-color@7.2.0)
+      chokidar: 2.1.8
       is-negated-glob: 1.0.0
       just-debounce: 1.1.0
       normalize-path: 3.0.0
@@ -4388,7 +4354,7 @@ snapshots:
       ncp: 2.0.0
       proxyquire: 1.8.0
 
-  gulp-cli@2.3.0(supports-color@7.2.0):
+  gulp-cli@2.3.0:
     dependencies:
       ansi-colors: 1.1.0
       archy: 1.0.0
@@ -4400,8 +4366,8 @@ snapshots:
       gulplog: 1.0.0
       interpret: 1.4.0
       isobject: 3.0.1
-      liftoff: 3.1.0(supports-color@7.2.0)
-      matchdep: 2.0.0(supports-color@7.2.0)
+      liftoff: 3.1.0
+      matchdep: 2.0.0
       mute-stdout: 1.0.1
       pretty-hrtime: 1.0.3
       replace-homedir: 1.0.0
@@ -4433,7 +4399,7 @@ snapshots:
       lodash._reescape: 3.0.0
       lodash._reevaluate: 3.0.0
       lodash._reinterpolate: 3.0.0
-      lodash.template: 3.6.2
+      lodash.template: 4.18.1
       minimist: 1.2.8
       multipipe: 0.1.2
       object-assign: 3.0.0
@@ -4449,7 +4415,7 @@ snapshots:
       through2: 2.0.5
       which: 2.0.2
 
-  gulp-zip@5.1.0(gulp@4.0.2(supports-color@7.2.0)):
+  gulp-zip@5.1.0(gulp@4.0.2):
     dependencies:
       get-stream: 5.2.0
       plugin-error: 1.0.1
@@ -4457,12 +4423,12 @@ snapshots:
       vinyl: 2.2.1
       yazl: 2.5.1
     optionalDependencies:
-      gulp: 4.0.2(supports-color@7.2.0)
+      gulp: 4.0.2
 
-  gulp@4.0.2(supports-color@7.2.0):
+  gulp@4.0.2:
     dependencies:
-      glob-watcher: 5.0.5(supports-color@7.2.0)
-      gulp-cli: 2.3.0(supports-color@7.2.0)
+      glob-watcher: 5.0.5
+      gulp-cli: 2.3.0
       undertaker: 1.3.0
       vinyl-fs: 3.0.3
     transitivePeerDependencies:
@@ -4808,10 +4774,10 @@ snapshots:
       prelude-ls: 1.2.1
       type-check: 0.4.0
 
-  liftoff@3.1.0(supports-color@7.2.0):
+  liftoff@3.1.0:
     dependencies:
       extend: 3.0.2
-      findup-sync: 3.0.0(supports-color@7.2.0)
+      findup-sync: 3.0.0
       fined: 1.2.0
       flagged-respawn: 1.0.1
       is-plain-object: 2.0.4
@@ -4882,64 +4848,28 @@ snapshots:
     dependencies:
       p-locate: 5.0.0
 
-  lodash._basecopy@3.0.1: {}
-
-  lodash._basetostring@3.0.1: {}
-
-  lodash._basevalues@3.0.0: {}
-
-  lodash._getnative@3.9.1: {}
-
-  lodash._isiterateecall@3.0.9: {}
-
   lodash._reescape@3.0.0: {}
 
   lodash._reevaluate@3.0.0: {}
 
   lodash._reinterpolate@3.0.0: {}
 
-  lodash._root@3.0.1: {}
-
   lodash.defaults@4.2.0: {}
 
   lodash.difference@4.5.0: {}
 
-  lodash.escape@3.2.0:
-    dependencies:
-      lodash._root: 3.0.1
-
   lodash.flatten@4.4.0: {}
-
-  lodash.isarguments@3.1.0: {}
-
-  lodash.isarray@3.0.4: {}
 
   lodash.isplainobject@4.0.6: {}
 
-  lodash.keys@3.1.2:
-    dependencies:
-      lodash._getnative: 3.9.1
-      lodash.isarguments: 3.1.0
-      lodash.isarray: 3.0.4
-
-  lodash.restparam@3.6.1: {}
-
-  lodash.template@3.6.2:
-    dependencies:
-      lodash._basecopy: 3.0.1
-      lodash._basetostring: 3.0.1
-      lodash._basevalues: 3.0.0
-      lodash._isiterateecall: 3.0.9
-      lodash._reinterpolate: 3.0.0
-      lodash.escape: 3.2.0
-      lodash.keys: 3.1.2
-      lodash.restparam: 3.6.1
-      lodash.templatesettings: 3.1.1
-
-  lodash.templatesettings@3.1.1:
+  lodash.template@4.18.1:
     dependencies:
       lodash._reinterpolate: 3.0.0
-      lodash.escape: 3.2.0
+      lodash.templatesettings: 4.2.0
+
+  lodash.templatesettings@4.2.0:
+    dependencies:
+      lodash._reinterpolate: 3.0.0
 
   lodash.union@4.6.0: {}
 
@@ -4976,10 +4906,10 @@ snapshots:
     dependencies:
       object-visit: 1.0.1
 
-  matchdep@2.0.0(supports-color@7.2.0):
+  matchdep@2.0.0:
     dependencies:
-      findup-sync: 2.0.0(supports-color@7.2.0)
-      micromatch: 3.1.10(supports-color@7.2.0)
+      findup-sync: 2.0.0
+      micromatch: 3.1.10
       resolve: 1.22.12
       stack-trace: 0.0.10
     transitivePeerDependencies:
@@ -4991,20 +4921,20 @@ snapshots:
 
   merge2@1.4.1: {}
 
-  micromatch@3.1.10(supports-color@7.2.0):
+  micromatch@3.1.10:
     dependencies:
       arr-diff: 4.0.0
       array-unique: 0.3.2
-      braces: 2.3.2(supports-color@7.2.0)
+      braces: 2.3.2
       define-property: 2.0.2
       extend-shallow: 3.0.2
-      extglob: 2.0.4(supports-color@7.2.0)
+      extglob: 2.0.4
       fragment-cache: 0.2.1
       kind-of: 6.0.3
-      nanomatch: 1.2.13(supports-color@7.2.0)
+      nanomatch: 1.2.13
       object.pick: 1.3.0
       regex-not: 1.0.2
-      snapdragon: 0.8.2(supports-color@7.2.0)
+      snapdragon: 0.8.2
       to-regex: 3.0.2
     transitivePeerDependencies:
       - supports-color
@@ -5071,7 +5001,7 @@ snapshots:
 
   nanoid@3.3.18: {}
 
-  nanomatch@1.2.13(supports-color@7.2.0):
+  nanomatch@1.2.13:
     dependencies:
       arr-diff: 4.0.0
       array-unique: 0.3.2
@@ -5082,7 +5012,7 @@ snapshots:
       kind-of: 6.0.3
       object.pick: 1.3.0
       regex-not: 1.0.2
-      snapdragon: 0.8.2(supports-color@7.2.0)
+      snapdragon: 0.8.2
       to-regex: 3.0.2
     transitivePeerDependencies:
       - supports-color
@@ -5126,11 +5056,11 @@ snapshots:
 
   number-is-nan@1.0.1: {}
 
-  nw-builder@3.7.4(supports-color@7.2.0):
+  nw-builder@3.7.4:
     dependencies:
       archiver: 5.3.1
       deprecate: 1.1.1
-      extract-zip: 2.0.1(supports-color@7.2.0)
+      extract-zip: 2.0.1
       graceful-fs-extra: 2.0.0
       graceful-ncp: 3.0.0
       inherits: 2.0.4
@@ -5438,10 +5368,10 @@ snapshots:
     dependencies:
       minimatch: 5.1.9
 
-  readdirp@2.2.1(supports-color@7.2.0):
+  readdirp@2.2.1:
     dependencies:
       graceful-fs: 4.2.11
-      micromatch: 3.1.10(supports-color@7.2.0)
+      micromatch: 3.1.10
       readable-stream: 2.3.8
     transitivePeerDependencies:
       - supports-color
@@ -5677,10 +5607,10 @@ snapshots:
     dependencies:
       kind-of: 3.2.2
 
-  snapdragon@0.8.2(supports-color@7.2.0):
+  snapdragon@0.8.2:
     dependencies:
       base: 0.11.2
-      debug: 2.6.9(supports-color@7.2.0)
+      debug: 2.6.9
       define-property: 0.2.5
       extend-shallow: 2.0.1
       map-cache: 0.2.2
