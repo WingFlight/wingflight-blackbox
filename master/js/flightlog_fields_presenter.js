@@ -31,6 +31,31 @@ function FlightLogFieldPresenter() {
         'axisB[1]': 'PID Boost [pitch]',
         'axisB[2]': 'PID Boost [yaw]',
 
+        'tvAxisP[all]': 'TV PID P',
+        'tvAxisP[0]': 'TV PID P [roll]',
+        'tvAxisP[1]': 'TV PID P [pitch]',
+        'tvAxisP[2]': 'TV PID P [yaw]',
+
+        'tvAxisI[all]': 'TV PID I',
+        'tvAxisI[0]': 'TV PID I [roll]',
+        'tvAxisI[1]': 'TV PID I [pitch]',
+        'tvAxisI[2]': 'TV PID I [yaw]',
+
+        'tvAxisD[all]': 'TV PID D',
+        'tvAxisD[0]': 'TV PID D [roll]',
+        'tvAxisD[1]': 'TV PID D [pitch]',
+        'tvAxisD[2]': 'TV PID D [yaw]',
+
+        'tvAxisF[all]': 'TV PID Feedforward',
+        'tvAxisF[0]': 'TV PID Feedforward [roll]',
+        'tvAxisF[1]': 'TV PID Feedforward [pitch]',
+        'tvAxisF[2]': 'TV PID Feedforward [yaw]',
+
+        'tvAxisB[all]': 'TV PID Boost',
+        'tvAxisB[0]': 'TV PID Boost [roll]',
+        'tvAxisB[1]': 'TV PID Boost [pitch]',
+        'tvAxisB[2]': 'TV PID Boost [yaw]',
+
         'axisO[all]': 'PID Offset',
         'axisO[0]': 'PID Offset [roll]',
         'axisO[1]': 'PID Offset [pitch]',
@@ -870,6 +895,21 @@ function FlightLogFieldPresenter() {
             case 'axisB[0]':
             case 'axisB[1]':
             case 'axisB[2]':
+            case 'tvAxisP[0]':
+            case 'tvAxisP[1]':
+            case 'tvAxisP[2]':
+            case 'tvAxisI[0]':
+            case 'tvAxisI[1]':
+            case 'tvAxisI[2]':
+            case 'tvAxisD[0]':
+            case 'tvAxisD[1]':
+            case 'tvAxisD[2]':
+            case 'tvAxisF[0]':
+            case 'tvAxisF[1]':
+            case 'tvAxisF[2]':
+            case 'tvAxisB[0]':
+            case 'tvAxisB[1]':
+            case 'tvAxisB[2]':
             case 'axisO[0]':
             case 'axisO[1]':
             case 'axisO[2]':
