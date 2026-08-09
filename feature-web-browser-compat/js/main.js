@@ -76,6 +76,11 @@ function BlackboxLogViewer() {
 
         // JSON graph configuration:
         graphConfig = {},
+        // Set when there's no stored graphConfig at all (a fresh profile/first-ever run).
+        // GraphConfig.getExampleGraphConfigs() needs a real flightLog to inspect for available
+        // fields, which doesn't exist yet this early at startup -- selectLog() below computes
+        // the example config lazily instead, once a flightLog actually exists.
+        graphConfigNeedsExample = false,
 
 
         offsetCache = [], // Storage for the offset cache (last 20 files)
@@ -612,6 +617,11 @@ function BlackboxLogViewer() {
         setVideoInTime(false);
         setVideoOutTime(false);
 
+        if (graphConfigNeedsExample) {
+            graphConfig = GraphConfig.getExampleGraphConfigs(flightLog, ["Motors", "Gyros"]);
+            graphConfigNeedsExample = false;
+        }
+
         activeGraphConfig.adaptGraphs(flightLog, graphConfig);
 
         graph.onSeek = function(offset) {
@@ -855,7 +865,10 @@ function BlackboxLogViewer() {
         graphConfig = GraphConfig.load(item);
 
         if (!graphConfig) {
-            graphConfig = GraphConfig.getExampleGraphConfigs(flightLog, ["Motors", "Gyros"]);
+            // Can't call GraphConfig.getExampleGraphConfigs() yet -- see graphConfigNeedsExample's
+            // own comment above. selectLog() computes the real default once flightLog exists.
+            graphConfig = [];
+            graphConfigNeedsExample = true;
         }
     });
 
@@ -962,8 +975,18 @@ function BlackboxLogViewer() {
     function onSwitchWorkspace(newWorkspaces, newAciveId) {
         prefs.set('activeWorkspace', newAciveId);
         prefs.set('workspaceGraphConfigs', newWorkspaces);
-        workspaceSelection.setWorkspaces(newWorkspaces);
-        workspaceSelection.setActiveWorkspace(newAciveId);
+        // workspaceSelection is only created once $(document).ready() runs (below), but this
+        // function is also called from two prefs.get() callbacks issued earlier in this
+        // constructor -- both async, so which fires first is a genuine race. Under NW.js's
+        // real chrome.storage.local, the IPC round-trip is normally slow enough that
+        // $(document).ready() always won by luck; that's not guaranteed (and doesn't hold at
+        // all for the localStorage-backed browser fallback), so guard against running too
+        // early instead of relying on timing. The prefs.set() calls above and the
+        // flightLog/graphConfig handling below don't depend on workspaceSelection existing.
+        if (workspaceSelection) {
+            workspaceSelection.setWorkspaces(newWorkspaces);
+            workspaceSelection.setActiveWorkspace(newAciveId);
+        }
         if (flightLog && newWorkspaces[newAciveId] && newWorkspaces[newAciveId].graphConfig) {
            newGraphConfig(newWorkspaces[newAciveId].graphConfig);
            document.getElementById("legend_title").textContent = newWorkspaces[newAciveId].title;
@@ -1042,7 +1065,14 @@ function BlackboxLogViewer() {
         graphLegend = new GraphLegend($(".log-graph-legend"), activeGraphConfig, onLegendVisbilityChange, onLegendSelectionChange, onLegendHighlightChange, zoomGraphConfig, expandGraphConfig, newGraphConfig);
 
         workspaceSelection = new WorkspaceSelection($(".log-workspace-selection"), workspaceGraphConfigs, onSwitchWorkspace, onSaveWorkspace);
-        onSwitchWorkspace(workspaceGraphConfigs, workspaceSelection);
+        // Sync the widget we just created with whatever workspaceGraphConfigs/activeWorkspace
+        // already hold (from the prefs.get() callbacks above, if those won the race against
+        // this $(document).ready() firing -- see onSwitchWorkspace's own comment). This was
+        // previously passing workspaceSelection itself (the widget object) as the active-
+        // workspace-ID argument, which onSwitchWorkspace/setActiveWorkspace then used as an
+        // array index -- never matching a real workspace, so the dropdown always opened with
+        // no active selection and an empty title instead of the real one.
+        onSwitchWorkspace(workspaceGraphConfigs, activeWorkspace);
 
         prefs.get('log-legend-hidden', function(item) {
             if (item) {
