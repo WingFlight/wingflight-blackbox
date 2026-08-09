@@ -315,7 +315,7 @@ function UserSettingsDialog(dialog, onLoad, onSave) {
             reader.onload = function (e) {
                 $('#watermark-logo').attr('src', e.target.result);
                 currentLogo = e.target.result;
-            }
+            };
 
             reader.readAsDataURL(input.files[0]);
         }
@@ -334,7 +334,7 @@ function UserSettingsDialog(dialog, onLoad, onSave) {
         this.resetToDefaults = function() {
                 currentSettings = $.extend({}, defaultSettings);
                 onSave(currentSettings);
-        }
+        };
 
 
     this.show = function(flightLog, settings) {

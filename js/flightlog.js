@@ -959,11 +959,11 @@ function FlightLog(logData) {
             case FIRMWARE_TYPE_WINGFLIGHT:
             case FIRMWARE_TYPE_BETAFLIGHT:
             case FIRMWARE_TYPE_INAV:
-                $(".open-header-dialog").show()
+                $(".open-header-dialog").show();
                 break;
 
             default:
-                $(".open-header-dialog").hide()
+                $(".open-header-dialog").hide();
                 break;
         }
 

@@ -156,7 +156,7 @@ function ConfigurationDefaults(prefs) {
         };
 
         reader.readAsText(file);
-    }
+    };
 
     // Public variables and functions
         this.getFile = function() {
@@ -165,11 +165,11 @@ function ConfigurationDefaults(prefs) {
 
         this.getLines = function() {
                 return fileLinesArray;
-        }
+        };
 
         this.hasDefaults = function() {
                 return (fileLinesArray!=null); // is there a default file array
-        }
+        };
 
         this.isDefault = function(line) {
                 // Returns the default line equivalent
@@ -181,7 +181,7 @@ function ConfigurationDefaults(prefs) {
                         return true; // line is same as default
                 }
                 return false; // line not the same as default or not found
-        }
+        };
 
 
     loadFileFromCache(); // configuration file loaded

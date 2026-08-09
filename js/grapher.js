@@ -96,7 +96,7 @@ function FlightLogGrapher(flightLog, graphConfig, canvas, stickCanvas, craftWrap
 
     this.getAnalyser = function() {
         return analyser;
-    }
+    };
 
     function extend(base, top) {
         var
@@ -500,7 +500,7 @@ function FlightLogGrapher(flightLog, graphConfig, canvas, stickCanvas, craftWrap
                 margin = 8,
                 labelWidth = canvasContext.measureText(label).width + 2 * margin;
 
-            align = align || 'left'
+            align = align || 'left';
             canvasContext.textAlign = align;
             var labelDirection = (align=='left')?1:-1;
 
@@ -552,7 +552,7 @@ function FlightLogGrapher(flightLog, graphConfig, canvas, stickCanvas, craftWrap
             break;
             case FlightLogEvent.INFLIGHT_ADJUSTMENT:
                 drawEventLine(x, labelY, event.data.name + " = " + event.data.value, "rgba(0,255,255,0.5)", 2);
-            break
+            break;
             case FlightLogEvent.FLIGHT_MODE:
                 drawEventLine(x, labelY, "Flight Mode Change" + FlightLogFieldPresenter.presentChangeEvent(event.data.newFlags, event.data.lastFlags, FLIGHT_LOG_FLIGHT_MODE_NAME), "rgba(0,0,255,0.75)", 3);
             break;
@@ -957,7 +957,7 @@ function FlightLogGrapher(flightLog, graphConfig, canvas, stickCanvas, craftWrap
         }
 
         flightLog.setFieldSmoothing(smoothing);
-    }
+    };
 
     this.destroy = function() {
         $(canvas).off("mousedown", onMouseDown);
@@ -991,7 +991,7 @@ function FlightLogGrapher(flightLog, graphConfig, canvas, stickCanvas, craftWrap
     // New function to return the current window scale.
     this.getWindowWidthTime = function() {
         return windowWidthMicros;
-    }
+    };
 
     // Add option toggling
     this.setDrawSticks = function(state) {
@@ -1011,14 +1011,14 @@ function FlightLogGrapher(flightLog, graphConfig, canvas, stickCanvas, craftWrap
     // Update user options
     this.refreshOptions = function(newSettings) {
         options = $.extend(defaultOptions, newSettings || {});
-    }
+    };
 
     this.refreshLogo = function() {
         if(options.watermark.logo) {
             watermarkLogo = new Image();
             watermarkLogo.src = options.watermark.logo;
         }
-    }
+    };
 
     // Use defaults for any options not provided
     options = extend(defaultOptions, options || {});

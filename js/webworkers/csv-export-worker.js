@@ -9,7 +9,7 @@ onmessage = function(event) {
      * @returns {string}
      */
     function normalizeEmpty(value) {
-        return !!value ? value : "";
+        return value ? value : "";
     }
 
     /**

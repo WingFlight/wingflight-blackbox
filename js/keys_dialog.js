@@ -9,7 +9,7 @@ function KeysDialog(dialog) {
 
     this.show = function(sysConfig) {
             dialog.modal('show');
-    }
+    };
 
          // Buttons
 

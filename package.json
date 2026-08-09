@@ -11,7 +11,9 @@
     "start": "gulp debug",
     "dev": "vite",
     "gulp": "gulp",
-    "release": "gulp release"
+    "release": "gulp release",
+    "lint": "eslint js index.js gulpfile.js gulp-appdmg.js vite.config.mjs eslint.config.mjs test",
+    "lint:fix": "eslint --fix js index.js gulpfile.js gulp-appdmg.js vite.config.mjs eslint.config.mjs test"
   },
   "window": {
     "id": "main",
@@ -33,9 +35,12 @@
     "webm-writer": "^0.3.0"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@quanle94/innosetup": "^6.0.2",
     "command-exists": "^1.2.8",
     "del": "^5.0.0",
+    "eslint": "^10.8.1",
+    "globals": "^17.9.0",
     "gulp": "^4.0.1",
     "gulp-debian": "~0.1.8",
     "gulp-rename": "^2.0.0",

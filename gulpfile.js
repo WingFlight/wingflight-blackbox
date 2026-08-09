@@ -11,7 +11,7 @@ const del = require('del');
 const innoSetup = require('@quanle94/innosetup');
 const NwBuilder = require('nw-builder');
 const deb = require('gulp-debian');
-const buildRpm = require('rpm-builder')
+const buildRpm = require('rpm-builder');
 const commandExistsSync = require('command-exists').sync;
 
 const gulp = require('gulp');
@@ -405,28 +405,28 @@ function listPostBuildTasks(folder, done) {
     var postBuildTasks = [];
 
     if (platforms.indexOf('win32') != -1) {
-        postBuildTasks.push(function post_build_win32(done){ return post_build('win32', folder, done) });
+        postBuildTasks.push(function post_build_win32(done){ return post_build('win32', folder, done); });
     }
 
     if (platforms.indexOf('win64') != -1) {
-        postBuildTasks.push(function post_build_win64(done){ return post_build('win64', folder, done) });
+        postBuildTasks.push(function post_build_win64(done){ return post_build('win64', folder, done); });
     }
 
     if (platforms.indexOf('linux32') != -1) {
-        postBuildTasks.push(function post_build_linux32(done){ return post_build('linux32', folder, done) });
+        postBuildTasks.push(function post_build_linux32(done){ return post_build('linux32', folder, done); });
     }
 
     if (platforms.indexOf('linux64') != -1) {
-        postBuildTasks.push(function post_build_linux64(done){ return post_build('linux64', folder, done) });
+        postBuildTasks.push(function post_build_linux64(done){ return post_build('linux64', folder, done); });
     }
 
     if (platforms.indexOf('osx64') != -1) {
-        postBuildTasks.push(function post_build_osx64(done){ return post_build('osx64', folder, done) });
+        postBuildTasks.push(function post_build_osx64(done){ return post_build('osx64', folder, done); });
     }
 
     // We need to return at least one task, if not gulp will throw an error
     if (postBuildTasks.length == 0) {
-        postBuildTasks.push(function post_build_none(done){ done() });
+        postBuildTasks.push(function post_build_none(done){ done(); });
     }
     return postBuildTasks;
 }
@@ -435,7 +435,7 @@ function post_build(arch, folder, done) {
 
     if ((arch == 'win32') || (arch == 'win64')) {
         // Copy ffmpeg codec library into Windows app
-        var libSrc = './library/' + arch + '/ffmpeg.dll'
+        var libSrc = './library/' + arch + '/ffmpeg.dll';
         var libDest = path.join(folder, pkg.name, arch);
         console.log('Copy ffmpeg library to Windows app (' + libSrc + ' to ' + libDest + ')');
         return gulp.src(libSrc)
@@ -448,7 +448,7 @@ function post_build(arch, folder, done) {
         var launcherDir = path.join(folder, pkg.name, arch);
 
        // Copy ffmpeg codec library into Linux app
-        var libSrc = './library/' + arch + '/libffmpeg.so'
+        var libSrc = './library/' + arch + '/libffmpeg.so';
         var libDest = path.join(launcherDir, 'lib');
 
         console.log('Copy Ubuntu launcher scripts to ' + launcherDir);        
@@ -459,7 +459,7 @@ function post_build(arch, folder, done) {
                 console.log('Copy ffmpeg library to Linux app (' + libSrc + ' to ' + libDest + ')');
                 gulp.src(libSrc)
                     .pipe(gulp.dest(libDest))
-                    .on('end', function() {done()});
+                    .on('end', function() {done();});
 
             });
         return;
@@ -471,9 +471,9 @@ function post_build(arch, folder, done) {
         var files = fs.readdirSync(pathToVersions);
         if (files.length >= 1) {
             var webKitVersion = files[0];
-            console.log('Found nwjs version: ' + webKitVersion)
+            console.log('Found nwjs version: ' + webKitVersion);
             // Copy ffmpeg codec library into macOS app
-            var libSrc = './library/osx64/libffmpeg.dylib'
+            var libSrc = './library/osx64/libffmpeg.dylib';
             var libDest = path.join(pathToVersions, webKitVersion) + '/';
             console.log('Copy ffmpeg library to macOS app (' + libSrc + ' to ' + libDest + ')');
             return gulp.src(libSrc)
@@ -511,7 +511,7 @@ function buildNWApps(platforms, flavor, dir, done) {
             done();
         });
     } else {
-        console.log('No platform suitable for NW Build')
+        console.log('No platform suitable for NW Build');
         done();
     }
 }
@@ -575,7 +575,7 @@ function release_zip(arch, appDirectory) {
 // Compress files from srcPath, using basePath, to outputFile in the RELEASE_DIR
 function compressFiles(srcPath, basePath, outputFile, zipFolder) {
     return gulp.src(srcPath, { base: basePath })
-               .pipe(rename(function(actualPath){ actualPath.dirname = path.join(zipFolder, actualPath.dirname) }))
+               .pipe(rename(function(actualPath){ actualPath.dirname = path.join(zipFolder, actualPath.dirname); }))
                .pipe(zip(outputFile))
                .pipe(gulp.dest(RELEASE_DIR));
 }

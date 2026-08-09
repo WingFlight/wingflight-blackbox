@@ -800,7 +800,7 @@ function FlightLogFieldPresenter() {
         var found = false;
         for(var i = 0; i < flagNames.length; i++) {
            if((1<<i) & (flags ^ lastFlags)) { // State Changed
-               eventState += '|' + flagNames[i] + ' ' + (((1<<i) & flags)?'ON':'OFF')
+               eventState += '|' + flagNames[i] + ' ' + (((1<<i) & flags)?'ON':'OFF');
                found = true;
            }
         }
@@ -1013,7 +1013,7 @@ function FlightLogFieldPresenter() {
                         case 'debug[0]':
                             return value.toFixed(0);
                         default:
-                            return (value/10).toFixed(1) + "V"
+                            return (value/10).toFixed(1) + "V";
                     }
                 case 'GYRO':
                 case 'GYRO_FILTERED':

@@ -1,15 +1,15 @@
- 'use strict;'
+ 'use strict;';
 
 var ReleaseChecker = function (releaseName, releaseUrl) {
     var self = this;
 
     self._releaseName = releaseName;
     self._releaseDataTag = `${self._releaseName}ReleaseData`;
-    self._releaseLastUpdateTag = `${self._releaseName}ReleaseLastUpdate`
+    self._releaseLastUpdateTag = `${self._releaseName}ReleaseLastUpdate`;
     self._releaseUrl = releaseUrl;
 
 
-}
+};
 
 ReleaseChecker.prototype.loadReleaseData = function (processFunction) {
     var self = this;
@@ -22,8 +22,8 @@ ReleaseChecker.prototype.loadReleaseData = function (processFunction) {
                 GUI.log(`Loaded release information for ${self._releaseName} from GitHub.`);
 
                 var data = {};
-                data[self._releaseDataTag] = releaseData
-                data[self._releaseLastUpdateTag] = releaseDataTimestamp
+                data[self._releaseDataTag] = releaseData;
+                data[self._releaseLastUpdateTag] = releaseDataTimestamp;
                 chrome.storage.local.set(data, function () {});
 
                 self._processReleaseData(releaseData, processFunction);
@@ -44,7 +44,7 @@ ReleaseChecker.prototype.loadReleaseData = function (processFunction) {
             self._processReleaseData(cacheReleaseData, processFunction);
         }
     });
-}
+};
 
 
 ReleaseChecker.prototype._processReleaseData = function (releaseData, processFunction) {
@@ -55,4 +55,4 @@ ReleaseChecker.prototype._processReleaseData = function (releaseData, processFun
 
         processFunction();
     }
-}
+};

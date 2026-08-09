@@ -669,7 +669,7 @@ function BlackboxLogViewer() {
             } else if (isVideo) {
                 loadVideo(files[i]);
             } else if (isWorkspaces) {
-                loadWorkspaces(files[i])
+                loadWorkspaces(files[i]);
             }
         }
 
@@ -820,7 +820,7 @@ function BlackboxLogViewer() {
             state:hasMarker,
             time:markerTime
             };
-    }
+    };
 
     this.getBookmarks = function() { // get bookmark events
             var bookmarks = [];
@@ -839,11 +839,11 @@ function BlackboxLogViewer() {
             } catch(e) {
                     return null;
             }
-    }
+    };
 
     this.getBookmarkTimes = function() {
         return bookmarkTimes;
-    }
+    };
 
     prefs.get('videoConfig', function(item) {
         if (item) {
@@ -892,7 +892,7 @@ function BlackboxLogViewer() {
 
     function upgradeWorkspaceFormat(oldFormat) {
         // Check if upgrade is needed
-        if (!oldFormat.graphConfig) { return oldFormat }
+        if (!oldFormat.graphConfig) { return oldFormat; }
 
         let newFormat = [];
 
@@ -906,7 +906,7 @@ function BlackboxLogViewer() {
                 newFormat[id] = {
                     title: title,
                     graphConfig: element
-                }
+                };
             }
             else {
                 newFormat[id] = null;
@@ -969,11 +969,11 @@ function BlackboxLogViewer() {
     function onSwitchWorkspace(newWorkspaces, newAciveId) {
         prefs.set('activeWorkspace', newAciveId);
         prefs.set('workspaceGraphConfigs', newWorkspaces);
-        workspaceSelection.setWorkspaces(newWorkspaces)
-        workspaceSelection.setActiveWorkspace(newAciveId)
+        workspaceSelection.setWorkspaces(newWorkspaces);
+        workspaceSelection.setActiveWorkspace(newAciveId);
         if (flightLog && newWorkspaces[newAciveId] && newWorkspaces[newAciveId].graphConfig) {
            newGraphConfig(newWorkspaces[newAciveId].graphConfig);
-           document.getElementById("legend_title").textContent = newWorkspaces[newAciveId].title
+           document.getElementById("legend_title").textContent = newWorkspaces[newAciveId].title;
         }
     }
 
@@ -983,7 +983,7 @@ function BlackboxLogViewer() {
             title: title,
             graphConfig: graphConfig
         };
-        onSwitchWorkspace(workspaceGraphConfigs, id)
+        onSwitchWorkspace(workspaceGraphConfigs, id);
     }
 
     // New workspaces feature; local storage of user configurations
@@ -999,10 +999,10 @@ function BlackboxLogViewer() {
 
     prefs.get('activeWorkspace', function (id){
         if (id) {
-            activeWorkspace = id
+            activeWorkspace = id;
         }
         else {
-            activeWorkspace = 1
+            activeWorkspace = 1;
         }
 
         onSwitchWorkspace(workspaceGraphConfigs, activeWorkspace);
@@ -1013,7 +1013,7 @@ function BlackboxLogViewer() {
         if(item) {
             offsetCache = item;
         }
-    })
+    });
 
     activeGraphConfig.addListener(function() {
         invalidateGraph();
@@ -1749,13 +1749,13 @@ function BlackboxLogViewer() {
                     var refreshRequired = false;
 
                     if (e.shiftKey) { // change zoom
-                        refreshRequired = changePenZoom(activeGraphConfig.getGraphs(), $(e.target).attr('graph'), $(e.target).attr('field'), (delta>=0))
+                        refreshRequired = changePenZoom(activeGraphConfig.getGraphs(), $(e.target).attr('graph'), $(e.target).attr('field'), (delta>=0));
                         e.preventDefault();
                     } else if (e.altKey) { // change Expo
-                        refreshRequired = changePenExpo(activeGraphConfig.getGraphs(), $(e.target).attr('graph'), $(e.target).attr('field'), (delta>=0))
+                        refreshRequired = changePenExpo(activeGraphConfig.getGraphs(), $(e.target).attr('graph'), $(e.target).attr('field'), (delta>=0));
                         e.preventDefault();
                     } else if (e.ctrlKey){ // Change smoothing
-                        refreshRequired = changePenSmoothing(activeGraphConfig.getGraphs(), $(e.target).attr('graph'), $(e.target).attr('field'), (delta>=0))
+                        refreshRequired = changePenSmoothing(activeGraphConfig.getGraphs(), $(e.target).attr('graph'), $(e.target).attr('field'), (delta>=0));
                         e.preventDefault();
                     }
 
@@ -1786,7 +1786,7 @@ function BlackboxLogViewer() {
                     case "I".charCodeAt(0):
                         if (!(shifted)) {
                             if (videoExportInTime === currentBlackboxTime) {
-                                setVideoInTime(false)
+                                setVideoInTime(false);
                             } else {
                                 setVideoInTime(currentBlackboxTime);
                             }
@@ -1876,7 +1876,7 @@ function BlackboxLogViewer() {
                                 var id = e.which - 48;
                                 if (!e.shiftKey) { // retreive graph configuration from workspace
                                     if (workspaceGraphConfigs[id] != null) {
-                                        onSwitchWorkspace(workspaceGraphConfigs, id)
+                                        onSwitchWorkspace(workspaceGraphConfigs, id);
                                     }
                                 } else { // store configuration to workspace
                                     if (workspaceGraphConfigs[id]) {

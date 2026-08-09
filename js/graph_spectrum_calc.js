@@ -231,7 +231,7 @@ GraphSpectrumCalc._getFlightChunks = function() {
     var allChunks = this._flightLog.getChunksInTimeRange(logStart, logEnd);
 
     return allChunks;
-}
+};
 
 GraphSpectrumCalc._getFlightSamplesFreq = function() {
 

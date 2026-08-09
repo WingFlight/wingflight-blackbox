@@ -44,6 +44,14 @@ web: dev-server ## Alias for dev-server
 dev-client: ## Launch the real NW.js desktop shell pointed at dev-server (start dev-server first)
 	pnpm gulp dev-client
 
+.PHONY: lint
+lint: ## Lint js/, index.js, gulpfile.js, and the *.mjs config files
+	pnpm lint
+
+.PHONY: lint-fix
+lint-fix: ## Same as lint, but auto-fix what ESLint can fix in place
+	pnpm lint:fix
+
 .PHONY: all
 all: apps
 

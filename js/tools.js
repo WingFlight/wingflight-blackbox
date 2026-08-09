@@ -468,6 +468,6 @@ function getManifestVersion(manifest) {
 
     } catch (error) {
         console.log("manifest does not exist, probably not running nw.js");
-        return "-"
+        return "-";
     }
 }
