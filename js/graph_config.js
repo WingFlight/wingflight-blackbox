@@ -84,7 +84,7 @@ function GraphConfig(graphConfig) {
                             {
                                 if(GraphConfig.PALETTE[index].color == field.color) break;
                             }
-                        field.color = GraphConfig.PALETTE[(index + colorIndexOffset) % GraphConfig.PALETTE.length].color
+                        field.color = GraphConfig.PALETTE[(index + colorIndexOffset) % GraphConfig.PALETTE.length].color;
                     }
 
                     if (field.color === undefined) {
@@ -102,7 +102,7 @@ function GraphConfig(graphConfig) {
                 if ((matches = field.name.match(/^(.+)\[all\]$/))) {
                     var
                         nameRoot = matches[1],
-                        nameRegex = new RegExp("^" + nameRoot + "\[[0-9]+\]$"),
+                        nameRegex = new RegExp("^" + nameRoot + "[[0-9]+]$"),
                         colorIndexOffset = 0;
 
                     for (var k = 0; k < logFieldNames.length; k++) {
@@ -187,7 +187,7 @@ GraphConfig.load = function(config) {
             } else {
                 return 0;
             }
-        } catch (e) { return 0;}
+        } catch (_e) { return 0;}
     };
 
 
@@ -205,7 +205,7 @@ GraphConfig.load = function(config) {
                 default:
                     return 500 * scale;
             }
-        }
+        };
 
         var getMinMaxForFields = function(/* fieldName1, fieldName2, ... */) {
             // helper to make a curve scale based on the combined min/max of one or more fields
@@ -230,7 +230,7 @@ GraphConfig.load = function(config) {
             }
 
             return {min:-500, max:500};
-        }
+        };
 
         var getCurveForMinMaxFields = function(/* fieldName1, fieldName2, ... */) {
             var mm = getMinMaxForFields.apply(null, arguments);
@@ -241,7 +241,7 @@ GraphConfig.load = function(config) {
                 inputRange: Math.max((mm.max - mm.min) / 2, 1.0),
                 outputRange: 1.0
             };
-        }
+        };
 
         var getCurveForMinMaxFieldsZeroOffset = function(/* fieldName1, fieldName2, ... */) {
             var mm = getMinMaxForFields.apply(null, arguments);
@@ -252,7 +252,7 @@ GraphConfig.load = function(config) {
                 inputRange: Math.max(Math.max(Math.abs(mm.max), Math.abs(mm.min)), 1.0),
                 outputRange: 1.0
             };
-        }
+        };
 
         const gyroScaleMargin = 1.20; // Give a 20% margin for gyro graphs
 
@@ -267,7 +267,7 @@ GraphConfig.load = function(config) {
                         power: 1.0,
                         inputRange: 1000,
                         outputRange: 1.0,
-                    }
+                    };
                 }
                 return {
                     offset: -500,
@@ -622,7 +622,7 @@ GraphConfig.load = function(config) {
             // if not found above then
             // Scale and center the field based on the whole-log observed ranges for that field
             return getCurveForMinMaxFields(fieldName);
-        } catch(e) {
+        } catch(_e) {
             return {
                 offset: 0,
                 power: 1.0,

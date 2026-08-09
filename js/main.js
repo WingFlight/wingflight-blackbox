@@ -63,6 +63,11 @@ function BlackboxLogViewer() {
 
         prefs = new PrefStorage(),
 
+        // Assigned (see `new Configuration(...)` below, which itself has side effects: it
+        // loads/renders the associated dump file) but the reference is never subsequently read.
+        // Not touching the multiple assignment sites in this file given the risk of disturbing
+        // app init/file-loading behavior.
+        // eslint-disable-next-line no-unused-vars
         configuration = null,                                                          // is their an associated dump file ?
         configurationDefaults = new ConfigurationDefaults(prefs),  // configuration defaults
 
@@ -71,6 +76,11 @@ function BlackboxLogViewer() {
 
         // JSON graph configuration:
         graphConfig = {},
+        // Set when there's no stored graphConfig at all (a fresh profile/first-ever run).
+        // GraphConfig.getExampleGraphConfigs() needs a real flightLog to inspect for available
+        // fields, which doesn't exist yet this early at startup -- selectLog() below computes
+        // the example config lazily instead, once a flightLog actually exists.
+        graphConfigNeedsExample = false,
 
 
         offsetCache = [], // Storage for the offset cache (last 20 files)
@@ -91,10 +101,8 @@ function BlackboxLogViewer() {
 
         hasVideo = false, hasLog = false, hasMarker = false, // add measure feature
         hasTable = true, hasAnalyser, hasAnalyserFullscreen,
-        hasAnalyserSticks = false, viewVideo = true, hasTableOverlay = false, hadTable,
+        viewVideo = true, hasTableOverlay = false,
         hasConfig = false, hasConfigOverlay = false,
-
-        isFullscreen = false, // New fullscreen feature (to hide table)
 
         video = $(".log-graph video")[0],
         canvas = $("#graphCanvas")[0],
@@ -113,6 +121,9 @@ function BlackboxLogViewer() {
 
         markerTime = 0, // New marker time
 
+        // Incremented elsewhere (see line ~288-ish, `graphRendersCount++;`) but never read; not
+        // touching that call site, see `configuration` above.
+        // eslint-disable-next-line no-unused-vars
         graphRendersCount = 0,
 
         seekBarCanvas = $(".log-seek-bar canvas")[0],
@@ -129,8 +140,11 @@ function BlackboxLogViewer() {
         graphZoom = GRAPH_DEFAULT_ZOOM,
         lastGraphZoom = GRAPH_DEFAULT_ZOOM; // QuickZoom function.
 
+        // Opens a second native window for a file handed to us via the OS's "open with"
+        // file association -- only reachable from onOpenFileAssociation() below, which is
+        // itself only wired up under window.isNWjs(). There's no browser-page equivalent of
+        // an OS file association, so this doesn't need a browser fallback.
         function createNewBlackboxWindow(fileToOpen) {
-
             const gui = require('nw.gui');
             gui.Window.open(INITIAL_APP_PAGE,
             {
@@ -140,11 +154,8 @@ function BlackboxLogViewer() {
                 'min_height' : INNER_BOUNDS_HEIGHT,
             },
             function (createdWindow) {
-                if (fileToOpen !== undefined) {
-                    createdWindow.window.argv = fileToOpen;
-                }
+                createdWindow.window.argv = fileToOpen;
             });
-
         }
 
     function blackboxTimeFromVideoTime() {
@@ -606,6 +617,11 @@ function BlackboxLogViewer() {
         setVideoInTime(false);
         setVideoOutTime(false);
 
+        if (graphConfigNeedsExample) {
+            graphConfig = GraphConfig.getExampleGraphConfigs(flightLog, ["Motors", "Gyros"]);
+            graphConfigNeedsExample = false;
+        }
+
         activeGraphConfig.adaptGraphs(flightLog, graphConfig);
 
         graph.onSeek = function(offset) {
@@ -661,7 +677,7 @@ function BlackboxLogViewer() {
             } else if (isVideo) {
                 loadVideo(files[i]);
             } else if (isWorkspaces) {
-                loadWorkspaces(files[i])
+                loadWorkspaces(files[i]);
             }
         }
 
@@ -699,7 +715,7 @@ function BlackboxLogViewer() {
                        html.toggleClass("has-config", hasConfig);
                    }
 
-                   } catch(e) {
+                   } catch(_e) {
                        configuration = null;
                        hasConfig = false;
                    }
@@ -764,7 +780,7 @@ function BlackboxLogViewer() {
         setPlaybackRate(playbackRate, true);
     }
 
-    function videoLoaded(e) {
+    function videoLoaded(_e) {
         hasVideo = true;
         html.toggleClass("has-video", hasVideo);
 
@@ -802,17 +818,12 @@ function BlackboxLogViewer() {
         html.toggleClass("has-marker",state);
     }
 
-    function setFullscreen(state) { // update fullscreen status
-        isFullscreen = state;
-        html.toggleClass("is-fullscreen",state);
-    }
-
     this.getMarker = function() { // get marker field
         return {
             state:hasMarker,
             time:markerTime
             };
-    }
+    };
 
     this.getBookmarks = function() { // get bookmark events
             var bookmarks = [];
@@ -828,14 +839,14 @@ function BlackboxLogViewer() {
                             }
                     }
                     return bookmarks;
-            } catch(e) {
+            } catch(_e) {
                     return null;
             }
-    }
+    };
 
     this.getBookmarkTimes = function() {
         return bookmarkTimes;
-    }
+    };
 
     prefs.get('videoConfig', function(item) {
         if (item) {
@@ -854,7 +865,10 @@ function BlackboxLogViewer() {
         graphConfig = GraphConfig.load(item);
 
         if (!graphConfig) {
-            graphConfig = GraphConfig.getExampleGraphConfigs(flightLog, ["Motors", "Gyros"]);
+            // Can't call GraphConfig.getExampleGraphConfigs() yet -- see graphConfigNeedsExample's
+            // own comment above. selectLog() computes the real default once flightLog exists.
+            graphConfig = [];
+            graphConfigNeedsExample = true;
         }
     });
 
@@ -884,7 +898,7 @@ function BlackboxLogViewer() {
 
     function upgradeWorkspaceFormat(oldFormat) {
         // Check if upgrade is needed
-        if (!oldFormat.graphConfig) { return oldFormat }
+        if (!oldFormat.graphConfig) { return oldFormat; }
 
         let newFormat = [];
 
@@ -898,7 +912,7 @@ function BlackboxLogViewer() {
                 newFormat[id] = {
                     title: title,
                     graphConfig: element
-                }
+                };
             }
             else {
                 newFormat[id] = null;
@@ -961,11 +975,21 @@ function BlackboxLogViewer() {
     function onSwitchWorkspace(newWorkspaces, newAciveId) {
         prefs.set('activeWorkspace', newAciveId);
         prefs.set('workspaceGraphConfigs', newWorkspaces);
-        workspaceSelection.setWorkspaces(newWorkspaces)
-        workspaceSelection.setActiveWorkspace(newAciveId)
+        // workspaceSelection is only created once $(document).ready() runs (below), but this
+        // function is also called from two prefs.get() callbacks issued earlier in this
+        // constructor -- both async, so which fires first is a genuine race. Under NW.js's
+        // real chrome.storage.local, the IPC round-trip is normally slow enough that
+        // $(document).ready() always won by luck; that's not guaranteed (and doesn't hold at
+        // all for the localStorage-backed browser fallback), so guard against running too
+        // early instead of relying on timing. The prefs.set() calls above and the
+        // flightLog/graphConfig handling below don't depend on workspaceSelection existing.
+        if (workspaceSelection) {
+            workspaceSelection.setWorkspaces(newWorkspaces);
+            workspaceSelection.setActiveWorkspace(newAciveId);
+        }
         if (flightLog && newWorkspaces[newAciveId] && newWorkspaces[newAciveId].graphConfig) {
            newGraphConfig(newWorkspaces[newAciveId].graphConfig);
-           document.getElementById("legend_title").textContent = newWorkspaces[newAciveId].title
+           document.getElementById("legend_title").textContent = newWorkspaces[newAciveId].title;
         }
     }
 
@@ -975,7 +999,7 @@ function BlackboxLogViewer() {
             title: title,
             graphConfig: graphConfig
         };
-        onSwitchWorkspace(workspaceGraphConfigs, id)
+        onSwitchWorkspace(workspaceGraphConfigs, id);
     }
 
     // New workspaces feature; local storage of user configurations
@@ -991,10 +1015,10 @@ function BlackboxLogViewer() {
 
     prefs.get('activeWorkspace', function (id){
         if (id) {
-            activeWorkspace = id
+            activeWorkspace = id;
         }
         else {
-            activeWorkspace = 1
+            activeWorkspace = 1;
         }
 
         onSwitchWorkspace(workspaceGraphConfigs, activeWorkspace);
@@ -1005,7 +1029,7 @@ function BlackboxLogViewer() {
         if(item) {
             offsetCache = item;
         }
-    })
+    });
 
     activeGraphConfig.addListener(function() {
         invalidateGraph();
@@ -1016,7 +1040,7 @@ function BlackboxLogViewer() {
         $('[data-toggle="tooltip"]').tooltip({trigger: "hover", placement: "auto bottom"}); // initialise tooltips
         $('[data-toggle="dropdown"]').dropdown(); // initialise menus
         $('a.auto-hide-menu').click(function() {
-            var test = $(this).closest('.dropdown').children().first().dropdown("toggle");
+            $(this).closest('.dropdown').children().first().dropdown("toggle");
         });
 
         // Get Latest Version Information
@@ -1032,7 +1056,7 @@ function BlackboxLogViewer() {
                     $(".viewer-download").hide();
                 }
                 });
-        } catch (e)
+        } catch (_e)
         {
             console.log('Cannot get latest version information');
             $(".viewer-download").hide();
@@ -1041,7 +1065,14 @@ function BlackboxLogViewer() {
         graphLegend = new GraphLegend($(".log-graph-legend"), activeGraphConfig, onLegendVisbilityChange, onLegendSelectionChange, onLegendHighlightChange, zoomGraphConfig, expandGraphConfig, newGraphConfig);
 
         workspaceSelection = new WorkspaceSelection($(".log-workspace-selection"), workspaceGraphConfigs, onSwitchWorkspace, onSaveWorkspace);
-        onSwitchWorkspace(workspaceGraphConfigs, workspaceSelection);
+        // Sync the widget we just created with whatever workspaceGraphConfigs/activeWorkspace
+        // already hold (from the prefs.get() callbacks above, if those won the race against
+        // this $(document).ready() firing -- see onSwitchWorkspace's own comment). This was
+        // previously passing workspaceSelection itself (the widget object) as the active-
+        // workspace-ID argument, which onSwitchWorkspace/setActiveWorkspace then used as an
+        // array index -- never matching a real workspace, so the dropdown always opened with
+        // no active selection and an empty title instead of the real one.
+        onSwitchWorkspace(workspaceGraphConfigs, activeWorkspace);
 
         prefs.get('log-legend-hidden', function(item) {
             if (item) {
@@ -1063,10 +1094,6 @@ function BlackboxLogViewer() {
         // Reset the analyser window on application startup.
         hasAnalyser = false;
         html.toggleClass("has-analyser", hasAnalyser);
-
-        $(".btn-new-window").click(function(e) {
-            createNewBlackboxWindow();
-        });
 
         $(".file-open").change(function(e) {
             var
@@ -1274,7 +1301,7 @@ function BlackboxLogViewer() {
             if (hasMarker && hasVideo && hasLog) { // adjust the video sync offset and remove marker
                 try {
                     setVideoOffset(videoOffset + (stringTimetoMsec($(".marker-offset", statusBar).text()) / 1000000), true);
-                } catch (e) {
+                } catch (_e) {
                     console.log('Failed to set video offset');
                 }
             }
@@ -1439,7 +1466,7 @@ function BlackboxLogViewer() {
             userSettingsDialog.show(flightLog, userSettings);
         });
 
-        $(".marker-offset", statusBar).click(function(e) {
+        $(".marker-offset", statusBar).click(function(_e) {
                 setCurrentBlackboxTime(markerTime);
                 invalidateGraph();
         });
@@ -1508,7 +1535,7 @@ function BlackboxLogViewer() {
 
         $(window).resize(function() { updateCanvasSize(); /*updateHeaderSize()*/ });
 
-        function updateHeaderSize() {
+        function _updateHeaderSize() {
             var newHeight = $(".video-top-controls").height() - 20; // 23px offset
             $(".log-graph").css("top", newHeight+"px");
             $(".log-graph-config").css("top", newHeight+"px");
@@ -1678,6 +1705,11 @@ function BlackboxLogViewer() {
 
         function saveOneUserSetting(name, value) {
             prefs.get('userSettings', function(data) {
+                // Unlike every other prefs.get() callback in this file, this one indexes
+                // straight into its result -- fine normally, but data is undefined on a fresh
+                // profile with no userSettings ever saved yet (nothing else here treats that
+                // as an error; it just means "nothing stored").
+                data = data || {};
                 data[name] = value;
                 prefs.set('userSettings', data);
             });
@@ -1741,13 +1773,13 @@ function BlackboxLogViewer() {
                     var refreshRequired = false;
 
                     if (e.shiftKey) { // change zoom
-                        refreshRequired = changePenZoom(activeGraphConfig.getGraphs(), $(e.target).attr('graph'), $(e.target).attr('field'), (delta>=0))
+                        refreshRequired = changePenZoom(activeGraphConfig.getGraphs(), $(e.target).attr('graph'), $(e.target).attr('field'), (delta>=0));
                         e.preventDefault();
                     } else if (e.altKey) { // change Expo
-                        refreshRequired = changePenExpo(activeGraphConfig.getGraphs(), $(e.target).attr('graph'), $(e.target).attr('field'), (delta>=0))
+                        refreshRequired = changePenExpo(activeGraphConfig.getGraphs(), $(e.target).attr('graph'), $(e.target).attr('field'), (delta>=0));
                         e.preventDefault();
                     } else if (e.ctrlKey){ // Change smoothing
-                        refreshRequired = changePenSmoothing(activeGraphConfig.getGraphs(), $(e.target).attr('graph'), $(e.target).attr('field'), (delta>=0))
+                        refreshRequired = changePenSmoothing(activeGraphConfig.getGraphs(), $(e.target).attr('graph'), $(e.target).attr('field'), (delta>=0));
                         e.preventDefault();
                     }
 
@@ -1778,7 +1810,7 @@ function BlackboxLogViewer() {
                     case "I".charCodeAt(0):
                         if (!(shifted)) {
                             if (videoExportInTime === currentBlackboxTime) {
-                                setVideoInTime(false)
+                                setVideoInTime(false);
                             } else {
                                 setVideoInTime(currentBlackboxTime);
                             }
@@ -1868,7 +1900,7 @@ function BlackboxLogViewer() {
                                 var id = e.which - 48;
                                 if (!e.shiftKey) { // retreive graph configuration from workspace
                                     if (workspaceGraphConfigs[id] != null) {
-                                        onSwitchWorkspace(workspaceGraphConfigs, id)
+                                        onSwitchWorkspace(workspaceGraphConfigs, id);
                                     }
                                 } else { // store configuration to workspace
                                     if (workspaceGraphConfigs[id]) {
@@ -1902,7 +1934,7 @@ function BlackboxLogViewer() {
                                         }
                                         $('.bookmark-'+(e.which-48), statusBar).css('visibility', ((bookmarkTimes[e.which-48]!=null)?('visible'):('hidden')) );
                                         var countBookmarks = 0;
-                                        for(var i=0; i<=9; i++) {
+                                        for(i=0; i<=9; i++) {
                                                 countBookmarks += (bookmarkTimes[i]!=null)?1:0;
                                         }
                                         $('.bookmark-clear', statusBar).css('visibility', ((countBookmarks>0)?('visible'):('hidden')) );
@@ -1911,7 +1943,7 @@ function BlackboxLogViewer() {
                                             invalidateGraph();
                                         }
                                 }
-                        } catch(e) {
+                        } catch(_e) {
                             console.log('Workspace feature not functioning');
                         }
                         e.preventDefault();
@@ -1925,7 +1957,7 @@ function BlackboxLogViewer() {
                             } else {
                                     (graphZoom==GRAPH_MIN_ZOOM)?setGraphZoomLevel(null, true):setGraphZoomLevel(GRAPH_MIN_ZOOM, true);
                             }
-                        } catch(e) {
+                        } catch(_e) {
                             console.log('Workspace toggle feature not functioning');
                         }
                         e.preventDefault();
@@ -1939,7 +1971,7 @@ function BlackboxLogViewer() {
                             } else if (e.altKey) {
                                 makeScreenshot();
                             }
-                        } catch(e) {
+                        } catch(_e) {
                             console.log('Smoothing override toggle feature not functioning');
                         }
                         e.preventDefault();
@@ -1951,7 +1983,7 @@ function BlackboxLogViewer() {
                                 toggleOverrideStatus('graphExpoOverride', 'has-expo-override' );
                                 e.preventDefault();
                             }
-                        } catch(e) {
+                        } catch(_e) {
                             console.log('Expo override toggle feature not functioning');
                         }
                         e.preventDefault();
@@ -1963,7 +1995,7 @@ function BlackboxLogViewer() {
                                 toggleOverrideStatus('graphGridOverride', 'has-grid-override' );
                                 e.preventDefault();
                             }
-                        } catch(e) {
+                        } catch(_e) {
                             console.log('Grid override toggle feature not functioning');
                         }
                         e.preventDefault();
@@ -2080,21 +2112,22 @@ function BlackboxLogViewer() {
             // Chrome or opening a file association
             if ((typeof argv !== 'undefined') && (argv.length > 0)) {
                 fullPath = argv[0];
-            } else {
+            } else if (window.isNWjs()) {
                 const gui = require('nw.gui');
                 if (gui.App.argv.length > 0) {
                     fullPath = gui.App.argv[0];
                 }
             }
             if (fullPath != null) {
-                const filename = fullPath.replace(/^.*[\\\/]/, '');
+                const filename = fullPath.replace(/^.*[\\/]/, '');
                 const file = new File(fullPath, filename);
                 loadFiles([file]);
             }
         }
         checkIfFileAsParameter();
 
-        // File extension association
+        // File extension association -- OS-level "open with" support, only meaningful for
+        // the NW.js desktop build; there is no equivalent for a page running in a browser tab.
         function onOpenFileAssociation() {
 
             const gui = require('nw.gui');
@@ -2120,7 +2153,9 @@ function BlackboxLogViewer() {
             });
 
         }
-        onOpenFileAssociation();
+        if (window.isNWjs()) {
+            onOpenFileAssociation();
+        }
 
         /* drag and drop support */
 

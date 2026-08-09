@@ -11,7 +11,6 @@
 function Configuration(file, configurationDefaults, showConfigFile) {
 
         // Private Variables
-        var that = this;           // generic pointer back to this function
         var fileData;                   // configuration file information
         var fileLinesArray;          // Store the contents of the file globally
 
@@ -36,14 +35,14 @@ function Configuration(file, configurationDefaults, showConfigFile) {
                                         li = $('<li class="configuration-row">' + highLight[1] + '<b>' + highLight[2] + '</b>' + highLight[3] + '</li>'); // Removed default syntax highlighting
                                         configurationList.append(li);
                                         }
-                                } catch(e) {
+                                } catch(_e) {
                                         continue;
                                 }
                         }
                 }
         }
 
-        function renderFileContents(filter) {
+        function renderFileContents(_filter) {
 
                 var
                 configurationElem  = ('.configuration-file'), // point to the actual element in index.html
@@ -55,9 +54,7 @@ function Configuration(file, configurationDefaults, showConfigFile) {
                                                           +             '<input type="text" class="form-control configuration-filter" placeholder="Enter filter" size="5"/>'
                                                           +         '</div>'
                                                           +                '<div><ul class="list-unstyled configuration-list"></ul></div>'
-                                                          +'</div>'),
-                configurationTitle = $('h3', configurationDiv),
-                li;
+                                                          +'</div>');
 
                 // now replace the element in the index.html with the loaded file information
                 $(configurationElem).replaceWith(configurationDiv);
@@ -125,7 +122,6 @@ function ConfigurationDefaults(prefs) {
         // Special configuration file that handles default values only
 
         // Private Variables
-        var that = this;                             // generic pointer back to this function
         var fileData;                                     // configuration file information
         var fileLinesArray = null;          // Store the contents of the file globally
 
@@ -156,7 +152,7 @@ function ConfigurationDefaults(prefs) {
         };
 
         reader.readAsText(file);
-    }
+    };
 
     // Public variables and functions
         this.getFile = function() {
@@ -165,11 +161,11 @@ function ConfigurationDefaults(prefs) {
 
         this.getLines = function() {
                 return fileLinesArray;
-        }
+        };
 
         this.hasDefaults = function() {
                 return (fileLinesArray!=null); // is there a default file array
-        }
+        };
 
         this.isDefault = function(line) {
                 // Returns the default line equivalent
@@ -181,7 +177,7 @@ function ConfigurationDefaults(prefs) {
                         return true; // line is same as default
                 }
                 return false; // line not the same as default or not found
-        }
+        };
 
 
     loadFileFromCache(); // configuration file loaded

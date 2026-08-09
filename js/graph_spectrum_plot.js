@@ -444,13 +444,12 @@ GraphSpectrumPlot._drawFiltersAndMarkers = function(canvasCtx) {
             }
         }
         offset++; // make some space!
-    } catch (e) {
+    } catch (_e) {
         console.log('Notch filter fieldName missing');
     }
 
     if (this._spectrumType === SPECTRUM_TYPE.FREQUENCY) {
         this._drawInterestFrequency(canvasCtx, this._fftData.maxNoiseIdx, PLOTTED_BLACKBOX_RATE, 'Max noise', WIDTH, HEIGHT, (15 * offset) + MARGIN, "rgba(255,0,0,0.33)", 3);
-        offset++;
     }
 
 };

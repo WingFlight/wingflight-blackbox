@@ -886,4 +886,4 @@ var DEFAULT_WORKSPACES = [
             }
         ]
     },
-]
+];

@@ -4,13 +4,14 @@ const pkg = require('./package.json');
 
 const fs = require('fs');
 const path = require('path');
+const spawn = require('child_process').spawn;
 
 const zip = require('gulp-zip');
 const del = require('del');
 const innoSetup = require('@quanle94/innosetup');
 const NwBuilder = require('nw-builder');
 const deb = require('gulp-debian');
-const buildRpm = require('rpm-builder')
+const buildRpm = require('rpm-builder');
 const commandExistsSync = require('command-exists').sync;
 
 const gulp = require('gulp');
@@ -22,6 +23,84 @@ const DIST_DIR = './dist/';
 const APPS_DIR = './apps/';
 const DEBUG_DIR = './debug/';
 const RELEASE_DIR = './release/';
+const DEV_CLIENT_DIR = './dev-client/';
+const WEB_DIST_DIR = './web-dist/';
+
+// Every plain-<script> source file, stylesheet, 3D model asset, HTML page, image, and
+// locale bundle the app actually loads at runtime -- shared between the NW.js dist() build
+// and the static webDist() build below, since both are just "assemble what index.html
+// references into one folder", they only differ in how they source their third-party deps.
+const APP_ASSET_SOURCES = [
+    // CSS files
+    './css/header_dialog.css',
+    './css/jquery.nouislider.min.css',
+    './css/keys_dialog.css',
+    './css/main.css',
+    './css/user_settings_dialog.css',
+
+    // JavaScript
+    './index.js',
+    './js/browser_compat.js',
+    './js/cache.js',
+    './js/complex.js',
+    './js/configuration.js',
+    './js/craft_3d.js',
+    './js/datastream.js',
+    './js/decoders.js',
+    './js/expo.js',
+    './js/flightlog.js',
+    './js/flightlog_fielddefs.js',
+    './js/flightlog_fields_presenter.js',
+    './js/flightlog_index.js',
+    './js/flightlog_parser.js',
+    './js/flightlog_video_renderer.js',
+    './js/graph_config.js',
+    './js/graph_config_dialog.js',
+    './js/graph_legend.js',
+    './js/workspace_selection.js',
+    './js/graph_spectrum.js',
+    './js/graph_spectrum_calc.js',
+    './js/graph_spectrum_plot.js',
+    './js/grapher.js',
+    './js/sticks.js',
+    './js/gui.js',
+    './js/header_dialog.js',
+    './js/keys_dialog.js',
+    './js/laptimer.js',
+    './js/localization.js',
+    './js/main.js',
+    './js/pref_storage.js',
+    './js/release_checker.js',
+    './js/seekbar.js',
+    './js/tools.js',
+    './js/user_settings_dialog.js',
+    './js/video_export_dialog.js',
+    './js/csv-exporter.js',
+    './js/webworkers/csv-export-worker.js',
+    './js/vendor/FileSaver.js',
+    './js/vendor/jquery-1.11.3.min.js',
+    './js/vendor/jquery-ui-1.11.4.min.js',
+    './js/vendor/jquery.ba-throttle-debounce.js',
+    './js/vendor/jquery.nouislider.all.min.js',
+    './js/vendor/modernizr-2.6.2-respond-1.1.0.min.js',
+    './js/vendor/semver.js',
+    './js/vendor/three.js',
+    './js/vendor/three.min.js',
+    './js/vendor/GLTFLoader.js',
+    './js/screenshot.js',
+    './js/default_workspaces.js',
+
+    './resources/models/model.gltf',
+    './resources/models/model.bin',
+
+    // everything else
+    './*.html',
+    './images/**/*',
+    './_locales/**/*',
+];
+
+// Must match vite.config.mjs's server.port.
+const VITE_DEV_SERVER_URL = 'http://localhost:8080/';
 
 const LINUX_INSTALL_DIR = '/opt/wingflight';
 
@@ -43,7 +122,7 @@ const SELECTED_PLATFORMS = getInputPlatforms();
 //Tasks
 //-----------------
 
-gulp.task('clean', gulp.parallel(clean_dist, clean_apps, clean_debug, clean_release));
+gulp.task('clean', gulp.parallel(clean_dist, clean_apps, clean_debug, clean_release, clean_dev_client, clean_web_dist));
 
 gulp.task('clean-dist', clean_dist);
 
@@ -55,8 +134,15 @@ gulp.task('clean-release', clean_release);
 
 gulp.task('clean-cache', clean_cache);
 
+gulp.task('clean-dev-client', clean_dev_client);
+
+gulp.task('clean-web-dist', clean_web_dist);
+
 const distRebuild = gulp.series(clean_dist, dist);
 gulp.task('dist', distRebuild);
+
+const webDistBuild = gulp.series(clean_web_dist, webDist);
+gulp.task('web-dist', webDistBuild);
 
 const appsBuild = gulp.series(gulp.parallel(clean_apps, distRebuild), apps, gulp.parallel(listPostBuildTasks(APPS_DIR)));
 gulp.task('apps', appsBuild);
@@ -65,6 +151,13 @@ const debugAppsBuild = gulp.series(gulp.parallel(clean_debug, distRebuild), debu
 
 const debugBuild = gulp.series(dist, debug, gulp.parallel(listPostBuildTasks(DEBUG_DIR)), start_debug);
 gulp.task('debug', debugBuild);
+
+// Launches the real NW.js desktop shell pointed at the Vite dev server (`yarn dev` /
+// `make dev-server`) instead of a packaged dist/debug copy, so source changes just need a
+// save + reload in the running window -- no rebuild each time. Requires the dev server to
+// already be running. Mirrors wingflight-configurator's `dev_client` gulp task.
+const devClientBuild = gulp.series(dev_client_manifest, run_dev_client);
+gulp.task('dev-client', devClientBuild);
 
 const releaseBuild = gulp.series(gulp.parallel(clean_release, appsBuild), gulp.parallel(listReleaseTasks(APPS_DIR)));
 gulp.task('release', releaseBuild);
@@ -157,11 +250,12 @@ function getRunDebugAppCommand(arch) {
     let command;
 
     switch (arch) {
-    case 'osx64':
+    case 'osx64': {
         const pkgName = `${pkg.name}.app`;
         command = `open ${path.join(DEBUG_DIR, pkg.name, arch, pkgName)}`;
 
         break;
+    }
 
     case 'linux64':
     case 'linux32':
@@ -204,91 +298,137 @@ function clean_release() {
     return del([RELEASE_DIR + '**'], { force: true }); 
 };
 
-function clean_cache() { 
-    return del(['./cache/**'], { force: true }); 
+function clean_cache() {
+    return del(['./cache/**'], { force: true });
 };
+
+function clean_dev_client() {
+    return del([DEV_CLIENT_DIR + '**'], { force: true });
+};
+
+function clean_web_dist() {
+    return del([WEB_DIST_DIR + '**'], { force: true });
+};
+
+// A minimal NW.js manifest whose "main" points at the running Vite dev server, instead of
+// a bundled index.html -- everything else is copied from package.json (window size, icon,
+// etc.) so the dev-client window matches the real app.
+function dev_client_manifest(done) {
+    var manifest = Object.assign({}, pkg, {
+        main: VITE_DEV_SERVER_URL,
+    });
+
+    // default_locale tells NW.js's Chrome-extension-style manifest loader to expect a
+    // _locales/<lang>/messages.json directory sitting right next to this package.json --
+    // true for the real app (see js/localization.js's chrome.i18n.getMessage() calls), but
+    // dev-client/ only ever contains this generated manifest. The actual locale data is
+    // still served live over HTTP by Vite (main points there), so this field would only
+    // make NW.js fail to load the app with "Default locale was specified, but _locales
+    // subtree is missing" -- drop it.
+    delete manifest.default_locale;
+
+    fs.mkdirSync(DEV_CLIENT_DIR, { recursive: true });
+    fs.writeFileSync(DEV_CLIENT_DIR + 'package.json', JSON.stringify(manifest, null, 2));
+    done();
+}
+
+function run_dev_client(done) {
+    var platforms = getPlatforms();
+
+    if (platforms.length !== 1) {
+        console.log('dev-client only supports a single platform, got: ' + platforms);
+        done();
+        return;
+    }
+
+    var builder = new NwBuilder(Object.assign({}, nwBuilderOptions, {
+        buildDir: DEBUG_DIR,
+        platforms: platforms,
+        flavor: 'sdk',
+        files: DEV_CLIENT_DIR + '**/*',
+    }));
+    builder.on('log', console.log);
+
+    // Deliberately not using builder.run()/runApp(): nw-builder 3.7.4's runApp() spawns
+    // nw.exe with { detached: true, windowsHide: true } (lib/index.cjs:949-956).
+    // windowsHide maps to Windows' CREATE_NO_WINDOW flag, and combined with detached that
+    // reliably launches nw.exe with no visible window on Windows -- confirmed by finding
+    // multiple orphaned, windowless nw.exe processes still running after "successful"
+    // dev-client runs. (runApp's callback path is also separately broken -- see the
+    // dev-client: work around nw-builder 3.7.4's broken run(callback) path commit.)
+    //
+    // So: reuse nw-builder's own download/cache pipeline (this part works fine -- it
+    // correctly fetches and caches the NW.js SDK build), then spawn the cached executable
+    // ourselves with plain, visible-window-safe options instead of calling runApp().
+    builder.checkFiles()
+        .then(builder.resolveLatestVersion.bind(builder))
+        .then(builder.checkVersion.bind(builder))
+        .then(builder.platformFilesForVersion.bind(builder))
+        .then(builder.downloadNwjs.bind(builder))
+        .then(function () {
+            var currentPlatform = builder.options.currentPlatform;
+            var platform = builder._platforms[currentPlatform];
+            var runnable = currentPlatform.indexOf('win') === 0 ? 'nw.exe'
+                : currentPlatform.indexOf('osx') === 0 ? 'nwjs.app/Contents/MacOS/nwjs'
+                : 'nw';
+            var executable = path.resolve(platform.cache, runnable);
+            var parentDirectory = (Array.isArray(builder.options.files) ? builder.options.files[0] : builder.options.files)
+                .replace(/\*[/*]*/, '');
+
+            console.log('Launching App: ' + executable);
+
+            var nwProcess = spawn(executable, [parentDirectory], {
+                detached: true,
+                stdio: 'ignore',
+            });
+            // Let the app keep running after this gulp task (and `make dev-client`) exits,
+            // instead of blocking the terminal until the window is closed.
+            nwProcess.unref();
+
+            done();
+        })
+        .catch(function (err) {
+            console.log('Error running NW.js dev client: ' + err);
+            process.exit(1);
+        });
+}
 
 // Real work for dist task. Done in another task to call it via
 // run-sequence.
 function dist() {
-    var distSources = [
-        // CSS files
-        './css/header_dialog.css',
-        './css/jquery.nouislider.min.css',
-        './css/keys_dialog.css',
-        './css/main.css',
-        './css/user_settings_dialog.css',
-
-        // JavaScript
-        './index.js',
-        './js/cache.js',
-        './js/complex.js',
-        './js/configuration.js',
-        './js/craft_3d.js',
-        './js/datastream.js',
-        './js/decoders.js',
-        './js/expo.js',
-        './js/flightlog.js',
-        './js/flightlog_fielddefs.js',
-        './js/flightlog_fields_presenter.js',
-        './js/flightlog_index.js',
-        './js/flightlog_parser.js',
-        './js/flightlog_video_renderer.js',
-        './js/graph_config.js',
-        './js/graph_config_dialog.js',
-        './js/graph_legend.js',
-        './js/workspace_selection.js',
-        './js/graph_spectrum.js',
-        './js/graph_spectrum_calc.js',
-        './js/graph_spectrum_plot.js',
-        './js/grapher.js',
-        './js/sticks.js',
-        './js/gui.js',
-        './js/header_dialog.js',
-        './js/imu.js',
-        './js/keys_dialog.js',
-        './js/laptimer.js',
-        './js/localization.js',
-        './js/main.js',
-        './js/pref_storage.js',
-        './js/real.js',
-        './js/release_checker.js',
-        './js/seekbar.js',
-        './js/tools.js',
-        './js/user_settings_dialog.js',
-        './js/video_export_dialog.js',
-        './js/csv-exporter.js',
-        './js/webworkers/csv-export-worker.js',
-        './js/vendor/FileSaver.js',
-        './js/vendor/jquery-1.11.3.min.js',
-        './js/vendor/jquery-ui-1.11.4.min.js',
-        './js/vendor/jquery.ba-throttle-debounce.js',
-        './js/vendor/jquery.nouislider.all.min.js',
-        './js/vendor/modernizr-2.6.2-respond-1.1.0.min.js',
-        './js/vendor/semver.js',
-        './js/vendor/three.js',
-        './js/vendor/three.min.js',
-        './js/vendor/GLTFLoader.js',
-        './js/screenshot.js',
-        './js/default_workspaces.js',
-
-        './resources/models/bell_cw.gltf',
-        './resources/models/bell_cw.png',
-        './resources/models/bell_cw.bin',
-
-        // everything else
+    var distSources = APP_ASSET_SOURCES.concat([
         './package.json', // For NW.js
         './yarn.lock',
-        './*.html',
-        './images/**/*',
-        './_locales/**/*',
-    ];
+    ]);
     return gulp.src(distSources, { base: '.' })
         .pipe(gulp.dest(DIST_DIR))
         .pipe(yarn({
             production: true,
             ignoreScripts: true
         }));;
+};
+
+// Static web build: the same app assets as dist(), but pulls its third-party JS/CSS
+// (bootstrap, html2canvas, webm-writer, lodash) straight from the already-installed root
+// node_modules/ instead of running a nested yarn install inside the output directory -- and
+// skips yarn.lock, which nothing in a browser deploy ever reads. Mirrors the exact
+// node_modules/... paths index.html's own <link>/<script> tags already reference, so nothing
+// in index.html needs to change for this to work.
+//
+// package.json IS still included here, unlike yarn.lock -- not for NW.js packaging (there's
+// no manifest to package for a browser deploy), but because js/browser_compat.js's
+// chrome.runtime.getManifest() shim fetches it over HTTP to report the app version in a
+// plain browser tab the same way NW.js does natively.
+function webDist() {
+    var webDistSources = APP_ASSET_SOURCES.concat([
+        './package.json',
+        './node_modules/bootstrap/dist/**/*',
+        './node_modules/html2canvas/dist/html2canvas.min.js',
+        './node_modules/webm-writer/*.js',
+        './node_modules/lodash/lodash.min.js',
+    ]);
+    return gulp.src(webDistSources, { base: '.' })
+        .pipe(gulp.dest(WEB_DIST_DIR));
 };
 
 // Create runable app directories in ./apps
@@ -298,35 +438,35 @@ function apps(done) {
     buildNWApps(platforms, 'normal', APPS_DIR, done);
 };
 
-function listPostBuildTasks(folder, done) {
+function listPostBuildTasks(folder, _done) {
 
     var platforms = getPlatforms();
 
     var postBuildTasks = [];
 
     if (platforms.indexOf('win32') != -1) {
-        postBuildTasks.push(function post_build_win32(done){ return post_build('win32', folder, done) });
+        postBuildTasks.push(function post_build_win32(done){ return post_build('win32', folder, done); });
     }
 
     if (platforms.indexOf('win64') != -1) {
-        postBuildTasks.push(function post_build_win64(done){ return post_build('win64', folder, done) });
+        postBuildTasks.push(function post_build_win64(done){ return post_build('win64', folder, done); });
     }
 
     if (platforms.indexOf('linux32') != -1) {
-        postBuildTasks.push(function post_build_linux32(done){ return post_build('linux32', folder, done) });
+        postBuildTasks.push(function post_build_linux32(done){ return post_build('linux32', folder, done); });
     }
 
     if (platforms.indexOf('linux64') != -1) {
-        postBuildTasks.push(function post_build_linux64(done){ return post_build('linux64', folder, done) });
+        postBuildTasks.push(function post_build_linux64(done){ return post_build('linux64', folder, done); });
     }
 
     if (platforms.indexOf('osx64') != -1) {
-        postBuildTasks.push(function post_build_osx64(done){ return post_build('osx64', folder, done) });
+        postBuildTasks.push(function post_build_osx64(done){ return post_build('osx64', folder, done); });
     }
 
     // We need to return at least one task, if not gulp will throw an error
     if (postBuildTasks.length == 0) {
-        postBuildTasks.push(function post_build_none(done){ done() });
+        postBuildTasks.push(function post_build_none(done){ done(); });
     }
     return postBuildTasks;
 }
@@ -335,7 +475,7 @@ function post_build(arch, folder, done) {
 
     if ((arch == 'win32') || (arch == 'win64')) {
         // Copy ffmpeg codec library into Windows app
-        var libSrc = './library/' + arch + '/ffmpeg.dll'
+        var libSrc = './library/' + arch + '/ffmpeg.dll';
         var libDest = path.join(folder, pkg.name, arch);
         console.log('Copy ffmpeg library to Windows app (' + libSrc + ' to ' + libDest + ')');
         return gulp.src(libSrc)
@@ -348,8 +488,8 @@ function post_build(arch, folder, done) {
         var launcherDir = path.join(folder, pkg.name, arch);
 
        // Copy ffmpeg codec library into Linux app
-        var libSrc = './library/' + arch + '/libffmpeg.so'
-        var libDest = path.join(launcherDir, 'lib');
+        libSrc = './library/' + arch + '/libffmpeg.so';
+        libDest = path.join(launcherDir, 'lib');
 
         console.log('Copy Ubuntu launcher scripts to ' + launcherDir);        
         gulp.src('assets/linux/**')                   
@@ -359,7 +499,7 @@ function post_build(arch, folder, done) {
                 console.log('Copy ffmpeg library to Linux app (' + libSrc + ' to ' + libDest + ')');
                 gulp.src(libSrc)
                     .pipe(gulp.dest(libDest))
-                    .on('end', function() {done()});
+                    .on('end', function() {done();});
 
             });
         return;
@@ -371,10 +511,10 @@ function post_build(arch, folder, done) {
         var files = fs.readdirSync(pathToVersions);
         if (files.length >= 1) {
             var webKitVersion = files[0];
-            console.log('Found nwjs version: ' + webKitVersion)
+            console.log('Found nwjs version: ' + webKitVersion);
             // Copy ffmpeg codec library into macOS app
-            var libSrc = './library/osx64/libffmpeg.dylib'
-            var libDest = path.join(pathToVersions, webKitVersion) + '/';
+            libSrc = './library/osx64/libffmpeg.dylib';
+            libDest = path.join(pathToVersions, webKitVersion) + '/';
             console.log('Copy ffmpeg library to macOS app (' + libSrc + ' to ' + libDest + ')');
             return gulp.src(libSrc)
                        .pipe(gulp.dest(libDest));
@@ -411,7 +551,7 @@ function buildNWApps(platforms, flavor, dir, done) {
             done();
         });
     } else {
-        console.log('No platform suitable for NW Build')
+        console.log('No platform suitable for NW Build');
         done();
     }
 }
@@ -475,7 +615,7 @@ function release_zip(arch, appDirectory) {
 // Compress files from srcPath, using basePath, to outputFile in the RELEASE_DIR
 function compressFiles(srcPath, basePath, outputFile, zipFolder) {
     return gulp.src(srcPath, { base: basePath })
-               .pipe(rename(function(actualPath){ actualPath.dirname = path.join(zipFolder, actualPath.dirname) }))
+               .pipe(rename(function(actualPath){ actualPath.dirname = path.join(zipFolder, actualPath.dirname); }))
                .pipe(zip(outputFile))
                .pipe(gulp.dest(RELEASE_DIR));
 }
@@ -562,7 +702,7 @@ function release_rpm(arch, appDirectory, done) {
              rpmDest: RELEASE_DIR
     };
 
-    buildRpm(options, function(err, rpm) {
+    buildRpm(options, function(err, _rpm) {
         if (err) {
           console.error("Error generating rpm package: " + err);
         }

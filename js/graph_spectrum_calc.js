@@ -125,7 +125,7 @@ GraphSpectrumCalc.dataLoadFrequencyVsThrottle = function() {
     }
 
     // Divide by the number of samples
-    for (var i = 0; i < THROTTLE_VALUES; i++) {
+    for (i = 0; i < THROTTLE_VALUES; i++) {
         if (numberSamplesThrottle[i] > 1) {
             for (var j = 0; j < matrixFftOutput[i].length; j++) {
                 matrixFftOutput[i][j] /= numberSamplesThrottle[i];
@@ -211,6 +211,7 @@ GraphSpectrumCalc.dataLoadPidErrorVsSetpoint = function() {
 
 GraphSpectrumCalc._getFlightChunks = function() {
 
+    // eslint-disable-next-line no-useless-assignment -- default value, always overwritten by the branch below
     var logStart = 0;
     if(this._analyserTimeRange.in) {
         logStart = this._analyserTimeRange.in;
@@ -218,6 +219,7 @@ GraphSpectrumCalc._getFlightChunks = function() {
         logStart = this._flightLog.getMinTime();
     }
 
+    // eslint-disable-next-line no-useless-assignment -- default value, always overwritten by the branch below
     var logEnd = 0;
     if(this._analyserTimeRange.out) {
         logEnd = this._analyserTimeRange.out;
@@ -231,7 +233,7 @@ GraphSpectrumCalc._getFlightChunks = function() {
     var allChunks = this._flightLog.getChunksInTimeRange(logStart, logEnd);
 
     return allChunks;
-}
+};
 
 GraphSpectrumCalc._getFlightSamplesFreq = function() {
 

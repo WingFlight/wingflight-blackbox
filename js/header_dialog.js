@@ -5,7 +5,6 @@ function HeaderDialog(dialog, onSave) {
         // Private Variables
 
 
-        var that = this;                 // generic pointer back to this function
         var activeSysConfig;        // pointer to the current system configuration
 
         /** By default, all parameters are shown on the header
@@ -135,45 +134,45 @@ function HeaderDialog(dialog, onSave) {
 
     function ratesScaling(rates_type)
     {
-        let rcRateFactor = 1
-        let rcRateDec = 0
-        let rcExpoFactor = 1
-        let rcExpoDec = 2
-        let ratesFactor = 1
-        let ratesDec = 0
+        let rcRateFactor = 1;
+        let rcRateDec = 0;
+        let rcExpoFactor = 1;
+        let rcExpoDec = 2;
+        let ratesFactor = 1;
+        let ratesDec = 0;
         switch(rates_type)
         {
             case 0: // NONE
-                rcExpoDec = 0
-                break
+                rcExpoDec = 0;
+                break;
             case 1: // BETAFLIGHT
-                rcRateFactor = 1
-                rcRateDec = 2
-                ratesFactor = 1
-                ratesDec = 2
-                break
+                rcRateFactor = 1;
+                rcRateDec = 2;
+                ratesFactor = 1;
+                ratesDec = 2;
+                break;
             case 2: // RACEFLIGHT
-                rcRateFactor = 10
-                rcExpoDec = 0
-                break
+                rcRateFactor = 10;
+                rcExpoDec = 0;
+                break;
             case 3: // KISS
-                rcRateFactor = 1
-                rcRateDec = 2
-                ratesFactor = 1
-                ratesDec = 2
-                break
+                rcRateFactor = 1;
+                rcRateDec = 2;
+                ratesFactor = 1;
+                ratesDec = 2;
+                break;
             case 5: // QUICK
-                ratesFactor = 10
-                rcRateDec = 2
-                break
+                ratesFactor = 10;
+                rcRateDec = 2;
+                break;
             case 4: // ACTUAL
-                rcRateFactor = 10
-                ratesFactor = 10
-                break
+                rcRateFactor = 10;
+                ratesFactor = 10;
+                break;
             default:
-                break
+                break;
         }
-        return {rcRateFactor, rcRateDec, rcExpoFactor, rcExpoDec, ratesFactor, ratesDec}
+        return {rcRateFactor, rcRateDec, rcExpoFactor, rcExpoDec, ratesFactor, ratesDec};
     }
 
         function isParameterValid(name) {
@@ -234,7 +233,7 @@ function HeaderDialog(dialog, onSave) {
 
         }
 
-    function setParameterFloat(name, data, decimalPlaces) {
+    function _setParameterFloat(name, data, decimalPlaces) {
         var parameterElem = $('.parameter td[name="' + name + '"]');
         var nameElem = $('input', parameterElem);
         if(data!=null) {
@@ -281,10 +280,10 @@ function HeaderDialog(dialog, onSave) {
                 } else {
                     $(this).closest('tr').addClass('missing');
                 }
-            })
+            });
         }
 
-        function isFeatureEnabled(name, list, value) {
+        function _isFeatureEnabled(name, list, value) {
                 for (var i = 0; i < list.length; i++) {
                         if (list[i].name == name && (value & 1<<list[i].bit)) {
                                 return true;
@@ -369,7 +368,7 @@ function HeaderDialog(dialog, onSave) {
                         });
                 }
 
-                for (var i = 0; i < radioGroups.length; i++) {
+                for (i = 0; i < radioGroups.length; i++) {
                         var group = radioGroups[i];
                         var controls_e = $('input[name="' + group + '"].feature');
 
@@ -419,16 +418,16 @@ function HeaderDialog(dialog, onSave) {
                 {name: 'ESC', description: 'ESC Telemetry'},
                 {name: 'BEC', description: 'BEC Telemetry'},
                 {name: 'ESC2', description: 'ESC2 Telemetry'},
-            ]]
+            ]];
         }
 
         if(sysConfig.firmwareType == FIRMWARE_TYPE_ROTORFLIGHT && semver.gte(sysConfig.firmwareVersion, '4.6.0')) {
             fields = [...fields, ...[
                 {name: 'Governor', description: 'Governor PID terms'},
-            ]]
+            ]];
         }
 
-        const fieldsList_e = $('tbody.fields_list').empty()
+        const fieldsList_e = $('tbody.fields_list').empty();
 
         for (let i = 0; i < fields.length; i++) {
             const row_e = $(`<tr><td><label class="option"><input class="field ${i}
@@ -443,7 +442,7 @@ function HeaderDialog(dialog, onSave) {
             field_e.prop('checked', (value & 1<<i));
             field_e.data('bit', i);
 
-            fieldsList_e.append(row_e)
+            fieldsList_e.append(row_e);
         }
     }
 
@@ -465,19 +464,19 @@ function HeaderDialog(dialog, onSave) {
                         } else {
                                 $('.unknown').hide();
                         }
-                } catch(e) {
+                } catch(_e) {
                         $('.unknown').hide();
                 }
         }
 
     function harmonicLabel(num) {
         switch(num) {
-            case 0: return 'None'
-            case 1: return 'Fundamental'
-            case 2: return '2nd'
-            case 3: return '3rd'
+            case 0: return 'None';
+            case 1: return 'Fundamental';
+            case 2: return '2nd';
+            case 3: return '3rd';
             default:
-                return num + 'th'
+                return num + 'th';
         }
     }
 
@@ -494,29 +493,29 @@ function HeaderDialog(dialog, onSave) {
         gyro_rpm_notch_source_yaw,
         gyro_rpm_notch_q_yaw) {
 
-        var $tableNc = $('.rpm_notch_config table tbody').empty()
+        var $tableNc = $('.rpm_notch_config table tbody').empty();
         let elemNc = `<tr><td>Gyro Rpm Notch Preset</td><td>${getGyroRpmNotchPresetText(gyro_rpm_notch_preset)}</td></tr>`;
         elemNc += `<tr><td>Gyro Rpm Notch Min Hz</td><td>${gyro_rpm_notch_min_hz}</td></tr>`;
         $tableNc.append(elemNc);
 
         //Create pitch data
-        const pitchItems = createNotchData(gyro_rpm_notch_source_pitch,gyro_rpm_notch_q_pitch)
+        const pitchItems = createNotchData(gyro_rpm_notch_source_pitch,gyro_rpm_notch_q_pitch);
         //Create roll data
-        const rollItems = createNotchData(gyro_rpm_notch_source_roll,gyro_rpm_notch_q_roll)
+        const rollItems = createNotchData(gyro_rpm_notch_source_roll,gyro_rpm_notch_q_roll);
         //Create yaw data
-        const yawItems = createNotchData(gyro_rpm_notch_source_yaw,gyro_rpm_notch_q_yaw)
+        const yawItems = createNotchData(gyro_rpm_notch_source_yaw,gyro_rpm_notch_q_yaw);
 
 
-        var $table = $('.rpm_notches table tbody').empty()
-        let elem = ""
-        for (const [src, item] of Object.entries(pitchItems)) {
-            elem += `<tr><td>Pitch</td><td>${item.source}</td><td>${item.type}</td><td>${item.harmonic}</td><td>${item.q}</td></tr>`
+        var $table = $('.rpm_notches table tbody').empty();
+        let elem = "";
+        for (const [_src, item] of Object.entries(pitchItems)) {
+            elem += `<tr><td>Pitch</td><td>${item.source}</td><td>${item.type}</td><td>${item.harmonic}</td><td>${item.q}</td></tr>`;
         }
-        for (const [src, item] of Object.entries(rollItems)) {
-            elem += `<tr><td>Roll</td><td>${item.source}</td><td>${item.type}</td><td>${item.harmonic}</td><td>${item.q}</td></tr>`
+        for (const [_src, item] of Object.entries(rollItems)) {
+            elem += `<tr><td>Roll</td><td>${item.source}</td><td>${item.type}</td><td>${item.harmonic}</td><td>${item.q}</td></tr>`;
         }
-        for (const [src, item] of Object.entries(yawItems)) {
-            elem += `<tr><td>Yaw</td><td>${item.source}</td><td>${item.type}</td><td>${item.harmonic}</td><td>${item.q}</td></tr>`
+        for (const [_src, item] of Object.entries(yawItems)) {
+            elem += `<tr><td>Yaw</td><td>${item.source}</td><td>${item.type}</td><td>${item.harmonic}</td><td>${item.q}</td></tr>`;
         }
 
 
@@ -526,9 +525,9 @@ function HeaderDialog(dialog, onSave) {
    function createNotchData(source,q) {
 
     const items = (source || []).reduce(function(acc, src, i) {
-        if(src == 0) return acc
+        if(src == 0) return acc;
         if(!acc[src]) {
-            acc[src] = {type: "Single", hCount: 1}
+            acc[src] = {type: "Single", hCount: 1};
         } else if (acc[src].hCount == 1) {
             acc[src].type = "Double";
             acc[src].hCount = 2;
@@ -537,69 +536,69 @@ function HeaderDialog(dialog, onSave) {
         }
 
         if(src >= 1 && src <= 8) {
-            acc[src].source = "Motor " + src
-            acc[src].harmonic = harmonicLabel(1)
+            acc[src].source = "Motor " + src;
+            acc[src].harmonic = harmonicLabel(1);
         } else if(src == 10) {
-            acc[src].source = "Main Motor"
-            acc[src].harmonic = harmonicLabel(1)
+            acc[src].source = "Main Motor";
+            acc[src].harmonic = harmonicLabel(1);
         } else if(src >= 11 && src <= 18) {
-            acc[src].source = "Main Rotor"
-            acc[src].harmonic = harmonicLabel(src % 10)
+            acc[src].source = "Main Rotor";
+            acc[src].harmonic = harmonicLabel(src % 10);
         } else if(src == 20) {
-            acc[src].source = "Tail Motor"
-            acc[src].harmonic = harmonicLabel(1)
+            acc[src].source = "Tail Motor";
+            acc[src].harmonic = harmonicLabel(1);
         } else if(src >= 21 && src <= 28) {
-            acc[src].source = "Tail Rotor"
-            acc[src].harmonic = harmonicLabel(src % 10)
+            acc[src].source = "Tail Rotor";
+            acc[src].harmonic = harmonicLabel(src % 10);
         } else {
-            acc[src].source = "Unknown"
-            acc[src].harmonic = harmonicLabel(0)
+            acc[src].source = "Unknown";
+            acc[src].harmonic = harmonicLabel(0);
         }
-        acc[src].q = (q[i] * 0.1).toFixed(1)
-        return acc
-    }, {})
+        acc[src].q = (q[i] * 0.1).toFixed(1);
+        return acc;
+    }, {});
 
-    return items
+    return items;
 
    }
 
     function renderRpmFilters(sources, qs, limits) {
         const items = (sources || []).reduce(function(acc, src, i) {
-            if(src == 0) return acc
+            if(src == 0) return acc;
             if(!acc[src]) {
-                acc[src] = {type: "Single"}
+                acc[src] = {type: "Single"};
             } else {
-                acc[src].type = "Double"
+                acc[src].type = "Double";
             }
 
             if(src >= 1 && src <= 8) {
-                acc[src].source = "Motor " + src
-                acc[src].harmonic = harmonicLabel(1)
+                acc[src].source = "Motor " + src;
+                acc[src].harmonic = harmonicLabel(1);
             } else if(src == 10) {
-                acc[src].source = "Main Motor"
-                acc[src].harmonic = harmonicLabel(1)
+                acc[src].source = "Main Motor";
+                acc[src].harmonic = harmonicLabel(1);
             } else if(src >= 11 && src <= 18) {
-                acc[src].source = "Main Rotor"
-                acc[src].harmonic = harmonicLabel(src % 10)
+                acc[src].source = "Main Rotor";
+                acc[src].harmonic = harmonicLabel(src % 10);
             } else if(src == 20) {
-                acc[src].source = "Tail Motor"
-                acc[src].harmonic = harmonicLabel(1)
+                acc[src].source = "Tail Motor";
+                acc[src].harmonic = harmonicLabel(1);
             } else if(src >= 21 && src <= 28) {
-                acc[src].source = "Tail Rotor"
-                acc[src].harmonic = harmonicLabel(src % 10)
+                acc[src].source = "Tail Rotor";
+                acc[src].harmonic = harmonicLabel(src % 10);
             } else {
-                acc[src].source = "Unknown"
-                acc[src].harmonic = harmonicLabel(0)
+                acc[src].source = "Unknown";
+                acc[src].harmonic = harmonicLabel(0);
             }
-            acc[src].q = (qs[i] * 0.1).toFixed(1)
-            acc[src].limit = limits[i]
-            return acc
-        }, {})
+            acc[src].q = (qs[i] * 0.1).toFixed(1);
+            acc[src].limit = limits[i];
+            return acc;
+        }, {});
 
-        var $table = $('.rpm_filters table tbody').empty()
-        let elem = ""
-        for (const [src, item] of Object.entries(items)) {
-            elem += `<tr><td>${item.source}</td><td>${item.type}</td><td>${item.harmonic}</td><td>${item.q}</td><td>${item.limit}</td></tr>`
+        var $table = $('.rpm_filters table tbody').empty();
+        let elem = "";
+        for (const [_src, item] of Object.entries(items)) {
+            elem += `<tr><td>${item.source}</td><td>${item.type}</td><td>${item.harmonic}</td><td>${item.q}</td><td>${item.limit}</td></tr>`;
         }
         $table.append(elem);
     }
@@ -677,21 +676,21 @@ function HeaderDialog(dialog, onSave) {
                         PID_CONTROLLER_TYPE = ([
                                         'LEGACY',
                                         'BETAFLIGHT'
-                                ])
+                                ]);
                 } else if (sysConfig.firmwareType == FIRMWARE_TYPE_ROTORFLIGHT) {
                         PID_CONTROLLER_TYPE = ([
                                         'ROTORFLIGHT',
-                                ])
+                                ]);
                 } else if (sysConfig.firmwareType == FIRMWARE_TYPE_WINGFLIGHT) {
                         PID_CONTROLLER_TYPE = ([
                                         'WINGFLIGHT',
-                                ])
+                                ]);
                 } else {
                         PID_CONTROLLER_TYPE = ([
                                         'UNUSED',
                                         'MWREWRITE',
                                         'LUXFLOAT'
-                                ])
+                                ]);
                 }
 
             renderSelect("pidController", sysConfig.pidController, PID_CONTROLLER_TYPE);
@@ -730,7 +729,7 @@ function HeaderDialog(dialog, onSave) {
         populatePID('yawBW'                     , sysConfig.yawBW);
 
         // Fill in data from for the rates object
-        const {rcRateFactor, rcRateDec, rcExpoFactor, rcExpoDec, ratesFactor, ratesDec} = ratesScaling(sysConfig.rates_type)
+        const {rcRateFactor, rcRateDec, rcExpoFactor, rcExpoDec, ratesFactor, ratesDec} = ratesScaling(sysConfig.rates_type);
         setParameter('rcRollRate'               , sysConfig.rc_rates[0] * rcRateFactor, rcRateDec);
         setParameter('rcPitchRate'              , sysConfig.rc_rates[1] * rcRateFactor, rcRateDec);
         setParameter('rcYawRate'                , sysConfig.rc_rates[2] * rcRateFactor, rcRateDec);
@@ -750,7 +749,7 @@ function HeaderDialog(dialog, onSave) {
             sysConfig.gyro_rpm_notch_source_yaw,
             sysConfig.gyro_rpm_notch_q_yaw );
 
-        renderRpmFilters(sysConfig.gyro_rpm_filter_bank_rpm_source, sysConfig.gyro_rpm_filter_bank_notch_q, sysConfig.gyro_rpm_filter_bank_rpm_limit)
+        renderRpmFilters(sysConfig.gyro_rpm_filter_bank_rpm_source, sysConfig.gyro_rpm_filter_bank_notch_q, sysConfig.gyro_rpm_filter_bank_rpm_limit);
 
         setParameter('vbatscale'                                ,sysConfig.vbatscale,0);
         setParameter('vbatref'                                        ,sysConfig.vbatref,2);
@@ -850,7 +849,7 @@ function HeaderDialog(dialog, onSave) {
             renderSelect('rcSmoothingMode'              ,sysConfig.rc_smoothing_mode, RC_SMOOTHING_MODE);
             setParameter('rcSmoothingFeedforwardHz'     ,sysConfig.rc_smoothing_feedforward_hz, 0);
             setParameter('rcSmoothingSetpointHz'        ,sysConfig.rc_smoothing_setpoint_hz, 0);
-            setParameter('rcSmoothingAutoFactorSetpoint',sysConfig.rc_smoothing_auto_factor_setpoint, 0)
+            setParameter('rcSmoothingAutoFactorSetpoint',sysConfig.rc_smoothing_auto_factor_setpoint, 0);
             setParameter('rcSmoothingThrottleHz'        ,sysConfig.rc_smoothing_throttle_hz, 0);
             setParameter('rcSmoothingAutoFactorThrottle',sysConfig.rc_smoothing_auto_factor_throttle, 0);
             setParameter('rcSmoothingActiveCutoffsFf'   ,sysConfig.rc_smoothing_active_cutoffs_ff_sp_thr[0], 0);
@@ -1189,11 +1188,11 @@ function HeaderDialog(dialog, onSave) {
 
         dialog.modal('toggle');
 
-    }
+    };
 
          // Buttons
 
-    $(".header-dialog-save").click(function(e) {
+    $(".header-dialog-save").click(function(_e) {
         onSave(convertUIToSysConfig());
     });
 }
@@ -1211,7 +1210,7 @@ function hideUnsupportedFeatures(activeSysConfig){
         $('td[name="yaw_inertia_precomp_gain"]').hide();
     }
 
-    $('.rpm_filters').toggle(activeSysConfig.gyro_rpm_filter_bank_rpm_source.length != 0)
-    $('.rpm_notches').toggle(activeSysConfig.gyro_rpm_notch_source_pitch.length != 0)
-    $('.rpm_notch_config').toggle(activeSysConfig.gyro_rpm_notch_preset != null)
+    $('.rpm_filters').toggle(activeSysConfig.gyro_rpm_filter_bank_rpm_source.length != 0);
+    $('.rpm_notches').toggle(activeSysConfig.gyro_rpm_notch_source_pitch.length != 0);
+    $('.rpm_notch_config').toggle(activeSysConfig.gyro_rpm_notch_preset != null);
 }

@@ -141,7 +141,7 @@ function LapTimer() {
 
                         if(lapTime.laps.length > 0 && currentTime > bookmarkTimesSorted[0]) {
                                 lapTime.best=maxTime;
-                                for(var i=0; i<lapTime.laps.length; i++) {
+                                for(i=0; i<lapTime.laps.length; i++) {
                                         if(lapTime.laps[i] < lapTime.best) {
                                                 lapTime.best = lapTime.laps[i];
                                         };

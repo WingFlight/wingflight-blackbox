@@ -87,11 +87,11 @@ function signExtend2Bit(byte) {
  * @returns {Number}
  */
 function memmem(haystack, needle, startIndex) {
-    var i, j, found;
+    var i, j;
 
-    for (var i = startIndex ? startIndex : 0; i <= haystack.length - needle.length; i++) {
+    for (i = startIndex ? startIndex : 0; i <= haystack.length - needle.length; i++) {
         if (haystack[i] == needle[0]) {
-            for (var j = 1; j < needle.length && haystack[i + j] == needle[j]; j++)
+            for (j = 1; j < needle.length && haystack[i + j] == needle[j]; j++)
                 ;
 
             if (j == needle.length)
@@ -287,7 +287,7 @@ function stringTimetoMsec(input) {
                    return ((matches[1])?-1:1) * (matches[2] * 1000000 + ((matches[4])?(matches[4] + "00").slice(0,3):0) * 1000);
                 }
             } else return ((matches[1])?-1:1) * (matches[2] * 1000000);
-        } catch(e) {
+        } catch(_e) {
             return 0;
         }
 }
@@ -389,6 +389,7 @@ var mouseNotification = {
         var popupRect  = $(this.elem).get(0).getBoundingClientRect(); // get the popup metrics
         var targetRect = $(target).get(0).getBoundingClientRect();
 
+        // eslint-disable-next-line no-useless-assignment -- default values, always overwritten by the branches below
         var left = 0, top = 0;
 
         // reposition the notification;
@@ -466,8 +467,8 @@ function getManifestVersion(manifest) {
 
         return version;
 
-    } catch (error) {
+    } catch (_error) {
         console.log("manifest does not exist, probably not running nw.js");
-        return "-"
+        return "-";
     }
 }

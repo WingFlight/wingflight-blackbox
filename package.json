@@ -4,12 +4,16 @@
   "description": "Crossplatform blackbox analytics tool for WingFlight flight control system.",
   "version": "0.0.0",
   "main": "index.html",
+  "node-remote": "http://localhost:*",
   "chromium-args": "--disable-features=nw2",
   "default_locale": "en",
   "scripts": {
     "start": "gulp debug",
+    "dev": "vite",
     "gulp": "gulp",
-    "release": "gulp release"
+    "release": "gulp release",
+    "lint": "eslint js index.js gulpfile.js gulp-appdmg.js vite.config.mjs eslint.config.mjs test",
+    "lint:fix": "eslint --fix js index.js gulpfile.js gulp-appdmg.js vite.config.mjs eslint.config.mjs test"
   },
   "window": {
     "id": "main",
@@ -31,9 +35,12 @@
     "webm-writer": "^0.3.0"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@quanle94/innosetup": "^6.0.2",
     "command-exists": "^1.2.8",
     "del": "^5.0.0",
+    "eslint": "^10.8.1",
+    "globals": "^17.9.0",
     "gulp": "^4.0.1",
     "gulp-debian": "~0.1.8",
     "gulp-rename": "^2.0.0",
@@ -46,15 +53,16 @@
     "rpm-builder": "^1.0.0",
     "temp": "^0.9.0",
     "through2": "4.0.2",
+    "vite": "^8.2.1",
     "yarn": "^1.22.0"
   },
   "optionalDependencies": {
     "appdmg": "^0.6.2"
   },
   "resolutions": {
-    "**/**/lodash.template": "^4.5.0"
+    "lodash.template": "^4.5.0"
   },
   "engines": {
-    "node": "16.x"
+    "node": "^20.19.0 || >=22.12.0"
   }
 }

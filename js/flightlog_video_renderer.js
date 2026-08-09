@@ -34,9 +34,9 @@ function FlightLogVideoRenderer(flightLog, logParameters, videoOptions, events) 
         craftWrapper = document.createElement('div'),
         craftCanvas = document.createElement('canvas'),
         analyserCanvas = document.createElement('canvas'),
-        stickCanvasLeft, stickCanvasTop, hasStick,
-        craftCanvasLeft, craftCanvasTop, hasCraft,
-        analyserCanvasLeft, analyserCanvasTop, hasAnalyser,
+        stickCanvasLeft, stickCanvasTop,
+        craftCanvasLeft, craftCanvasTop,
+        analyserCanvasLeft, analyserCanvasTop,
 
 
         canvasContext = canvas.getContext("2d"),
@@ -99,7 +99,7 @@ function FlightLogVideoRenderer(flightLog, logParameters, videoOptions, events) 
      * Returns a Promise that resolves to a FileWriter for the file the user chose, or fails if the user cancels/
      * something else bad happens.
      */
-    function openFileForWrite(suggestedName, onComplete) {
+    function openFileForWrite(suggestedName, _onComplete) {
         return new Promise(function(resolve, reject) {
             chrome.fileSystem.chooseEntry({type: 'saveFile', suggestedName: suggestedName,
                     accepts: [{extensions: ['webm']}]}, function(fileEntry) {

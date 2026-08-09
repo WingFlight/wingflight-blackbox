@@ -164,11 +164,6 @@ a.disabled {
         height: 25px;
     }
 
-    div.navbar-logo span {
-        top: 25px;
-        line-height: 1.5;
-    }
-
     html.has-log button.log-jump-start,
     html.has-log button.log-jump-back,
     html.has-log button.log-jump-forward,
@@ -1167,56 +1162,21 @@ progress {
 .navbar-logo {
 	position: absolute;
 	display:block;
-	left: -40px;
+	left: 50px;
 }
 
-html.isCF .navbar-logo {
-    left: 16px;
-}
-
-html.isINAV .navbar-logo {
-    left: 34px;
-}
-
-html.isCF .navbar-logo img {
-	content: url(".././images/cf_logo_white.svg");
-	width: 160px;
-}
-
-html.isBF .navbar-logo img {
-    content: url(".././images/light-wide-2.svg");
-    width: 282px;
-    height: 50px;
-    margin-left: 0 !important;
-}
-
-html.isRF .navbar-logo img {
-    content: url(".././images/rf_logo_white.svg");
-    width: 250px;
-    height: 35px;
-    margin-top: 5px !important;
-    margin-left: 5px !important;
-}
-
-html.isWF .navbar-logo img {
-    content: url(".././images/wf_logo_white.svg");
-    width: 138px;
-    height: 40px;
-    margin-top: 5px !important;
-    margin-left: 5px !important;
-}
-
-html.isINAV .navbar-logo img {
-	content: url(".././images/inav_logo_white.png");
-	width: auto;
-	left: -16px;
-	top: 3px;
-}
-
+/* Always WingFlight-branded, regardless of which firmware recorded the loaded log --
+   deliberately not per-firmware (unlike .view-*/switch/graph-header rules elsewhere in this
+   file, which do still vary with html.isCF/isBF/isRF/isINAV/isWF for legitimate per-firmware
+   UI differences). No adjacent "Blackbox Explorer" text anymore either (removed from
+   index.html) -- the logo has the whole .navbar-logo box to itself, sized up accordingly. */
 .navbar-logo img {
 	position:relative;
-	height: 35px;
-	width: 210px;
+	content: url(".././images/wf_logo_white.svg");
+	height: 45px;
+	width: 155px;
+	margin-top: 5px !important;
+	margin-left: 5px !important;
 	padding: 0;
 	display:block;
 }
@@ -1225,31 +1185,17 @@ html.isINAV .navbar-logo img {
     padding: 0;
     position: absolute;
     top: 32%;
-    left: 75%;
+    font-size: 15px;
+    /* Fixed, not a %: .navbar-logo has no explicit width, so it shrink-to-fits around its
+       content, and this <a> is itself one of the absolutely-positioned children that gets
+       excluded from that shrink-to-fit calculation -- a % here was computed against
+       whatever the *other* sibling (the logo image, plus the "Blackbox Explorer" text that
+       used to sit next to it) happened to add up to, which is exactly why removing that
+       text pulled this back into range and made it overlap the now-wider logo. left: 180px
+       clears the logo image's own right edge (margin-left 5px + width 155px = 160px) with
+       a fixed 20px gap that doesn't depend on sibling content width at all. */
+    left: 180px;
     width: 100%;
-}
-
-.navbar-logo span {
-	padding-left: 0;
-    position: relative;
-	left: -150px;
-	top: 20px;
-	color: antiquewhite;
-}
-
-html.isBF .navbar-logo span {
-    left: -181px;
-    top: 30px;
-}
-
-html.isRF .navbar-logo span {
-    left: -160px;
-    top: 30px;
-}
-
-html.isWF .navbar-logo span {
-    left: -150px;
-    top: 30px;
 }
 
 html.has-video .navbar-static-top,

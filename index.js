@@ -6,8 +6,8 @@ $(document).ready(function () {
     localize();
 });
 
-function checkForConfiguratorUpdates() {
-    var releaseChecker = new ReleaseChecker('configurator', 'https://api.github.com/repos/WingFlight/wingflight-blackbox/releases');
+function checkForBlackboxUpdates() {
+    var releaseChecker = new ReleaseChecker('blackbox', 'https://api.github.com/repos/WingFlight/wingflight-blackbox/releases');
 
     releaseChecker.loadReleaseData(notifyOutdatedVersion);
 }
@@ -15,7 +15,7 @@ function checkForConfiguratorUpdates() {
 function notifyOutdatedVersion(releaseData) {
     chrome.storage.local.get('checkForUnstableVersions', function (result) {
         var showUnstableReleases = false;
-        if (result.checkForConfiguratorUnstableVersions) {
+        if (result.checkForUnstableVersions) {
             showUnstableReleases = true;
         }
         var versions = releaseData.filter(function (version) {
@@ -26,7 +26,7 @@ function notifyOutdatedVersion(releaseData) {
         }).sort(function (v1, v2) {
             try {
                 return semver.compare(v2.tag_name, v1.tag_name);
-            } catch (e) {
+            } catch (_e) {
                 return false;
             }
         });
@@ -53,9 +53,15 @@ function notifyOutdatedVersion(releaseData) {
     });
 }
 
-checkForConfiguratorUpdates();
+checkForBlackboxUpdates();
 
 function openLinksInExternalBrowserByDefault() {
+
+    // Only meaningful for the NW.js desktop build -- links opened with target="_blank" in a
+    // normal browser tab already go to a new tab/window without any extra handling needed.
+    if (!window.isNWjs()) {
+        return;
+    }
 
     const gui = require('nw.gui');
 

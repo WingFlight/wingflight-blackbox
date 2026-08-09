@@ -7,15 +7,21 @@ function WorkspaceSelection(targetElem, workspaces, onSelectionChange, onSaveWor
         buttonElem = null,
         menuElem = null,
         editButton = null,
-        workspaces = [],
-        activeId = 1
+        activeId = 1;
+
+    // The `workspaces` constructor parameter above is discarded here rather than used --
+    // this only works because the sole caller (js/main.js) immediately follows `new
+    // WorkspaceSelection(...)` with a call to onSwitchWorkspace(), which calls
+    // this.setWorkspaces() (below) with the real data right away. Any future caller that
+    // doesn't do that same follow-up call would silently get an empty workspace list.
+    workspaces = [];
 
     function buildUI() {
 
         buttonElem = $('<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" id="workspace-menu"></button>');
         numberSpan = $('<span class="workspace-selector-index">');
         titleSpan = $('<span class="workspace-selector-title">');
-        var caretElem = $('<span class="caret"></span>')
+        var caretElem = $('<span class="caret"></span>');
 
         editButton = $('<span class="glyphicon glyphicon-pencil workspace-selector-editButton" aria-hidden="true" data-toggle="tooltip" title="Edit Workspace Name"></span>');
         editButton.click(editTitle);
@@ -24,7 +30,7 @@ function WorkspaceSelection(targetElem, workspaces, onSelectionChange, onSaveWor
         menuElem = $('<ul id="workspace-menu-content" class="dropdown-menu pull-right" role="menu" aria-labelledby="workspace-menu"></ul>');
 
         targetElem.empty();
-        targetElem.addClass("dropdown")
+        targetElem.addClass("dropdown");
         targetElem.append(buttonElem);
         targetElem.append(menuElem);
         buttonElem.append(numberSpan);
@@ -41,12 +47,12 @@ function WorkspaceSelection(targetElem, workspaces, onSelectionChange, onSaveWor
         var inputElem = $('<input type="text" onkeyup="event.preventDefault()">');
         inputElem.click((e) => e.stopPropagation()); // Stop click from closing
         titleSpan.replaceWith(inputElem);
-        inputElem.val(workspaces[activeId].title)
+        inputElem.val(workspaces[activeId].title);
         inputElem.focus();
         inputElem.on('focusout', () => {
             inputElem.replaceWith(titleSpan);
             editButton.show();
-            onSaveWorkspace(activeId, inputElem.val())
+            onSaveWorkspace(activeId, inputElem.val());
         });
 
         e.preventDefault();
@@ -61,14 +67,14 @@ function WorkspaceSelection(targetElem, workspaces, onSelectionChange, onSaveWor
             let element = workspaces[id];
 
             var item = $('<li></li>');
-            var link = $('<a href="#"></a>')
+            var link = $('<a href="#"></a>');
 
             if (!element) {
                 // item.addClass("disabled");
             }
 
             var number = $('<span class="workspace-selector-index">').text(id);
-            var title = $('<span class="workspace-selector-title">')
+            var title = $('<span class="workspace-selector-title">');
 
             if (!element) {
                 title.text("<empty>");
@@ -106,7 +112,7 @@ function WorkspaceSelection(targetElem, workspaces, onSelectionChange, onSaveWor
             link.append(title);
             link.append(actionButtons);
             actionButtons.append(saveButton);
-            item.toggleClass("active", id == activeId)
+            item.toggleClass("active", id == activeId);
             menuElem.append(item);
         }
 
@@ -122,7 +128,7 @@ function WorkspaceSelection(targetElem, workspaces, onSelectionChange, onSaveWor
             //Add to menu item
             let element = DEFAULT_WORKSPACES[index-totalNumberOfWorkspaces];
             const item = $('<li></li>');
-            const link = $('<a href="#"></a>')
+            const link = $('<a href="#"></a>');
             const number = $('<span class="workspace-selector-index">').text(index);
             const title = $('<span class="workspace-selector-title-preset">');
             title.text(element.title);
@@ -152,12 +158,12 @@ function WorkspaceSelection(targetElem, workspaces, onSelectionChange, onSaveWor
     this.setWorkspaces = function (newWorkspaces) {
         workspaces = newWorkspaces;
         update();
-    }
+    };
 
     this.setActiveWorkspace = function (newId) {
         activeId = newId;
         update();
-    }
+    };
 
     buildUI();
 }

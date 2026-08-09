@@ -1,4 +1,6 @@
-importScripts("/node_modules/lodash/lodash.min.js");
+// Relative to this worker script's own location (js/webworkers/), not the domain root -- a
+// leading "/" would always resolve against the root instead of the deploy's own subpath.
+importScripts("../../node_modules/lodash/lodash.min.js");
 
 onmessage = function(event) {
 
@@ -9,7 +11,7 @@ onmessage = function(event) {
      * @returns {string}
      */
     function normalizeEmpty(value) {
-        return !!value ? value : "";
+        return value ? value : "";
     }
 
     /**

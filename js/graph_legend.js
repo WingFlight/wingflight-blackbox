@@ -44,8 +44,8 @@ function GraphLegend(targetElem, config, onVisibilityChange, onNewSelectionChang
         }
 
         // Add a trigger on legend; highlight the hovered field in plot
-        $('.graph-legend-field').on('mouseenter', function(e){
-            $(this).addClass("highlight")
+        $('.graph-legend-field').on('mouseenter', function(_e){
+            $(this).addClass("highlight");
             config.highlightGraphIndex = $(this).attr('graph');
             config.highlightFieldIndex = $(this).attr('field');
             if (onHighlightChange) {
@@ -53,8 +53,8 @@ function GraphLegend(targetElem, config, onVisibilityChange, onNewSelectionChang
             }
         });
 
-        $('.graph-legend-field').on('mouseleave', function(e){
-            $(this).removeClass("highlight")
+        $('.graph-legend-field').on('mouseleave', function(_e){
+            $(this).removeClass("highlight");
             config.highlightGraphIndex = null;
             config.highlightFieldIndex = null;
             if (onHighlightChange) {
@@ -111,7 +111,7 @@ function GraphLegend(targetElem, config, onVisibilityChange, onNewSelectionChang
         // Make the legend dragabble
         $('.log-graph-legend').sortable(
             {
-                update: function( event, ui ) {
+                update: function( _event, _ui ) {
                             var newOrder = $('.log-graph-legend').sortable('toArray');
                             var newGraphs = [];
                             var oldGraphs = config.getGraphs();
@@ -142,12 +142,11 @@ function GraphLegend(targetElem, config, onVisibilityChange, onNewSelectionChang
             // New function to show values on legend.
             var currentFlightMode = frame[ flightLog.getMainFieldIndexByName("flightModeFlags") ];
             var
-                graphs = config.getGraphs(),
-                i, j;
+                graphs = config.getGraphs();
 
             $(".graph-legend-field-value").each(function (index, value) {
                 var fieldName = $(this).attr('name');
-                var value = frame[ flightLog.getMainFieldIndexByName(fieldName) ]; // get the raw value from log
+                value = frame[ flightLog.getMainFieldIndexByName(fieldName) ]; // get the raw value from log
                 if (userSettings.legendUnits) { // if we want the legend to show engineering units
                     value = FlightLogFieldPresenter.decodeFieldToFriendly(flightLog, fieldName, value, currentFlightMode);
                 } else { // raw value
@@ -163,7 +162,7 @@ function GraphLegend(targetElem, config, onVisibilityChange, onNewSelectionChang
                 }
             });
 
-            $('.graph-legend-field-settings').each(function (index, value) {
+            $('.graph-legend-field-settings').each(function (_index, _value) {
                 var i = $(this).attr('graph');
                 var j = $(this).attr('field');
                 var field = graphs[ i ].fields[ j ];
@@ -174,7 +173,7 @@ function GraphLegend(targetElem, config, onVisibilityChange, onNewSelectionChang
                 $(this).text(str);
             });
 
-        } catch (e) {
+        } catch (_e) {
             console.log('Cannot update legend with values');
         }
     };

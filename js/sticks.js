@@ -1,4 +1,4 @@
-"use strict"
+"use strict";
 
 function FlightLogSticks(flightLog, rcCommandFields, canvas) {
     var // inefficient; copied from grapher.js. Font could be a global?
@@ -23,8 +23,6 @@ function FlightLogSticks(flightLog, rcCommandFields, canvas) {
         };
 
     var
-        that = this,
-        windowCenterTime,
         canvasContext = canvas.getContext("2d"),
         defaultSettings = {
             drawSticks: true,
@@ -59,7 +57,7 @@ function FlightLogSticks(flightLog, rcCommandFields, canvas) {
         var labelLength = (userSettings.stickUnits ? 7 : 4);
         var minWidthForLabels = drawingParams.stickSurroundRadius * 4 + drawingParams.stickSpacing * 2 + 0.8 * labelLength * drawingParams.fontSizeValueLabel * 2;
         drawingParams.drawLabels = width > minWidthForLabels;
-    }
+    };
 
     this.render = function (centerFrame, chunks, startFrameIndex, windowCenterTime) {
         if (userSettings.eraseBackground) {
@@ -188,7 +186,7 @@ function FlightLogSticks(flightLog, rcCommandFields, canvas) {
 
         canvasContext.restore();
 
-    }
+    };
 
     function getStickValues(frame, stickPositions, stickLabel, config) {
         var

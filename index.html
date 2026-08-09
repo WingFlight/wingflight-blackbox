@@ -18,6 +18,7 @@
     <link rel="stylesheet" href="css/user_settings_dialog.css">
 
     <script src="js/vendor/modernizr-2.6.2-respond-1.1.0.min.js"></script>
+    <script src="js/browser_compat.js"></script>
 </head>
 
 <body>
@@ -38,24 +39,22 @@
                 <div class="col-sm-4">
                     <div class="panel panel-default">
                         <div class="panel-heading">
-                            Introduction to Blackbox
+                            Getting Started
                         </div>
                         <div class="panel-body">
                             <p>
-                                The Blackbox feature is built in to
-                                <a href="https://github.com/WingFlight/" target="_blank" rel="noopener noreferrer">WingFlight</a>, and is supported on most modern flight controllers (F4,F7,H7,etc.)
+                                Blackbox is built in to
+                                <a href="https://github.com/WingFlight/" target="_blank" rel="noopener noreferrer">WingFlight</a>, and is supported on most modern flight controllers (F4, F7, H7, etc.)
                             </p>
                             <p>
                                 To get started with Blackbox recording, read
                                 <a href="https://github.com/WingFlight/wingflight-firmware/blob/master/docs/Blackbox.md" target="_blank" rel="noopener noreferrer">WingFlight's Blackbox feature documentation</a>.
                             </p>
                             <p>
-                                Already have a log recorded? View
-                                <a href="https://github.com/betaflight/blackbox-tools/blob/master/Readme.md" target="_blank" rel="noopener noreferrer">the documentation for this log viewer</a> for details on how to best use this tool.
+                                Already have a log recorded? Just open it above.
                             </p>
                             <p>
-                                If you believe you've found a bug in this viewer (e.g. the viewer crashes upon attempting to open a log file), or you have
-                                a suggestion, please add it to
+                                Found a bug, or have a suggestion? Please add it to
                                 <a href="https://github.com/WingFlight/wingflight-blackbox/issues" target="_blank" rel="noopener noreferrer">the viewer's GitHub bug tracker</a>.
                             </p>
                         </div>
@@ -64,39 +63,19 @@
                 <div class="col-sm-4">
                     <div class="panel panel-default">
                         <div class="panel-heading">
-                            Tuning your craft
+                            Tuning Your Craft
                         </div>
                         <div class="panel-body">
                             <p>
-                                The Blackbox can deliver insights on your flight performance that will allow you to tune variables such as your PIDs and
+                                Blackbox logs give insight into your flight performance, helping you tune variables such as your PIDs and
                                 low-pass filter settings.
                             </p>
-                            <p>
-                                For help and instructions on how to tune your craft, please read some of these resources:
-                            </p>
                             <ul>
                                 <li>
-                                    <a href="https://github.com/WingFlight/wingflight-firmware/wiki" target="_blank" rel="noopener noreferrer">WingFlight Official Wiki</a>.
+                                    <a href="https://github.com/WingFlight/wingflight-firmware/wiki" target="_blank" rel="noopener noreferrer">WingFlight Official Wiki</a>
                                 </li>
                                 <li>
-                                    <a href="http://www.rcgroups.com/forums/showthread.php?t=4000345" target="_blank" rel="noopener noreferrer">Rotorflight support topic</a> on RCGroups.com.
-                                </li>
-                                <li>
-                                    <a href="https://discord.com/invite/FyfMF4RwSA" target="_blank" rel="noopener noreferrer">Rotorflight discussion</a> on Discord.
-                                </li>
-                            </ul>
-                            <p>
-                                Also, these Betaflight resources may be helpful:
-                            </p>
-                            <ul>
-                                <li>
-                                    <a href="http://www.rcgroups.com/forums/showthread.php?t=2386267" target="_blank" rel="noopener noreferrer">Betaflight Blackbox log analyzation/help thread</a> on RCGroups.com
-                                </li>
-                                <li>
-                                    <a href="http://www.rcgroups.com/forums/showthread.php?t=2464844" target="_blank" rel="noopener noreferrer">Betaflight support topic</a> on RCGroups.com
-                                </li>
-                                <li>
-                                    <a href="https://github.com/cleanflight/cleanflight/blob/master/docs/PID%20tuning.md" target="_blank" rel="noopener noreferrer">Cleanflight's PID tuning documentation</a>
+                                    <a href="https://discord.com/invite/aEyyAJTXRw" target="_blank" rel="noopener noreferrer">WingFlight Discord</a>
                                 </li>
                             </ul>
                         </div>
@@ -105,19 +84,15 @@
                 <div class="col-sm-4">
                     <div class="panel panel-default">
                         <div class="panel-heading">
-                            Other tools
+                            Other Tools
                         </div>
                         <div class="panel-body">
                             <p>
-                                If you want to analyze your logs with your own mathematics package (such as Matlab) you can use the separate
-                                <a href="https://github.com/betaflight/blackbox-tools/" target="_blank" rel="noopener noreferrer">blackbox_decode tool</a>
-                                to convert your log file into a CSV file for analysis.
+                                Want to share your log as a video? Use the "Export video" button at the top once a log is open, or a screen recording
+                                tool to capture playback of this viewer directly.
                             </p>
                             <p>
-                                If you want to share your log as a video, you can use the"export video" button at the top to render a WebM video, or use
-                                the commandline
-                                <a href="https://github.com/betaflight/blackbox-tools/" target="_blank" rel="noopener noreferrer">blackbox_render tool</a>
-                                tool to turn your log into a series of PNG files, or use a screen recording tool to record the playback of this log viewer.
+                                Want to analyze your logs with your own tools (e.g. Matlab)? Export to CSV with the "Export CSV" button once a log is open.
                             </p>
                         </div>
                     </div>
@@ -167,8 +142,7 @@
                 </button>
                 <div class="navbar-logo">
                     <div>
-                        <img src="./images/cf_logo_white.svg" class="navbar-brand" />
-                        <span>Blackbox&nbsp;Explorer</span>
+                        <img src="./images/wf_logo_white.svg" class="navbar-brand" />
                     </div>
                     <a class="navbar-brand log-filename" html="#"></a>
                 </div>
@@ -176,7 +150,6 @@
             <div id="navbar" class="navbar-collapse collapse">
                 <div class="navbar-form navbar-right" role="form">
                     <div class="btn-group">
-                        <a class="btn btn-default btn-new-window" data-toggle="tooltip" title="Open a new Blackbox Log Viewer window"> New Window </a>
                         <a class="btn btn-primary btn-video-export" data-toggle="tooltip" title="Export your video and chart setup to file"> Export video...</a>
                         <a class="btn btn-primary btn-workspaces-export" data-toggle="tooltip" title="Export your workspace configurations to file">
                             Export Workspaces...</a>
@@ -3053,46 +3026,6 @@
                 <div class="modal-body">
                     <div class="cf_column half left">
                         <div class="pane-user-settings form-horizontal">
-                            <div class="gui_box grey mixer-settings">
-                                <div class="gui_box_titlebar">
-                                    <div class="spacer_box_title">Mixer Settings</div>
-                                </div>
-                                <div class="spacer_box">
-                                    <div>
-                                        <label class="option">Custom
-                                            <input class="custom-mixes ios-switch" type="checkbox" />
-                                            <div>
-                                                <div></div>
-                                            </div>
-                                            <span>Select custom craft display.</span>
-                                        </label>
-                                    </div>
-                                    <div class="custom-mixes-group">
-                                        <table>
-                                            <tr>
-                                                <td>
-                                                    <label>Mixer Type</label>
-                                                    <select class="mixerList">
-                                                        <!-- list generated here -->
-                                                    </select>
-                                                </td>
-                                                <td class="mixerPreview">
-                                                    <img src="./images/motor_order/quad_x.svg" />
-                                                </td>
-                                            </tr>
-                                        </table>
-                                        <table class="motorList">
-                                            <!-- list generated here -->
-                                        </table>
-                                        <p>The custom mixer settings ONLY affect the craft icon that is displayed over the log.
-                                            Please set the closest craft type (e.g. QuadX) and then identify which motors
-                                            are connected to which motor outputs. If you deselect the custom setting, then
-                                            the viewer will function as per the original method (i.e. it will autocalculate
-                                            the craft model based upon the number of motors found in the log.)
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
                             <div class="gui_box grey stick-settings">
                                 <div class="gui_box_titlebar">
                                     <div class="spacer_box_title">Stick Settings</div>
@@ -3451,7 +3384,6 @@
     <script src="node_modules/html2canvas/dist/html2canvas.min.js"></script>
     <script src="js/screenshot.js"></script>
     <script src="js/complex.js"></script>
-    <script src="js/real.js"></script>
     <script src="js/vendor/jquery-1.11.3.min.js"></script>
     <script src="js/vendor/jquery-ui-1.11.4.min.js"></script>
     <script src="node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
@@ -3471,7 +3403,6 @@
     <script src="js/expo.js"></script>
     <script src="js/datastream.js"></script>
     <script src="js/decoders.js"></script>
-    <script src="js/imu.js"></script>
     <script src="js/craft_3d.js"></script>
     <script src="js/flightlog_fielddefs.js"></script>
     <script src="js/flightlog_fields_presenter.js"></script>

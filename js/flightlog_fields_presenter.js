@@ -800,7 +800,7 @@ function FlightLogFieldPresenter() {
         var found = false;
         for(var i = 0; i < flagNames.length; i++) {
            if((1<<i) & (flags ^ lastFlags)) { // State Changed
-               eventState += '|' + flagNames[i] + ' ' + (((1<<i) & flags)?'ON':'OFF')
+               eventState += '|' + flagNames[i] + ' ' + (((1<<i) & flags)?'ON':'OFF');
                found = true;
            }
         }
@@ -991,7 +991,7 @@ function FlightLogFieldPresenter() {
         }
     };
 
-    FlightLogFieldPresenter.decodeDebugFieldToFriendly = function(flightLog, fieldName, value, currentFlightMode) {
+    FlightLogFieldPresenter.decodeDebugFieldToFriendly = function(flightLog, fieldName, value, _currentFlightMode) {
         if (flightLog) {
             const debugModeName = DEBUG_MODE[flightLog.getSysConfig().debug_mode]; // convert to recognisable name
             switch (debugModeName) {
@@ -1013,7 +1013,7 @@ function FlightLogFieldPresenter() {
                         case 'debug[0]':
                             return value.toFixed(0);
                         default:
-                            return (value/10).toFixed(1) + "V"
+                            return (value/10).toFixed(1) + "V";
                     }
                 case 'GYRO':
                 case 'GYRO_FILTERED':
@@ -1107,7 +1107,6 @@ function FlightLogFieldPresenter() {
                         default:
                             return value.toFixed(0) + " Hz";
                     }
-                    break;
                 case 'DYN_NOTCH_TIME':
                     switch (fieldName) {
                         case 'debug[6]':
@@ -1116,7 +1115,6 @@ function FlightLogFieldPresenter() {
                         default:
                             return value.toFixed(0) + " µs";
                     }
-                    break;
                 case 'DYN_NOTCH_FREQ':
                     return (value / 10).toFixed(1) + " Hz";
                 case 'DSHOT_RPM_TELEMETRY':
@@ -1204,7 +1202,6 @@ function FlightLogFieldPresenter() {
                         default:
                             return value.toFixed(0) + " Hz";
                     }
-                    break;
                 case 'DYN_IDLE':
                     switch (fieldName) {
                         case 'debug[3]': // minRPS best shown as rpm, since commanded value is rpm

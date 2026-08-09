@@ -14,7 +14,7 @@
  */
 let CsvExporter = function(flightLog, opts={}) {
 
-    var opts = _.merge({
+    opts = _.merge({
         columnDelimiter: ",",
         stringDelimiter: "\"",
         quoteStrings: true,
@@ -26,7 +26,9 @@ let CsvExporter = function(flightLog, opts={}) {
     function dump(success) {
         let frames = _(flightLog.getChunksInTimeRange(flightLog.getMinTime(), flightLog.getMaxTime()))
                 .map(chunk => chunk.frames).value(),
-            worker = new Worker("/js/webworkers/csv-export-worker.js");
+            // Relative, not "/js/...": the web deploy serves every branch/tag build from its
+            // own subpath, and a leading "/" would always resolve against the domain root.
+            worker = new Worker("js/webworkers/csv-export-worker.js");
 
         worker.onmessage = event => {
             success(event.data);

@@ -2,10 +2,6 @@
 
 function FlightLogGrapher(flightLog, graphConfig, canvas, stickCanvas, craftWrapper, analyserCanvas, options) {
     var
-        PID_P = 0,
-        PID_I = 1,
-        PID_D = 2,
-
         DEFAULT_FONT_FACE = "Verdana, Arial, sans-serif",
 
         drawingParams = {
@@ -55,13 +51,11 @@ function FlightLogGrapher(flightLog, graphConfig, canvas, stickCanvas, craftWrap
 
         idents,
 
-        sysConfig = flightLog.getSysConfig(),
-
         graphs = [],
 
         inTime = false, outTime = false,
 
-        lastMouseX, lastMouseY,
+        lastMouseX,
 
         sticks = null,
 
@@ -96,7 +90,7 @@ function FlightLogGrapher(flightLog, graphConfig, canvas, stickCanvas, craftWrap
 
     this.getAnalyser = function() {
         return analyser;
-    }
+    };
 
     function extend(base, top) {
         var
@@ -122,7 +116,6 @@ function FlightLogGrapher(flightLog, graphConfig, canvas, stickCanvas, craftWrap
         }
 
         lastMouseX = e.pageX;
-        lastMouseY = e.pageY;
     }
 
     function onTouchMove(e) {
@@ -134,13 +127,11 @@ function FlightLogGrapher(flightLog, graphConfig, canvas, stickCanvas, craftWrap
         }
 
         lastMouseX = e.originalEvent.touches[0].pageX;
-        lastMouseY = e.originalEvent.touches[0].pageY;
     }
 
     function onMouseDown(e) {
         if (e.which == 1) { //Left mouse button only for seeking
             lastMouseX = e.pageX;
-            lastMouseY = e.pageY;
 
             //"capture" the mouse so we can drag outside the boundaries of canvas
             $(document).on("mousemove", onMouseMove);
@@ -157,7 +148,6 @@ function FlightLogGrapher(flightLog, graphConfig, canvas, stickCanvas, craftWrap
     function onTouchStart(e) {
         if (e.which == 0) {
             lastMouseX = e.originalEvent.touches[0].pageX;
-            lastMouseY = e.originalEvent.touches[0].pageY;
 
             //"capture" so we can drag outside the boundaries of canvas
             $(document).on("touchmove", onTouchMove);
@@ -225,16 +215,16 @@ function FlightLogGrapher(flightLog, graphConfig, canvas, stickCanvas, craftWrap
 
                 idents.axisPIDSum[axisIndex] = fieldIndex;
             } else if ((matches = fieldName.match(/^axis(.)\[(\d+)]$/))) {
-                var axisIndex = matches[2];
+                axisIndex = matches[2];
 
                 idents.axisPIDFields[matches[1]] = axisIndex;
                 idents.hasPIDs = true;
             } else if ((matches = fieldName.match(/^gyroADC\[(\d+)]$/))) {
-                var axisIndex = matches[1];
+                axisIndex = matches[1];
 
                 idents.gyroFields[axisIndex] = fieldIndex;
             } else if ((matches = fieldName.match(/^accADC\[(\d+)]$/))) {
-                var axisIndex = matches[1];
+                axisIndex = matches[1];
 
                 idents.accFields[axisIndex] = fieldIndex;
             } else if ((matches = fieldName.match(/^servo\[(\d+)]$/))) {
@@ -316,7 +306,6 @@ function FlightLogGrapher(flightLog, graphConfig, canvas, stickCanvas, craftWrap
             drawingLine = false,
             notInBounds = -5, // when <0, then line is always drawn, (this allows us to paritially dash the line when the bounds is exceeded)
             inGap = false,
-            lastX, lastY,
             yScale = -plotHeight,
             xScale = canvas.width / windowWidthMicros;
 
@@ -500,7 +489,7 @@ function FlightLogGrapher(flightLog, graphConfig, canvas, stickCanvas, craftWrap
                 margin = 8,
                 labelWidth = canvasContext.measureText(label).width + 2 * margin;
 
-            align = align || 'left'
+            align = align || 'left';
             canvasContext.textAlign = align;
             var labelDirection = (align=='left')?1:-1;
 
@@ -552,7 +541,7 @@ function FlightLogGrapher(flightLog, graphConfig, canvas, stickCanvas, craftWrap
             break;
             case FlightLogEvent.INFLIGHT_ADJUSTMENT:
                 drawEventLine(x, labelY, event.data.name + " = " + event.data.value, "rgba(0,255,255,0.5)", 2);
-            break
+            break;
             case FlightLogEvent.FLIGHT_MODE:
                 drawEventLine(x, labelY, "Flight Mode Change" + FlightLogFieldPresenter.presentChangeEvent(event.data.newFlags, event.data.lastFlags, FLIGHT_LOG_FLIGHT_MODE_NAME), "rgba(0,0,255,0.75)", 3);
             break;
@@ -615,6 +604,7 @@ function FlightLogGrapher(flightLog, graphConfig, canvas, stickCanvas, craftWrap
         if ((shouldSetFont) && ((markerEvent!=null)||(bookmarkEvents!=null))) {
             canvasContext.fillStyle = "rgba(255, 255, 255, 0.8)";
             canvasContext.font = drawingParams.fontSizeEventLabel + "pt " + DEFAULT_FONT_FACE;
+            // eslint-disable-next-line no-useless-assignment -- "set font once" guard; final value is legitimately never re-read
             shouldSetFont = false;
         }
 
@@ -645,7 +635,7 @@ function FlightLogGrapher(flightLog, graphConfig, canvas, stickCanvas, craftWrap
 
         // Draw Bookmarks Event Line
         if(bookmarkEvents!=null) {
-                for(var i=0; i<=9; i++) {
+                for(i=0; i<=9; i++) {
                         if(bookmarkEvents[i]!=null) {
                             if(bookmarkEvents[i].state)
                         if ((bookmarkEvents[i].time >= windowStartTime - BEGIN_MARGIN_MICROSECONDS) && (bookmarkEvents[i].time < windowEndTime)) {
@@ -777,7 +767,7 @@ function FlightLogGrapher(flightLog, graphConfig, canvas, stickCanvas, craftWrap
 
         var
             chunks = flightLog.getSmoothedChunksInTimeRange(windowStartTime, windowEndTime),
-            startChunkIndex, startFrameIndex,
+            startFrameIndex,
             i, j;
 
         if (chunks.length) {
@@ -885,8 +875,8 @@ function FlightLogGrapher(flightLog, graphConfig, canvas, stickCanvas, craftWrap
             // Draw Analyser
             if (options.drawAnalyser && graphConfig.selectedFieldName) {
                 try{ // If we do not select a graph/field, then the analyser is hidden
-                var graph = graphs[graphConfig.selectedGraphIndex];
-                                var field = graph.fields[graphConfig.selectedFieldIndex];
+                graph = graphs[graphConfig.selectedGraphIndex];
+                                field = graph.fields[graphConfig.selectedFieldIndex];
                 analyser.plotSpectrum(field.index, field.curve, field.friendlyName);
                 } catch(err) {console.log('Cannot plot analyser ' + err);}
             }
@@ -957,7 +947,7 @@ function FlightLogGrapher(flightLog, graphConfig, canvas, stickCanvas, craftWrap
         }
 
         flightLog.setFieldSmoothing(smoothing);
-    }
+    };
 
     this.destroy = function() {
         $(canvas).off("mousedown", onMouseDown);
@@ -991,7 +981,7 @@ function FlightLogGrapher(flightLog, graphConfig, canvas, stickCanvas, craftWrap
     // New function to return the current window scale.
     this.getWindowWidthTime = function() {
         return windowWidthMicros;
-    }
+    };
 
     // Add option toggling
     this.setDrawSticks = function(state) {
@@ -1011,14 +1001,14 @@ function FlightLogGrapher(flightLog, graphConfig, canvas, stickCanvas, craftWrap
     // Update user options
     this.refreshOptions = function(newSettings) {
         options = $.extend(defaultOptions, newSettings || {});
-    }
+    };
 
     this.refreshLogo = function() {
         if(options.watermark.logo) {
             watermarkLogo = new Image();
             watermarkLogo.src = options.watermark.logo;
         }
-    }
+    };
 
     // Use defaults for any options not provided
     options = extend(defaultOptions, options || {});
