@@ -87,7 +87,7 @@ var FlightAnalysis = (function() {
         "tvAxisB[0]", "tvAxisB[1]", "tvAxisB[2]"
     ];
 
-    function readColumns(flightLog) {
+    function readColumns(flightLog, startTime, endTime) {
         var fieldIndexByName = {};
         var wanted = [];
         for (var i = 0; i < WANTED_FIELDS.length; i++) {
@@ -99,7 +99,10 @@ var FlightAnalysis = (function() {
         }
 
         var timeFieldIndex = FlightLogParser.prototype.FLIGHT_LOG_FIELD_INDEX_TIME;
-        var chunks = flightLog.getChunksInTimeRange(flightLog.getMinTime(), flightLog.getMaxTime());
+        var chunks = flightLog.getChunksInTimeRange(
+            startTime === undefined ? flightLog.getMinTime() : startTime,
+            endTime === undefined ? flightLog.getMaxTime() : endTime
+        );
 
         var sampleCount = 0;
         for (var c = 0; c < chunks.length; c++) sampleCount += chunks[c].frames.length;
@@ -805,12 +808,77 @@ var FlightAnalysis = (function() {
     }
 
     // ------------------------------------------------------------------
+    // Very large logs (tens of MB+) can take minutes to fully decode --
+    // flightLog.getChunksInTimeRange() is a single synchronous, CPU-bound
+    // call with no opportunity to yield, and pulling a whole such flight
+    // freezes the tab for the duration (the same cost js/csv-exporter.js
+    // pays for "export the whole log", just triggered here by default the
+    // moment the dialog opens instead of on an explicit user action).
+    //
+    // Rather than always decoding the entire flight, cap how much we ask
+    // for: above MAX_ANALYSIS_DURATION_S, use the per-I-frame activity
+    // summary -- already built cheaply at log-open time, no full decode
+    // needed -- to find the steadiest (lowest throttle-spread) window of
+    // that length, and only decode that slice.
+    // ------------------------------------------------------------------
+
+    var MAX_ANALYSIS_DURATION_S = 240;
+
+    function findSteadiestWindow(flightLog, windowSeconds) {
+        var summary = flightLog.getActivitySummary();
+        if (!summary || !summary.times || !summary.times.length) return null;
+
+        var times = summary.times, throttle = summary.avgThrottle;
+        var n = times.length;
+        var windowUs = windowSeconds * 1000000;
+
+        var bestSpread = Infinity, bestStart = null;
+        var j = 0, min = Infinity, max = -Infinity;
+
+        for (var i = 0; i < n; i++) {
+            var endTime = times[i] + windowUs;
+            if (endTime > times[n - 1]) break;
+
+            // Advance the window end and track min/max throttle within it
+            // (recomputed per start -- summary arrays are small, this stays cheap).
+            j = i; min = Infinity; max = -Infinity;
+            while (j < n && times[j] <= endTime) {
+                if (throttle[j] < min) min = throttle[j];
+                if (throttle[j] > max) max = throttle[j];
+                j++;
+            }
+
+            var spread = max - min;
+            if (spread < bestSpread) {
+                bestSpread = spread;
+                bestStart = times[i];
+            }
+        }
+
+        return bestStart !== null ? { startTime: bestStart, endTime: bestStart + windowUs } : null;
+    }
+
+    // ------------------------------------------------------------------
     // Entry point
     // ------------------------------------------------------------------
 
     function build(flightLog) {
         var sysConfig = flightLog.getSysConfig();
-        var extracted = readColumns(flightLog);
+
+        var minTime = flightLog.getMinTime(), maxTime = flightLog.getMaxTime();
+        var totalDurationS = (maxTime - minTime) / 1000000;
+
+        var analysisWindow = null;
+        if (totalDurationS > MAX_ANALYSIS_DURATION_S) {
+            analysisWindow = findSteadiestWindow(flightLog, MAX_ANALYSIS_DURATION_S);
+            // No usable activity summary (unlikely) -- fall back to just the
+            // first MAX_ANALYSIS_DURATION_S rather than the whole flight.
+            if (!analysisWindow) analysisWindow = { startTime: minTime, endTime: minTime + MAX_ANALYSIS_DURATION_S * 1000000 };
+        }
+
+        var extracted = analysisWindow
+            ? readColumns(flightLog, analysisWindow.startTime, analysisWindow.endTime)
+            : readColumns(flightLog);
 
         // Real logs still show up with the pre-rename field names (older
         // firmware builds logged "headspeed"/"tailspeed" before they became
@@ -854,8 +922,10 @@ var FlightAnalysis = (function() {
         var context = {
             craftName: sysConfig.Craft_name || "Unnamed craft",
             firmwareVersion: sysConfig.firmwareVersion || null,
-            durationSeconds: extracted.time.length ? (extracted.time[extracted.time.length - 1] - extracted.time[0]) : 0,
-            stableSeconds: stable.sampleRateHz ? stable.stableSampleCount / stable.sampleRateHz : 0
+            durationSeconds: totalDurationS,
+            stableSeconds: stable.sampleRateHz ? stable.stableSampleCount / stable.sampleRateHz : 0,
+            analyzedSeconds: analysisWindow ? (analysisWindow.endTime - analysisWindow.startTime) / 1000000 : totalDurationS,
+            capped: !!analysisWindow
         };
 
         return { context: context, labs: labs, verdict: buildVerdict(labs) };
