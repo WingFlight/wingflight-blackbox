@@ -119,7 +119,47 @@
         };
     }
 
-    // chrome.storage.local already has a localStorage fallback in js/pref_storage.js, and
+    // chrome.storage.local: js/pref_storage.js has its own localStorage fallback for when this
+    // doesn't exist, but js/release_checker.js talks to chrome.storage.local directly and has
+    // no such fallback -- so this still needs a real shim, backed by localStorage underneath.
+    //
+    // Real chrome.storage.* calls are always asynchronous, even when the answer is available
+    // immediately -- and at least one caller (BlackboxLogViewer's graphConfig prefs.get(), in
+    // js/main.js) actually depends on that: its callback reads outer-scope variables (like
+    // flightLog) that aren't assigned until later in that same synchronous constructor call. A
+    // synchronous callback would run too early and crash; queueing via setTimeout matches the
+    // real API's async contract instead.
+    //
     // chrome.app.window is only reached from code paths that are now gated behind
-    // window.isNWjs(), so neither needs a shim here.
+    // window.isNWjs(), so that one doesn't need a shim here.
+    if (!window.chrome.storage) {
+        window.chrome.storage = {
+            local: {
+                get: function (keys, callback) {
+                    var keyList = Array.isArray(keys) ? keys : [keys];
+                    var result = {};
+
+                    keyList.forEach(function (key) {
+                        try {
+                            result[key] = JSON.parse(window.localStorage[key]);
+                        } catch (_e) {
+                            // No valid stored value for this key -- leave it out of the result,
+                            // same as the real API would for a key that was never set.
+                        }
+                    });
+
+                    setTimeout(function () { callback(result); }, 0);
+                },
+                set: function (items, callback) {
+                    Object.keys(items).forEach(function (key) {
+                        window.localStorage[key] = JSON.stringify(items[key]);
+                    });
+
+                    if (callback) {
+                        setTimeout(callback, 0);
+                    }
+                }
+            }
+        };
+    }
 })();
