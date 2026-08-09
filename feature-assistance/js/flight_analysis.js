@@ -212,17 +212,24 @@ var FlightAnalysis = (function() {
 
         if (!motorSpeed) return insufficient("No motor-speed (motor1speed) data was logged for this flight.");
         if (ctx.stable.stableSampleCount < MIN_STABLE_SAMPLES) return insufficient(ctx.stable.reason);
-        if (!target) return insufficient("Motor speed was logged, but no governor target — tracking and speed sag can't be measured.");
 
         var idx = ctx.stable.stableIndexes;
         var speedStable = pickAtIndexes(motorSpeed, idx);
-        var targetStable = pickAtIndexes(target, idx);
 
+        // Current WingFlight firmware runs an RPM governor (flight/governor.c)
+        // but doesn't log its internal target to blackbox -- only the actual
+        // motor speed reaches the log. If a target ever does show up (older or
+        // future logs), prefer the more precise sag-vs-target read; otherwise
+        // fall back to scoring how steady the motor held its own speed.
+        return target ? analyzeGovernorAgainstTarget(speedStable, pickAtIndexes(target, idx)) : analyzeGovernorSteadiness(speedStable);
+    }
+
+    function analyzeGovernorAgainstTarget(speedStable, targetStable) {
         var avgTarget = average(targetStable);
         var avgSpeed = average(speedStable);
         var maxSag = 0;
-        var errors = new Array(idx.length);
-        for (var i = 0; i < idx.length; i++) {
+        var errors = new Array(speedStable.length);
+        for (var i = 0; i < speedStable.length; i++) {
             var sag = targetStable[i] - speedStable[i];
             if (sag > maxSag) maxSag = sag;
             errors[i] = targetStable[i] - speedStable[i];
@@ -254,6 +261,48 @@ var FlightAnalysis = (function() {
                 { label: "RMS tracking error", value: Math.round(rmsError) + " rpm" }
             ],
             sagPercent: sagPercent
+        };
+    }
+
+    // No governor-target telemetry available (the normal case on current
+    // firmware) -- score on how steady the motor held its own speed during
+    // stable flight instead of sag-vs-target.
+    function analyzeGovernorSteadiness(speedStable) {
+        var avgSpeed = average(speedStable);
+        var maxDeviation = 0;
+        var deviations = new Array(speedStable.length);
+        for (var i = 0; i < speedStable.length; i++) {
+            var deviation = speedStable[i] - avgSpeed;
+            deviations[i] = deviation;
+            if (Math.abs(deviation) > maxDeviation) maxDeviation = Math.abs(deviation);
+        }
+        var rmsDeviation = rms(deviations);
+        var variabilityPercent = avgSpeed ? (maxDeviation / avgSpeed) * 100 : 0;
+
+        var status = variabilityPercent > 3 ? "attention" : variabilityPercent > 1.2 ? "watch" : "good";
+
+        var caveat = " (This firmware doesn't log a governor target, so this reflects motor-speed steadiness, not tracking accuracy.)";
+        var story;
+        if (status === "good") {
+            story = "Motor speed held steady during stable flight: averaged " + Math.round(avgSpeed) +
+                " rpm, straying by at most " + Math.round(maxDeviation) + " rpm (" + variabilityPercent.toFixed(1) + "%)." + caveat;
+        } else if (status === "watch") {
+            story = "Motor speed mostly held steady, but wandered as much as " + Math.round(maxDeviation) + " rpm (" +
+                variabilityPercent.toFixed(1) + "%) during stable flight — worth keeping an eye on." + caveat;
+        } else {
+            story = "Motor speed varied noticeably during stable flight: up to " + Math.round(maxDeviation) + " rpm (" +
+                variabilityPercent.toFixed(1) + "%) away from its average. Consider more governor gain, or check for a power-system limit." + caveat;
+        }
+
+        return {
+            status: status,
+            story: story,
+            metrics: [
+                { label: "Average motor speed", value: Math.round(avgSpeed) + " rpm" },
+                { label: "Max deviation", value: Math.round(maxDeviation) + " rpm (" + variabilityPercent.toFixed(1) + "%)" },
+                { label: "RMS variation", value: Math.round(rmsDeviation) + " rpm" }
+            ],
+            variabilityPercent: variabilityPercent
         };
     }
 
