@@ -1,3 +1,9 @@
+# 0.0.11
+
+Add web app deployment support for blackbox.wingflight.org and clean up browser compatibility.
+Add flight-analysis tooling.
+Fix WingFlight flight-mode/debug field definitions to align with current firmware.
+
 # 0.0.10
 
 Rename blackbox log fields headspeed/tailspeed to motor1speed/motor2speed, matching wingflight-firmware's generic per-motor naming.
