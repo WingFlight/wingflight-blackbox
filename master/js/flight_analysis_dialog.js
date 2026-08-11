@@ -17,6 +17,7 @@ function FlightAnalysisDialog(dialog) {
 
     var LAB_ORDER = [
         { key: "governor", title: "Motor Speed / Governor" },
+        { key: "idleChop", title: "Idle Chop Recovery" },
         { key: "esc", title: "Power / ESC" },
         { key: "battery", title: "Battery" },
         { key: "vibration", title: "Vibration" },
