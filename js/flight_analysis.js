@@ -45,6 +45,19 @@ var FlightAnalysis = (function() {
         return max;
     }
 
+    function minOf(values) {
+        var min = Infinity;
+        for (var i = 0; i < values.length; i++) if (values[i] < min) min = values[i];
+        return min;
+    }
+
+    function median(values) {
+        if (!values || !values.length) return null;
+        var sorted = values.slice(0).sort(function(a, b) { return a - b; });
+        var mid = Math.floor(sorted.length / 2);
+        return sorted.length % 2 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
+    }
+
     function spread(array, lo, hi) {
         var min = Infinity, max = -Infinity;
         for (var i = lo; i <= hi; i++) {
@@ -77,6 +90,7 @@ var FlightAnalysis = (function() {
         "axisError[0]", "axisError[1]", "axisError[2]",
         "axisSum[0]", "axisSum[1]", "axisSum[2]",
         "gyroADC[0]", "gyroADC[1]", "gyroADC[2]",
+        "rcCommand[4]",
         "Vbat", "Ibat",
         "EscV", "EscI", "EscThr", "EscCap",
         "motor[0]",
@@ -383,6 +397,186 @@ var FlightAnalysis = (function() {
             ],
             variabilityPercent: variabilityPercent
         };
+    }
+
+    // ------------------------------------------------------------------
+    // Idle chop recovery lab
+    // ------------------------------------------------------------------
+
+    function analyzeIdleChopRecoveryLab(ctx) {
+        var throttle = ctx.columns["rcCommand[4]"];
+        var motorSpeed = ctx.columns.motor1speed;
+        var motorOutput = ctx.columns["motor[0]"];
+
+        if (!throttle) return insufficient("No throttle-command data was logged for this flight.");
+        if (!motorSpeed) return insufficient("No motor-speed data was logged for this flight.");
+        if (!motorOutput) return insufficient("No motor output data was logged for this flight.");
+
+        var IDLE_THROTTLE = 20;      // blackbox rcCommand[4] is 0..1000
+        var PULSE_THROTTLE = 200;    // require a real pulse, not stick noise
+        var PRE_IDLE_SECONDS = 0.75;
+        var RECOVERY_SECONDS = 1.50;
+        var MIN_IDLE_SECONDS = 0.35;
+        var MIN_IDLE_SAMPLES = 20;
+
+        var pulses = findIdleChopPulses(ctx.time, throttle, motorSpeed, motorOutput,
+            IDLE_THROTTLE, PULSE_THROTTLE, PRE_IDLE_SECONDS, RECOVERY_SECONDS, MIN_IDLE_SECONDS, MIN_IDLE_SAMPLES);
+
+        if (!pulses.length) {
+            return insufficient("No clean idle-chop sequence was found. This check needs throttle pulses that start from idle, return to idle, and leave at least a short idle recovery window.");
+        }
+
+        var baselineRpm = average(pulses.map(function(p) { return p.baselineRpm; }));
+        var baselineOutput = median(pulses.map(function(p) { return p.baselineOutput; }));
+        var minRpm = minOf(pulses.map(function(p) { return p.minRpm; }));
+        var minOutput = minOf(pulses.map(function(p) { return p.minOutput; }));
+        var maxDipPercent = maxOf(pulses.map(function(p) { return p.dipPercent; }));
+        var maxRecoveryTime = maxOf(pulses.map(function(p) { return p.recoveryTime === null ? RECOVERY_SECONDS : p.recoveryTime; }));
+
+        var outputDropPercent = baselineOutput > 0 ? ((baselineOutput - minOutput) / baselineOutput) * 100 : 0;
+        var outputFloorTooLow = baselineOutput > 0 && minOutput < baselineOutput * 0.85;
+        var status = "good";
+        if (maxDipPercent > 25 || maxRecoveryTime > 1.0 || outputDropPercent > 20) status = "attention";
+        else if (maxDipPercent > 12 || maxRecoveryTime > 0.6 || outputDropPercent > 10) status = "watch";
+
+        var story;
+        if (status === "good") {
+            story = "Idle chop recovery looked clean across " + pulses.length + " pulse" + (pulses.length === 1 ? "" : "s") +
+                ": motor speed stayed close to the settled idle and recovered promptly.";
+        } else if (outputFloorTooLow) {
+            story = "Idle chop recovery sagged after throttle cuts: settled idle held around " + formatMotorOutputPercent(baselineOutput) +
+                " output, but post-chop output fell as low as " + formatMotorOutputPercent(minOutput) +
+                ". Raise governor_throttle toward the settled idle output and keep governor_handover above that floor.";
+        } else {
+            story = "Idle chop recovery dipped after throttle cuts: motor speed fell as much as " +
+                maxDipPercent.toFixed(0) + "% below the settled idle before recovering. Consider slightly more governor gain if the idle floor already matches the settled output.";
+        }
+
+        return {
+            status: status,
+            story: story,
+            metrics: [
+                { label: "Pulses analyzed", value: String(pulses.length) },
+                { label: "Settled idle speed", value: Math.round(baselineRpm) + " rpm" },
+                { label: "Deepest speed dip", value: Math.round(minRpm) + " rpm (" + maxDipPercent.toFixed(0) + "%)" },
+                { label: "Settled idle output", value: formatMotorOutputPercent(baselineOutput) },
+                { label: "Lowest post-chop output", value: formatMotorOutputPercent(minOutput) },
+                { label: "Slowest recovery", value: maxRecoveryTime.toFixed(2) + "s" }
+            ],
+            dipPercent: maxDipPercent,
+            outputDropPercent: outputDropPercent
+        };
+    }
+
+    function findIdleChopPulses(time, throttle, motorSpeed, motorOutput,
+        idleThrottle, pulseThrottle, preIdleSeconds, recoverySeconds, minIdleSeconds, minIdleSamples) {
+        var pulses = [];
+        var n = time.length;
+        var i = 0;
+
+        while (i < n) {
+            while (i < n && throttle[i] <= pulseThrottle) i++;
+            if (i >= n) break;
+
+            var highStart = i;
+            while (i < n && throttle[i] > pulseThrottle) i++;
+            var highEnd = i - 1;
+
+            var pulseStart = highStart;
+            while (pulseStart > 0 && throttle[pulseStart - 1] > idleThrottle) pulseStart--;
+
+            var chopIndex = i;
+            while (chopIndex < n && throttle[chopIndex] > idleThrottle) chopIndex++;
+            if (chopIndex >= n) break;
+
+            var nextPulseIndex = chopIndex + 1;
+            while (nextPulseIndex < n && throttle[nextPulseIndex] <= idleThrottle) nextPulseIndex++;
+
+            var idleEndTime = Math.min(time[chopIndex] + recoverySeconds,
+                nextPulseIndex < n ? time[nextPulseIndex] : time[n - 1]);
+            var idleDuration = idleEndTime - time[chopIndex];
+
+            var beforeIndexes = indexesInWindow(time, throttle, pulseStart, time[pulseStart] - preIdleSeconds,
+                time[pulseStart], idleThrottle, motorSpeed);
+            var afterIndexes = indexesInWindow(time, throttle, chopIndex, time[chopIndex],
+                idleEndTime, idleThrottle, motorSpeed);
+
+            if (idleDuration >= minIdleSeconds &&
+                    beforeIndexes.length >= minIdleSamples &&
+                    afterIndexes.length >= minIdleSamples &&
+                    time[highEnd] > time[highStart]) {
+                var pulse = summarizeIdleChopPulse(time, motorSpeed, motorOutput, beforeIndexes, afterIndexes);
+                if (pulse) pulses.push(pulse);
+            }
+
+            i = Math.max(chopIndex + 1, highEnd + 1);
+        }
+
+        return pulses;
+    }
+
+    function indexesInWindow(time, throttle, startSearch, startTime, endTime, idleThrottle, motorSpeed) {
+        var result = [];
+        var first = startSearch;
+        while (first > 0 && time[first] >= startTime) first--;
+
+        for (var i = first; i < time.length && time[i] <= endTime; i++) {
+            if (time[i] >= startTime && throttle[i] <= idleThrottle && motorSpeed[i] > 500) {
+                result.push(i);
+            }
+        }
+        return result;
+    }
+
+    function summarizeIdleChopPulse(time, motorSpeed, motorOutput, beforeIndexes, afterIndexes) {
+        var beforeRpm = pickAtIndexes(motorSpeed, beforeIndexes);
+        var beforeOutput = pickAtIndexes(motorOutput, beforeIndexes);
+        var afterRpm = pickAtIndexes(motorSpeed, afterIndexes);
+        var afterOutput = pickAtIndexes(motorOutput, afterIndexes);
+
+        var baselineRpm = median(beforeRpm);
+        var baselineOutput = median(beforeOutput);
+        var minRpm = minOf(afterRpm);
+        var minOutput = minOf(afterOutput);
+        if (!baselineRpm || baselineRpm <= 0) return null;
+
+        var beforeRpmSpread = maxOf(beforeRpm) - minOf(beforeRpm);
+        var beforeOutputSpread = maxOf(beforeOutput) - minOf(beforeOutput);
+        if (beforeRpmSpread > Math.max(200, baselineRpm * 0.25) ||
+                beforeOutputSpread > Math.max(30, baselineOutput * 0.25)) {
+            return null;
+        }
+
+        var minRpmIndex = afterIndexes[0];
+        for (var i = 0; i < afterIndexes.length; i++) {
+            if (motorSpeed[afterIndexes[i]] === minRpm) {
+                minRpmIndex = afterIndexes[i];
+                break;
+            }
+        }
+
+        var recoveredAt = null;
+        var recoveryThreshold = baselineRpm * 0.95;
+        for (i = 0; i < afterIndexes.length; i++) {
+            var idx = afterIndexes[i];
+            if (idx >= minRpmIndex && motorSpeed[idx] >= recoveryThreshold) {
+                recoveredAt = time[idx] - time[afterIndexes[0]];
+                break;
+            }
+        }
+
+        return {
+            baselineRpm: baselineRpm,
+            baselineOutput: baselineOutput,
+            minRpm: minRpm,
+            minOutput: minOutput,
+            dipPercent: ((baselineRpm - minRpm) / baselineRpm) * 100,
+            recoveryTime: recoveredAt
+        };
+    }
+
+    function formatMotorOutputPercent(value) {
+        return (value / 10).toFixed(1) + "%";
     }
 
     // ------------------------------------------------------------------
@@ -802,6 +996,7 @@ var FlightAnalysis = (function() {
     function buildVerdict(labs) {
         var cards = [
             cardFromLab("governor", "Motor Speed", "seekbar", labs.governor),
+            cardFromLab("idleChop", "Idle Chop", "seekbar", labs.idleChop),
             cardFromLab("esc", "Power", "seekbar", labs.esc),
             cardFromLab("battery", "Battery", "seekbar", labs.battery),
             cardFromLab("pid", "PID Tracking", "seekbar", labs.pid)
@@ -930,6 +1125,7 @@ var FlightAnalysis = (function() {
 
         var labs = {
             governor: analyzeGovernorLab(ctx),
+            idleChop: analyzeIdleChopRecoveryLab(ctx),
             esc: analyzeEscLab(ctx),
             battery: analyzeBatteryLab(ctx, flightLog),
             vibration: analyzeVibrationLab(ctx, flightLog),
