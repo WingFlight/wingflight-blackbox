@@ -1,3 +1,7 @@
+# 0.0.12
+
+Add idle chop recovery analysis.
+
 # 0.0.11
 
 Add web app deployment support for blackbox.wingflight.org and clean up browser compatibility.
