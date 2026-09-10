@@ -539,6 +539,12 @@ function FlightLogGrapher(flightLog, graphConfig, canvas, stickCanvas, craftWrap
             case FlightLogEvent.AIRBORNE_STATE:
                 drawEventLine(x, labelY, `Airborne: ${FlightLogFieldPresenter.presentEnum(event.data.airborneState, FLIGHT_LOG_AIRBORNE_STATES)}`, "rgba(255,150,0,0.75)", 2);
             break;
+            case FlightLogEvent.OSC_LIMITER: {
+                const axisName = ["Roll", "Pitch", "Yaw"][event.data.axis] || `Axis ${event.data.axis}`;
+                const state = event.data.active ? "ENGAGED" : "released";
+                drawEventLine(x, labelY, `OscLimiter: ${axisName} ${state} (${event.data.gainScale}%)`, "rgba(255,0,0,0.75)", 2);
+            }
+            break;
             case FlightLogEvent.INFLIGHT_ADJUSTMENT:
                 drawEventLine(x, labelY, event.data.name + " = " + event.data.value, "rgba(0,255,255,0.5)", 2);
             break;

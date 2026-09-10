@@ -26,6 +26,7 @@ var
         GOVERNOR_STATE: 50,
         RESCUE_STATE: 51,
         AIRBORNE_STATE: 52,
+        OSC_LIMITER: 53,
 
         CUSTOM_DATA: 100,
         CUSTOM_STRING: 101,
@@ -855,11 +856,11 @@ var
     // Positions mirror debugType_e in wingflight-firmware's build/debug.h, not
     // DEBUG_MODE_RF_4_6: the "Remove OSD" refactor deleted DEBUG_MAX7456_SIGNAL/
     // SPICLOCK outright (no reserved placeholder), renumbering every slot from
-    // SBUS onward, and appended GYRO_CALIBRATION/AUTOHOVER/ATTHOLD at the end
-    // (there is no POLAR_RATE or USER1-4 debug mode in this firmware). The
-    // governor/rescue/cyclic slots that lost their populating code keep their
-    // old positions and are relabeled here to make clear they're dead for
-    // WingFlight logs.
+    // SBUS onward, and appended GYRO_CALIBRATION/AUTOHOVER/ATTHOLD/OSC_LIMITER/
+    // TVHOLD at the end, in that order (there is no POLAR_RATE or USER1-4
+    // debug mode in this firmware). The governor/rescue/cyclic slots that
+    // lost their populating code keep their old positions and are relabeled
+    // here to make clear they're dead for WingFlight logs.
     DEBUG_MODE_WF = makeReadOnly([
         "NONE",
         "CYCLETIME",
@@ -942,6 +943,8 @@ var
         "GYRO_CALIBRATION",
         "AUTOHOVER",
         "ATTHOLD",
+        "OSC_LIMITER",
+        "TVHOLD",
     ]),
 
     SUPER_EXPO_YAW = makeReadOnly([

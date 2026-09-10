@@ -1567,6 +1567,14 @@ var FlightLogParser = function(logData) {
             case FlightLogEvent.AIRBORNE_STATE:
                 lastEvent.data.airborneState = stream.readUnsignedVB();
             break;
+            case FlightLogEvent.OSC_LIMITER:
+                // Plain bytes (blackboxWrite), not VB-encoded -- see
+                // flightLogEvent_oscLimiter_t in wingflight-firmware's
+                // blackbox_fielddefs.h.
+                lastEvent.data.axis = stream.readByte();
+                lastEvent.data.active = stream.readByte();
+                lastEvent.data.gainScale = stream.readByte();
+            break;
             case FlightLogEvent.FLIGHT_MODE: // get the flag status change
                 lastEvent.data.newFlags = stream.readUnsignedVB();
                 lastEvent.data.lastFlags = stream.readUnsignedVB();
