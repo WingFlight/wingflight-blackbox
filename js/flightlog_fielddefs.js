@@ -244,6 +244,10 @@ var
     // are reserved-but-unrenumbered (-> UNUSED), BOXGOVERNOR (bit 27) is now a
     // real throttle-range governor engage switch rather than the old heli
     // fallback, and BOXAUTOHOVER/BOXMANUAL/BOXAUTOTRIM were appended at the end.
+    // Order must match boxId_e in src/main/fc/rc_modes.h exactly -- this decodes the
+    // rcModeActivationMask-derived flightModeFlags/flightModeFlags2 S-frame fields bit-for-bit,
+    // not the flightModeBits_e enum. 'UNUSED' entries are reserved boxIds kept only so later
+    // ids don't get renumbered (BOXRESCUE, BOXOSD, BOXGOVSUSPEND, BOXGOVBYPASS).
     FLIGHT_LOG_FLIGHT_MODE_NAME_WF = makeReadOnly([
         'ARM',
         'ANGLE',
@@ -253,6 +257,8 @@ var
         'ALTHOLD',
         'UNUSED',
         'GPSRESCUE',
+        'LOITER',
+        'RTH',
         'FAILSAFE',
         'PASSTHROUGH',
         'PREARM',
@@ -282,6 +288,9 @@ var
         'AUTOHOVER',
         'MANUAL',
         'AUTOTRIM',
+        'THRUSTVECTOR',
+        'TVHOLD',
+        'TRADITIONAL',
     ]),
 
     FLIGHT_LOG_FEATURES = [],
@@ -384,6 +393,7 @@ var
     // Same bit layout as FLIGHT_LOG_FEATURES_RF_4_3 -- wingflight-firmware kept
     // the old FEATURE_GOVERNOR bit reserved as FEATURE_UNUSED_26 rather than
     // renumbering (src/main/config/feature.h), so this must stay positional.
+    // Bit 24 was also repurposed, from unused to FEATURE_THRUST_VECTOR.
     FLIGHT_LOG_FEATURES_WF = makeReadOnly([
         'RX_PPM',
         'UNUSED1',
@@ -409,7 +419,7 @@ var
         'UNUSED21',
         'UNUSED22',
         'UNUSED23',
-        'UNUSED24',
+        'THRUST_VECTOR',
         'RX_SPI',
         'UNUSED26',
         'ESC_SENSOR',
@@ -942,6 +952,7 @@ var
         "GYRO_CALIBRATION",
         "AUTOHOVER",
         "ATTHOLD",
+        "TVHOLD",
     ]),
 
     SUPER_EXPO_YAW = makeReadOnly([
@@ -1012,6 +1023,15 @@ var
         "CALIBRATE_MAG",
         "SMALL_ANGLE",
         "FIXED_WING"
+    ]),
+
+    // wingflight-firmware's stateFlags_t (fc/runtime_config.h) trimmed the legacy 5-bit
+    // enum down to 3 members and repurposed bit 2 for GPS_FIX_EVER instead of CALIBRATE_MAG --
+    // reusing the BF/RF list above would mislabel it.
+    FLIGHT_LOG_FLIGHT_STATE_NAME_WF = makeReadOnly([
+        "GPS_FIX_HOME",
+        "GPS_FIX",
+        "GPS_FIX_EVER",
     ]),
 
     FLIGHT_LOG_FAILSAFE_PHASE_NAME = makeReadOnly([
@@ -1195,6 +1215,7 @@ function adjustFieldDefsList(firmwareType, firmwareVersion) {
         // no per-version branching needed.
         FLIGHT_LOG_FLIGHT_MODE_NAME = makeReadOnly(FLIGHT_LOG_FLIGHT_MODE_NAME_WF.slice());
         FLIGHT_LOG_FEATURES = makeReadOnly(FLIGHT_LOG_FEATURES_WF.slice());
+        FLIGHT_LOG_FLIGHT_STATE_NAME = makeReadOnly(FLIGHT_LOG_FLIGHT_STATE_NAME_WF.slice());
         DEBUG_MODE = makeReadOnly(DEBUG_MODE_WF.slice());
         FAST_PROTOCOL = FAST_PROTOCOL_RF_4_5.slice();
         // No governor, no rescue -- FLIGHT_LOG_GOVSTATES/FLIGHT_LOG_RESCUE_STATES
