@@ -1,3 +1,7 @@
+# 0.0.22
+
+Version bump for release alignment; no blackbox-relevant changes this cycle.
+
 # 0.0.21
 
 Version bump for release alignment; no blackbox-relevant changes this cycle.
@@ -87,3 +91,4 @@ Align with firmware channel maps
 # 0.0.1
 
 Initial release
+
