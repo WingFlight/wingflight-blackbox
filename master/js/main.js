@@ -206,6 +206,8 @@ function BlackboxLogViewer() {
         if (frame) {
 
             var currentFlightMode = frame[flightLog.getMainFieldIndexByName("flightModeFlags")];
+            var currentFlightMode2Index = flightLog.getMainFieldIndexByName("flightModeFlags2");
+            var currentFlightMode2 = (currentFlightMode2Index === undefined) ? 0 : frame[currentFlightMode2Index];
 
             if(hasTable || hasTableOverlay) { // Only redraw the table if it is enabled
 
@@ -239,9 +241,12 @@ function BlackboxLogViewer() {
 
             }
 
-            // Update flight mode flags on status bar
+            // Update flight mode flags on status bar. Combine flightModeFlags with
+            // flightModeFlags2 (boxId 32-63, e.g. AUTOHOVER/MANUAL/THRUSTVECTOR/TVHOLD) so modes
+            // that only live in the second word still show up here -- see blackbox.c's
+            // slowHistory.flightModeFlags2 comment for why the S-frame pair is the source of truth.
             $(".flight-mode", statusBar).text(
-                            fieldPresenter.decodeFieldToFriendly(null, 'flightModeFlags', currentFlightMode, null)
+                            fieldPresenter.presentFlags64(currentFlightMode, currentFlightMode2, FLIGHT_LOG_FLIGHT_MODE_NAME)
                     );
 
             // update time field on status bar

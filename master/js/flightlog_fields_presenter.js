@@ -173,6 +173,7 @@ function FlightLogFieldPresenter() {
         'attitude[2]': 'Attitude [yaw]',
 
         'flightModeFlags': 'Flight Mode Flags',
+        'flightModeFlags2': 'Flight Mode Flags 2',
         'stateFlags': 'State Flags',
         'failsafePhase': 'Failsafe Phase',
         'rxSignalReceived': 'RX Signal Received',
@@ -691,6 +692,19 @@ function FlightLogFieldPresenter() {
             'debug[2]':'Rate',
             'debug[3]':'Mult',
         },
+        'AUTOHOVER' : {
+            'debug[all]':'Auto Hover [debug-axis]',
+            'debug[0]':'Rate Command [debug-axis]',
+            'debug[1]':'Throttle Assist',
+        },
+        'ATTHOLD' : {
+            'debug[all]':'Att Hold [debug-axis]',
+            'debug[0]':'Setpoint / Rate [debug-axis]',
+        },
+        'TVHOLD' : {
+            'debug[all]':'TV Hold [debug-axis]',
+            'debug[0]':'Setpoint / Rate [debug-axis]',
+        },
     };
 
     let DEBUG_FRIENDLY_FIELD_NAMES = null;
@@ -817,6 +831,32 @@ function FlightLogFieldPresenter() {
         } else {
             return "0"; //No flags set
         }
+    };
+
+    // Same as presentFlags, but walks two 32-bit words back to back (boxId 0-31, then 32-63)
+    // against a single flagNames list -- for combining flightModeFlags + flightModeFlags2 into
+    // one "currently active modes" string, since boxIds >= 32 (AUTOHOVER, MANUAL, THRUSTVECTOR,
+    // TVHOLD, ...) only ever appear in the second word.
+    FlightLogFieldPresenter.presentFlags64 = function(lowFlags, highFlags, flagNames) {
+        var printedFlag = false, result = "", i = 0;
+        var words = [lowFlags >>> 0, highFlags >>> 0];
+
+        for (var w = 0; w < words.length; w++) {
+            var flags = words[w];
+            for (var b = 0; b < 32; b++, i++) {
+                if (flags & 1) {
+                    if (printedFlag) {
+                        result += "|";
+                    } else {
+                        printedFlag = true;
+                    }
+                    result += (flagNames[i] !== undefined) ? flagNames[i] : i;
+                }
+                flags >>>= 1;
+            }
+        }
+
+        return printedFlag ? result : "0"; //No flags set
     };
 
     // Only list events that have changed, flag with eirer go ON or OFF.
@@ -1016,6 +1056,11 @@ function FlightLogFieldPresenter() {
 
             case 'flightModeFlags':
                 return FlightLogFieldPresenter.presentFlags(value, FLIGHT_LOG_FLIGHT_MODE_NAME);
+
+            case 'flightModeFlags2':
+                // Second word of the boxId bitmask (boxId 32-63) -- see blackbox.c's
+                // slowHistory.flightModeFlags2. Offset into the same name list by 32 bits.
+                return FlightLogFieldPresenter.presentFlags(value, FLIGHT_LOG_FLIGHT_MODE_NAME.slice(32));
 
             case 'stateFlags':
                 return FlightLogFieldPresenter.presentFlags(value, FLIGHT_LOG_FLIGHT_STATE_NAME);
@@ -1380,6 +1425,21 @@ function FlightLogFieldPresenter() {
                         case 'debug[6]': // is hands on
                         case 'debug[7]': // is airborne
                             break;
+                    }
+                    break;
+                case 'AUTOHOVER':
+                    switch (fieldName) {
+                        case 'debug[0]': // rate[axis], deg/s
+                            return value.toFixed(0) + " °/s";
+                        case 'debug[1]': // throttle assist percent * 1000
+                            return (value / 10).toFixed(1) + "%";
+                    }
+                    break;
+                case 'ATTHOLD':
+                case 'TVHOLD':
+                    switch (fieldName) {
+                        case 'debug[0]': // pidSetpoint while tracking, else rate[axis] -- both deg/s
+                            return value.toFixed(0) + " °/s";
                     }
                     break;
             }
