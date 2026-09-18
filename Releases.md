@@ -1,3 +1,8 @@
+# 0.0.23
+
+Add missing WingFlight in-flight adjustment function names (indices 82-114: master gain scaling, AutoHover/AttHold gain, servo trims, Thrust Vector PID/gain set, TV profile, flap compensation, diff thrust yaw), which previously showed as "Unknown (N)" on flight-mode-change graph annotations.
+Add flightModeFlags2 and the missing WingFlight-specific flight mode/feature/state names (LOITER, RTH, THRUSTVECTOR, TVHOLD, TRADITIONAL, FEATURE_THRUST_VECTOR, GPS_FIX_EVER) to correctly decode current WingFlight logs.
+
 # 0.0.22
 
 Version bump for release alignment; no blackbox-relevant changes this cycle.
