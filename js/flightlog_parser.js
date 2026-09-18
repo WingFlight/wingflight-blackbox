@@ -193,6 +193,54 @@ var FlightLogParser = function(logData) {
             { name: 'Gov Headspeed'                                  },
             { name: 'Gov Yaw FF'                                     },
 
+            { name: 'Battery Profile'                                },
+
+            { name: 'Unused'                                         }, // reserved, see fc/rc_adjustments.h
+
+            // Live per-axis P/I/D scale -- in-flight tuning aid, doesn't alter the underlying gains
+            { name: 'Master Gain [pitch]'                            },
+            { name: 'Master Gain [roll]'                             },
+            { name: 'Master Gain [yaw]'                              },
+
+            { name: 'Auto Hover Gain'                                },
+
+            { name: 'Att Hold Gain'                                  },
+
+            // Servo axis trim (runtime-only, shifts servo center points per axis)
+            { name: 'Servo Trim [roll]'                              },
+            { name: 'Servo Trim [pitch]'                             },
+            { name: 'Servo Trim [yaw]'                               },
+
+            // Thrust Vector -- independent PID loop (FEATURE_THRUST_VECTOR)
+            { name: 'TV Master Gain [roll]'                          },
+            { name: 'TV Master Gain [pitch]'                         },
+            { name: 'TV Master Gain [yaw]'                           },
+            { name: 'TV Roll P-gain'                                 },
+            { name: 'TV Roll I-gain'                                 },
+            { name: 'TV Roll D-gain'                                 },
+            { name: 'TV Roll F-gain'                                 },
+            { name: 'TV Roll B-gain'                                 },
+            { name: 'TV Pitch P-gain'                                },
+            { name: 'TV Pitch I-gain'                                },
+            { name: 'TV Pitch D-gain'                                },
+            { name: 'TV Pitch F-gain'                                },
+            { name: 'TV Pitch B-gain'                                },
+            { name: 'TV Yaw P-gain'                                  },
+            { name: 'TV Yaw I-gain'                                  },
+            { name: 'TV Yaw D-gain'                                  },
+            { name: 'TV Yaw F-gain'                                  },
+            { name: 'TV Yaw B-gain'                                  },
+
+            // Thrust Vector Attitude Hold -- independent hold engine (flight/tv_hold.c)
+            { name: 'TV Hold Gain'                                   },
+
+            // Thrust Vector profile switching (independent of PID Profile)
+            { name: 'TV Profile'                                     },
+
+            // Mixer rule weight, found by mixerRuleRole_e tag rather than a fixed rule index
+            { name: 'Flap Compensation Gain'                         },
+            { name: 'Diff Thrust Yaw Gain'                           },
+
         ];
 
     //Private variables:
