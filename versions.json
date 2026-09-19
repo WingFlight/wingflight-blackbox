@@ -75,6 +75,11 @@
       "type": "branch",
       "name": "feature-oscillation-limiter-decode",
       "path": "./feature-oscillation-limiter-decode/"
+    },
+    {
+      "type": "branch",
+      "name": "feature-servo-trim-field",
+      "path": "./feature-servo-trim-field/"
     }
   ]
 }
