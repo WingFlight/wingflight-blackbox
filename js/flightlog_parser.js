@@ -206,7 +206,7 @@ var FlightLogParser = function(logData) {
 
             { name: 'Att Hold Gain'                                  },
 
-            // Servo axis trim (runtime-only, shifts servo center points per axis)
+            // Servo axis trim (adds to the trim of every servo fed by the axis; servo centers are untouched)
             { name: 'Servo Trim [roll]'                              },
             { name: 'Servo Trim [pitch]'                             },
             { name: 'Servo Trim [yaw]'                               },
