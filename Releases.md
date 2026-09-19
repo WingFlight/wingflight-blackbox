@@ -1,3 +1,7 @@
+# 0.0.24
+
+Version bump for release alignment; no blackbox-relevant changes this cycle.
+
 # 0.0.23
 
 Add missing WingFlight in-flight adjustment function names (indices 82-114: master gain scaling, AutoHover/AttHold gain, servo trims, Thrust Vector PID/gain set, TV profile, flap compensation, diff thrust yaw), which previously showed as "Unknown (N)" on flight-mode-change graph annotations.
