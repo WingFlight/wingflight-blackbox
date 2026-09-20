@@ -700,10 +700,22 @@ function FlightLogFieldPresenter() {
         'ATTHOLD' : {
             'debug[all]':'Att Hold [debug-axis]',
             'debug[0]':'Setpoint / Rate [debug-axis]',
+            'debug[1]':'Attitude Error [debug-axis]',
+            'debug[2]':'Stall Timer [debug-axis]',
+            'debug[3]':'I Bleed Timer [debug-axis]',
+            'debug[4]':'Stall Recaptures',
+            'debug[5]':'Last Recapture Axis',
+            'debug[6]':'Tracking Axes',
         },
         'TVHOLD' : {
             'debug[all]':'TV Hold [debug-axis]',
             'debug[0]':'Setpoint / Rate [debug-axis]',
+            'debug[1]':'Attitude Error [debug-axis]',
+            'debug[2]':'Stall Timer [debug-axis]',
+            'debug[3]':'I Bleed Timer [debug-axis]',
+            'debug[4]':'Stall Recaptures',
+            'debug[5]':'Last Recapture Axis',
+            'debug[6]':'Tracking Axes',
         },
     };
 
@@ -1440,6 +1452,19 @@ function FlightLogFieldPresenter() {
                     switch (fieldName) {
                         case 'debug[0]': // pidSetpoint while tracking, else rate[axis] -- both deg/s
                             return value.toFixed(0) + " °/s";
+                        case 'debug[1]': // attitude error on the debug axis, degrees x10
+                            return (value / 10).toFixed(1) + " °";
+                        case 'debug[2]': // stall timer, ms -- a re-capture fires at 3000
+                        case 'debug[3]': // full-rate I bleed time left after a re-capture, ms
+                            return (value / 1000).toFixed(2) + " s";
+                        case 'debug[4]': // stall re-captures since engagement, all axes
+                            return value.toFixed(0);
+                        case 'debug[5]': // axis of the last stall re-capture
+                            return ['Roll', 'Pitch', 'Yaw'][value] ?? 'None';
+                        case 'debug[6]': { // bitmask of axes currently free-tracking (not holding)
+                            const tracking = ['Roll', 'Pitch', 'Yaw'].filter((_, i) => value & (1 << i));
+                            return tracking.length ? tracking.join('+') : 'Holding';
+                        }
                     }
                     break;
             }
