@@ -78,11 +78,6 @@
     },
     {
       "type": "branch",
-      "name": "feature-hold-stall-debug",
-      "path": "./feature-hold-stall-debug/"
-    },
-    {
-      "type": "branch",
       "name": "feature-oscillation-limiter-decode",
       "path": "./feature-oscillation-limiter-decode/"
     },
