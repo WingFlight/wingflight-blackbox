@@ -1,3 +1,7 @@
+# 0.0.25
+
+Name and format the ATTHOLD/TVHOLD stall debug fields.
+
 # 0.0.24
 
 Version bump for release alignment; no blackbox-relevant changes this cycle.
