@@ -976,6 +976,9 @@ var FlightLogParser = function(logData) {
             case "gyro_rpm_filter_bank_rpm_source":
             case "gyro_rpm_filter_bank_rpm_limit":
             case "gyro_rpm_filter_bank_notch_q":
+            // loiter_radius, loiter_direction, rth_altitude, min_sats, max_bank_angle,
+            // max_pitch_angle, bearing_kp, altitude_kp, altitude_kd, throttle, turn_coordination
+            case "gps_nav":
                     that.sysConfig[fieldName] = parseCommaSeparatedString(fieldValue);
             break;
             case "error_decay":
