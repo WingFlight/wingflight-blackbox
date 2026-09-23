@@ -1,3 +1,8 @@
+# 0.0.26
+
+Publish release notes and a build link from the web deploy workflow.
+Remove the push/PR CI workflows; only the deployed web build is kept.
+
 # 0.0.25
 
 Name and format the ATTHOLD/TVHOLD stall debug fields.
