@@ -1,5 +1,6 @@
 # 0.0.26
 
+Read the GPS navigation settings from the log header.
 Publish release notes and a build link from the web deploy workflow.
 Remove the push/PR CI workflows; only the deployed web build is kept.
 
