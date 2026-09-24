@@ -17,6 +17,7 @@
     <link rel="stylesheet" href="css/keys_dialog.css">
     <link rel="stylesheet" href="css/user_settings_dialog.css">
     <link rel="stylesheet" href="css/flight_analysis_dialog.css">
+    <link rel="stylesheet" href="css/branding.css">
 
     <script src="js/vendor/modernizr-2.6.2-respond-1.1.0.min.js"></script>
     <script src="js/browser_compat.js"></script>
@@ -25,110 +26,92 @@
 <body>
     <!--  Welcome Page -->
     <div class="welcome-pane">
-        <div class="container">
-            <div class="jumbotron">
-                <h1>Welcome to the WingFlight Blackbox Explorer!</h1>
-                <p>This tool allows you to view and analyze logs created by WingFlight's Blackbox feature.</p>
-                <span class="btn btn-primary btn-lg btn-file" data-toggle="tooltip" title="Start by opening a log or video file"> Open log file/video
-                    <input type="file" class="file-open" accept=".bbl,.txt,.cfl,.bfl,.log,.avi,.mov,.mp4,.mpeg,.json" multiple />
+        <header class="wf-topbar">
+            <img src="./images/wf_logo_white.svg" alt="WingFlight" class="wf-topbar-logo" />
+            <nav class="wf-topbar-links">
+                <a href="https://doc.wingflight.org" target="_blank" rel="noopener noreferrer">Docs</a>
+                <a href="https://cfg.wingflight.org" target="_blank" rel="noopener noreferrer">Configurator</a>
+                <a href="https://discord.gg/aEyyAJTXRw" target="_blank" rel="noopener noreferrer">Discord</a>
+                <a href="https://github.com/WingFlight/wingflight-blackbox" target="_blank" rel="noopener noreferrer">GitHub</a>
+            </nav>
+        </header>
+
+        <main class="wf-hero">
+            <div class="wf-trace" aria-hidden="true">
+                <svg viewBox="0 0 1200 200" preserveAspectRatio="none">
+                    <path class="wf-trace-a" d="M0 110 C 60 60, 110 160, 170 105 S 280 40, 340 100 S 450 170, 520 95 S 640 30, 700 110 S 820 180, 880 90 S 1000 40, 1060 115 S 1160 150, 1200 100" />
+                    <path class="wf-trace-b" d="M0 120 C 80 150, 130 70, 200 115 S 320 160, 380 105 S 480 60, 560 120 S 660 150, 740 95 S 860 70, 920 125 S 1040 150, 1100 100 S 1170 90, 1200 110" />
+                </svg>
+            </div>
+
+            <div class="wf-hero-content">
+                <p class="wf-eyebrow">Blackbox Explorer</p>
+                <h1 class="wf-headline">Replay every <span class="wf-accent">flight</span>.</h1>
+                <p class="wf-lead">
+                    Open a WingFlight Blackbox log to graph gyro, PID and stick data, sync it to your onboard video,
+                    and find what your tune is really doing.
+                </p>
+
+                <div class="wf-dropzone">
+                    <svg class="wf-dropzone-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                        <polyline points="17 8 12 3 7 8"/>
+                        <line x1="12" y1="3" x2="12" y2="15"/>
+                    </svg>
+                    <p class="wf-dropzone-title">Drop a log or video anywhere</p>
+                    <p class="wf-dropzone-or">or</p>
+                    <span class="btn wf-btn-primary btn-file">
+                        Open log file / video
+                        <input type="file" class="file-open" accept=".bbl,.txt,.cfl,.bfl,.log,.avi,.mov,.mp4,.mpeg,.json" multiple />
+                    </span>
+                    <div id="loading-file-text" class="hiddenElement loading-message"></div>
+                    <ul class="wf-formats">
+                        <li>.BBL</li><li>.BFL</li><li>.TXT</li><li>.MP4</li><li>.MOV</li><li>.AVI</li><li>Workspace .JSON</li>
+                    </ul>
+                </div>
+            </div>
+        </main>
+
+        <section class="wf-cards">
+            <a class="wf-card" href="https://doc.wingflight.org/configurator/tabs/blackbox/" target="_blank" rel="noopener noreferrer">
+                <span class="wf-card-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3" fill="currentColor"/></svg>
                 </span>
-                <span id="loading-file-text" class="hiddenElement loading-message"></span>
+                <h3>Record</h3>
+                <p>Set up Blackbox logging to onboard flash or SD card from the Configurator's Blackbox tab.</p>
+                <span class="wf-card-link">Logging guide &rarr;</span>
+            </a>
+            <div class="wf-card">
+                <span class="wf-card-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 17 9 11 13 15 21 6"/><polyline points="15 6 21 6 21 12"/></svg>
+                </span>
+                <h3>Analyse</h3>
+                <p>Step through the flight frame by frame, compare workspaces, and use the spectrum analyser to tune your filters.</p>
+                <span class="wf-card-hint">Keyboard shortcuts are under the <kbd>?</kbd> button in the toolbar</span>
             </div>
-        </div>
-        <div class="container">
-            <div class="row">
-                <div class="col-sm-4">
-                    <div class="panel panel-default">
-                        <div class="panel-heading">
-                            Getting Started
-                        </div>
-                        <div class="panel-body">
-                            <p>
-                                Blackbox is built in to
-                                <a href="https://github.com/WingFlight/" target="_blank" rel="noopener noreferrer">WingFlight</a>, and is supported on most modern flight controllers (F4, F7, H7, etc.)
-                            </p>
-                            <p>
-                                To get started with Blackbox recording, read
-                                <a href="https://github.com/WingFlight/wingflight-firmware/blob/master/docs/Blackbox.md" target="_blank" rel="noopener noreferrer">WingFlight's Blackbox feature documentation</a>.
-                            </p>
-                            <p>
-                                Already have a log recorded? Just open it above.
-                            </p>
-                            <p>
-                                Found a bug, or have a suggestion? Please add it to
-                                <a href="https://github.com/WingFlight/wingflight-blackbox/issues" target="_blank" rel="noopener noreferrer">the viewer's GitHub bug tracker</a>.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-sm-4">
-                    <div class="panel panel-default">
-                        <div class="panel-heading">
-                            Tuning Your Craft
-                        </div>
-                        <div class="panel-body">
-                            <p>
-                                Blackbox logs give insight into your flight performance, helping you tune variables such as your PIDs and
-                                low-pass filter settings.
-                            </p>
-                            <ul>
-                                <li>
-                                    <a href="https://github.com/WingFlight/wingflight-firmware/wiki" target="_blank" rel="noopener noreferrer">WingFlight Official Wiki</a>
-                                </li>
-                                <li>
-                                    <a href="https://discord.com/invite/aEyyAJTXRw" target="_blank" rel="noopener noreferrer">WingFlight Discord</a>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-sm-4">
-                    <div class="panel panel-default">
-                        <div class="panel-heading">
-                            Other Tools
-                        </div>
-                        <div class="panel-body">
-                            <p>
-                                Want to share your log as a video? Use the "Export video" button at the top once a log is open, or a screen recording
-                                tool to capture playback of this viewer directly.
-                            </p>
-                            <p>
-                                Want to analyze your logs with your own tools (e.g. Matlab)? Export to CSV with the "Export CSV" button once a log is open.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-sm-4">
-                    <div class="panel panel-default">
-                        <div class="panel-heading">
-                            Version
-                        </div>
-                        <div class="panel-body">
-                            <p>
-                                <div id="viewer-version">
-                                    <!-- current version shown here -->
-                                </div>
-                            </p>
-                            <p class="viewer-download">
-                                The latest official version is
-                                <a class="btn btn-default btn-md btn-viewer-download" data-toggle="tooltip" title="Goto the latest version download page"
-                                    href="https://github.com/WingFlight/wingflight-blackbox/releases/latest" target="_blank" rel="noopener noreferrer">
-                                    vX.X.XX </a>
-                            </p>
-                        </div>
-                    </div>
-                </div>
+            <div class="wf-card">
+                <span class="wf-card-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="14" height="12" rx="2"/><polygon points="22 8 16 12 22 16 22 8"/></svg>
+                </span>
+                <h3>Share</h3>
+                <p>Export the graphs as a video overlay, or as CSV to dig in with your own tools.</p>
+                <span class="wf-card-hint">Export options appear in the toolbar</span>
             </div>
-        </div>
-        <!-- the changelog floats outside of the page. -->
-        <div id="changelog">
-            <div class="button">
-                <a id="changelog_toggle" href="#">Changelog</a>
-            </div>
-            <div class="wrapper">
-                <iframe src="./changelog.html"></iframe>
-            </div>
-        </div>
+        </section>
+
+        <footer class="wf-footer">
+            <span id="viewer-version">
+                <!-- current version shown here -->
+            </span>
+            <span class="viewer-download">
+                &middot; Latest release
+                <a class="btn-viewer-download" href="https://github.com/WingFlight/wingflight-blackbox/releases/latest" target="_blank" rel="noopener noreferrer">vX.X.XX</a>
+            </span>
+            &middot;
+            <a href="https://github.com/WingFlight/wingflight-blackbox/releases" target="_blank" rel="noopener noreferrer">Release notes</a>
+            &middot;
+            <a href="https://github.com/WingFlight/wingflight-blackbox/issues" target="_blank" rel="noopener noreferrer">Report an issue</a>
+        </footer>
     </div>
     <!-- Navigation Bar -->
     <nav class="navbar navbar-inverse navbar-static-top" role="navigation">
