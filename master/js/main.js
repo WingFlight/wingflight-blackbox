@@ -703,7 +703,7 @@ function BlackboxLogViewer() {
         reader.onload = function(e) {
             var bytes = e.target.result;
 
-            var fileContents = String.fromCharCode.apply(null, new Uint8Array(bytes, 0,100));
+            var fileContents = String.fromCharCode.apply(null, new Uint8Array(bytes, 0, Math.min(100, bytes.byteLength)));
 
             if(fileContents.match(/# dump|# diff/i)) { // this is actually a configuration file
                 try{
@@ -720,6 +720,10 @@ function BlackboxLogViewer() {
                        html.toggleClass("has-config", hasConfig);
                    }
 
+                   if (!hasLog) {
+                       $("#loading-file-text").text(`Loaded configuration ${file.name}. This is a CLI dump rather than a flight log, so open a Blackbox log (.bbl/.bfl) to view it alongside.`);
+                   }
+
                    } catch(_e) {
                        configuration = null;
                        hasConfig = false;
@@ -732,6 +736,7 @@ function BlackboxLogViewer() {
             try {
                 flightLog = new FlightLog(flightLogDataArray);
             } catch (err) {
+                $("#loading-file-text").hide();
                 alert("Sorry, an error occured while trying to open this log:\n\n" + err);
                 return;
             }
@@ -2103,12 +2108,6 @@ function BlackboxLogViewer() {
             .dblclick(function() {
                 setGraphZoomLevel(GRAPH_DEFAULT_ZOOM, true);
             });
-
-        $('.navbar-toggle').click(function(e) {
-            $('.navbar-collapse').collapse('toggle');
-
-            e.preventDefault();
-        });
 
         seekBar.onSeek = setCurrentBlackboxTime;
 
