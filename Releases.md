@@ -1,3 +1,7 @@
+# 0.0.27
+
+Show separate roll and pitch deadbands in the log header dialog, following the 0.0.27 firmware header change.
+
 # 0.0.26
 
 Read the GPS navigation settings from the log header.
