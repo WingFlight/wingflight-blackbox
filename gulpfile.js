@@ -67,6 +67,7 @@ const APP_ASSET_SOURCES = [
     './js/graph_spectrum_plot.js',
     './js/grapher.js',
     './js/sticks.js',
+    './js/context_menu.js',
     './js/gui.js',
     './js/header_dialog.js',
     './js/keys_dialog.js',

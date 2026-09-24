@@ -604,3 +604,74 @@ a.wf-card:hover {
         stroke-dashoffset: 0;
     }
 }
+
+/* ---------------------------------------------------------------------------------------------
+ * Right-click menu on the graph and seek bar (js/context_menu.js)
+ * ------------------------------------------------------------------------------------------- */
+
+.wf-context-menu {
+    position: absolute;
+    z-index: 2000;
+    min-width: 240px;
+    width: auto;
+    margin: 0;
+    padding: 6px 0;
+    border: 1px solid var(--wf-chrome-border);
+    border-radius: 8px;
+    background: var(--wf-chrome-bg);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+    font-family: var(--wf-font);
+    font-size: 13px;
+}
+
+.wf-context-menu > li > a {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    padding: 6px 14px;
+    color: var(--wf-text);
+}
+
+.wf-context-menu > li > a:hover,
+.wf-context-menu > li > a:focus {
+    background: var(--wf-red);
+    background-image: none;
+    color: #fff;
+}
+
+.wf-context-menu > .disabled > a,
+.wf-context-menu > .disabled > a:hover,
+.wf-context-menu > .disabled > a:focus {
+    background: transparent;
+    color: var(--wf-text-muted);
+    opacity: 0.6;
+}
+
+.wf-context-menu .dropdown-header {
+    padding: 4px 14px 6px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--wf-text-muted);
+}
+
+.wf-context-menu .divider {
+    margin: 5px 0;
+    background: var(--wf-chrome-border);
+}
+
+.wf-context-menu-shortcut {
+    padding: 1px 6px;
+    border-radius: 4px;
+    background: var(--wf-chrome-bg-raised);
+    box-shadow: none;
+    font-size: 11px;
+    color: var(--wf-text-muted);
+}
+
+.wf-context-menu > li > a:hover .wf-context-menu-shortcut {
+    background: rgba(0, 0, 0, 0.2);
+    color: #fff;
+}
