@@ -28,6 +28,7 @@ function FlightLogVideoRenderer(flightLog, logParameters, videoOptions, events) 
         WORK_CHUNK_SIZE_UNFOCUSED = 32,
 
         videoWriter,
+        fileWriter = null,
 
         canvas = document.createElement('canvas'),
         stickCanvas = document.createElement('canvas'),
@@ -91,8 +92,67 @@ function FlightLogVideoRenderer(flightLog, logParameters, videoOptions, events) 
         }
     }
 
+    function supportsChromeAppFileSystem() {
+        return !!(window.chrome && window.chrome.fileSystem);
+    }
+
+    function supportsSaveFilePicker() {
+        return typeof window.showSaveFilePicker === "function";
+    }
+
     function supportsFileWriter() {
-        return !!(chrome && chrome.fileSystem);
+        return supportsSaveFilePicker() || supportsChromeAppFileSystem();
+    }
+
+    function getSuggestedFilename() {
+        var
+            logFilename = $(".log-filename").text().trim();
+
+        if (logFilename) {
+            return logFilename.replace(/\.[^.]*$/, "") + ".webm";
+        }
+
+        return "video.webm";
+    }
+
+    /**
+     * Adapts a File System Access API writable stream to the FileWriter-style interface that WebMWriter's BlobBuffer
+     * expects (it detects a FileWriter by its constructor name, hence the naming).
+     */
+    function FileWriter(writableStream) {
+        var
+            position = 0,
+            self = this;
+
+        this.onwriteend = null;
+
+        this.seek = function(offset) {
+            position = offset;
+        };
+
+        this.write = function(blob) {
+            var
+                writePosition = position;
+
+            position += blob.size;
+
+            writableStream.write({type: "write", position: writePosition, data: blob}).then(function() {
+                if (self.onwriteend) {
+                    self.onwriteend();
+                }
+            }, function(e) {
+                console.error(e);
+            });
+        };
+
+        this.close = function() {
+            return writableStream.close();
+        };
+
+        // Discard everything written so far, leaving any pre-existing file untouched
+        this.abort = function() {
+            return writableStream.abort();
+        };
     }
 
     /**
@@ -100,6 +160,20 @@ function FlightLogVideoRenderer(flightLog, logParameters, videoOptions, events) 
      * something else bad happens.
      */
     function openFileForWrite(suggestedName, _onComplete) {
+        if (supportsSaveFilePicker()) {
+            return window.showSaveFilePicker({
+                suggestedName: suggestedName,
+                types: [{description: "WebM video", accept: {"video/webm": [".webm"]}}]
+            }).then(function(fileHandle) {
+                return fileHandle.createWritable();
+            }).then(function(writableStream) {
+                return new FileWriter(writableStream);
+            }, function(error) {
+                // The user dismissing the picker isn't an error worth reporting
+                throw (error && error.name === "AbortError") ? null : error;
+            });
+        }
+
         return new Promise(function(resolve, reject) {
             chrome.fileSystem.chooseEntry({type: 'saveFile', suggestedName: suggestedName,
                     accepts: [{extensions: ['webm']}]}, function(fileEntry) {
@@ -146,10 +220,15 @@ function FlightLogVideoRenderer(flightLog, logParameters, videoOptions, events) 
     function finishRender() {
         videoWriter.complete().then(function(webM) {
             if (webM) {
-                window.saveAs(webM, "video.webm");
+                window.saveAs(webM, getSuggestedFilename());
+            } else if (fileWriter && fileWriter.close) {
+                return fileWriter.close();
             }
-
+        }).then(function() {
             notifyCompletion(true, frameIndex);
+        }, function(error) {
+            console.error(error);
+            notifyCompletion(false);
         });
     }
 
@@ -165,6 +244,12 @@ function FlightLogVideoRenderer(flightLog, logParameters, videoOptions, events) 
             framesToRender = Math.min(workChunkSize, frameCount - frameIndex);
 
         if (cancel) {
+            if (fileWriter && fileWriter.abort) {
+                fileWriter.abort().catch(function(e) {
+                    console.error(e);
+                });
+            }
+
             notifyCompletion(false);
             return;
         }
@@ -256,13 +341,16 @@ function FlightLogVideoRenderer(flightLog, logParameters, videoOptions, events) 
             };
 
         if (supportsFileWriter()) {
-            openFileForWrite("video.webm").then(function(fileWriter) {
-                webMOptions.fileWriter = fileWriter;
+            openFileForWrite(getSuggestedFilename()).then(function(writer) {
+                fileWriter = writer;
+                webMOptions.fileWriter = writer;
 
                 videoWriter = new WebMWriter(webMOptions);
                 renderChunk();
             }, function(error) {
-                console.error(error);
+                if (error) {
+                    console.error(error);
+                }
                 notifyCompletion(false);
             });
         } else {
