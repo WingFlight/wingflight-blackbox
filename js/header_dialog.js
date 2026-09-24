@@ -780,7 +780,8 @@ function HeaderDialog(dialog, onSave) {
         setParameter('itermWindupPointPercent'  ,sysConfig.itermWindupPointPercent,0);
         setParameter('dterm_cut_hz'                                ,sysConfig.dterm_cut_hz,2);
         setParameter('iterm_reset_offset'                ,sysConfig.iterm_reset_offset,0);
-        setParameter('deadband'                                        ,sysConfig.deadband,0);
+        setParameter('roll_deadband'                                ,sysConfig.roll_deadband,0);
+        setParameter('pitch_deadband'                               ,sysConfig.pitch_deadband,0);
         setParameter('yaw_deadband'                                ,sysConfig.yaw_deadband,0);
 
         if ((activeSysConfig.firmwareType == FIRMWARE_TYPE_ROTORFLIGHT) ||
