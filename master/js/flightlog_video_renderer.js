@@ -105,14 +105,7 @@ function FlightLogVideoRenderer(flightLog, logParameters, videoOptions, events) 
     }
 
     function getSuggestedFilename() {
-        var
-            logFilename = $(".log-filename").text().trim();
-
-        if (logFilename) {
-            return logFilename.replace(/\.[^.]*$/, "") + ".webm";
-        }
-
-        return "video.webm";
+        return getLogBaseFilename("video") + ".webm";
     }
 
     /**
