@@ -1752,57 +1752,200 @@ function BlackboxLogViewer() {
             }
         });
 
-        $(document).on("mousewheel", function(e) {
-
-        if($(e.target).hasClass('no-wheel')) { // prevent mousewheel scrolling on non scrollable elements.
-            e.preventDefault();
-            return;
+        function clampToLog(time) {
+            return Math.min(Math.max(time, flightLog.getMinTime()), flightLog.getMaxTime());
         }
 
-        if (graph && $(e.target).parents('.modal').length == 0){
-            var delta = Math.max(-1, Math.min(1, (e.originalEvent.wheelDelta)));
-            if (delta!=0) {
-                if($(e.target).attr('id') == 'graphCanvas') { // we are scrolling the graph
-                    if (delta < 0) { // scroll down (or left)
-                        if (e.altKey || e.shiftKey) {
-                            setGraphZoomLevel(graphZoom - 1 - ((e.altKey) ? 2 : 0), true);
-                        } else {
-                            logJumpBack(0.1 /*10%*/);
-                        }
-                    } else { // scroll up or right
-                        if (e.altKey || e.shiftKey) {
-                            setGraphZoomLevel(graphZoom + 1 + ((e.altKey) ? 2 : 0), true);
-                        } else {
-                            logJumpForward(0.1 /*10%*/);
-                        }
-                    }
-                    e.preventDefault();
-                    return true;
-                }
-                if($(e.target).hasClass('field-quick-adjust')) {
-                    var refreshRequired = false;
+        // Position of pageX across the graph canvas, from -0.5 (left edge) to 0.5 (right edge)
+        function graphOffsetAtPageX(pageX) {
+            return (pageX - $(canvas).offset().left) / $(canvas).width() - 0.5;
+        }
 
-                    if (e.shiftKey) { // change zoom
-                        refreshRequired = changePenZoom(activeGraphConfig.getGraphs(), $(e.target).attr('graph'), $(e.target).attr('field'), (delta>=0));
-                        e.preventDefault();
-                    } else if (e.altKey) { // change Expo
-                        refreshRequired = changePenExpo(activeGraphConfig.getGraphs(), $(e.target).attr('graph'), $(e.target).attr('field'), (delta>=0));
-                        e.preventDefault();
-                    } else if (e.ctrlKey){ // Change smoothing
-                        refreshRequired = changePenSmoothing(activeGraphConfig.getGraphs(), $(e.target).attr('graph'), $(e.target).attr('field'), (delta>=0));
-                        e.preventDefault();
-                    }
+        function graphTimeAtPageX(pageX) {
+            return currentBlackboxTime + graphOffsetAtPageX(pageX) * graph.getWindowWidthTime();
+        }
 
-                    if(refreshRequired) {
-                        graph.refreshGraphConfig();
-                        invalidateGraph();
-                        mouseNotification.show($('.log-graph'), null, null, refreshRequired, 750, null, 'bottom-right', 0);
-                    }
+        // Zoom by the given number of levels, keeping the time under pageX in the same place on screen
+        function zoomGraphAtPageX(steps, pageX) {
+            var
+                offset = graphOffsetAtPageX(pageX),
+                timeAtCursor = currentBlackboxTime + offset * graph.getWindowWidthTime(),
+                oldZoom = graphZoom;
 
-                    return true;
-                }
+            setGraphZoomLevel(graphZoom + steps, true);
+
+            if (graphZoom != oldZoom) {
+                setCurrentBlackboxTime(clampToLog(timeAtCursor - offset * graph.getWindowWidthTime()));
+                setGraphState(GRAPH_STATE_PAUSED);
             }
         }
+
+        var
+            // Wheel travel (in pixels) per zoom level: one notch of a mouse wheel, or a short trackpad swipe
+            WHEEL_ZOOM_STEP = 100,
+            wheelZoomTravel = 0;
+
+        // Bound natively rather than with jQuery, because document-level wheel listeners default to passive and
+        // couldn't then stop the page scrolling or the browser zooming
+        document.addEventListener("wheel", function(e) {
+            if ($(e.target).hasClass('no-wheel')) { // prevent mousewheel scrolling on non scrollable elements.
+                e.preventDefault();
+                return;
+            }
+
+            if (!graph || $(e.target).parents('.modal').length != 0) {
+                return;
+            }
+
+            var
+                scale = (e.deltaMode == 1) ? 40 : (e.deltaMode == 2) ? 800 : 1, // lines or pages to pixels
+                deltaX = e.deltaX * scale,
+                deltaY = e.deltaY * scale;
+
+            if (e.target === canvas) {
+                e.preventDefault();
+
+                // Shift+wheel scrubs; some browsers already report it as horizontal movement
+                if (e.shiftKey && deltaX == 0) {
+                    deltaX = deltaY;
+                    deltaY = 0;
+                }
+
+                if (Math.abs(deltaX) > Math.abs(deltaY)) {
+                    // Scrub through time: 10% of the visible window per wheel notch
+                    setCurrentBlackboxTime(clampToLog(currentBlackboxTime + deltaX / WHEEL_ZOOM_STEP * 0.1 * graph.getWindowWidthTime()));
+                    setGraphState(GRAPH_STATE_PAUSED);
+                } else if (deltaY != 0) {
+                    // Zoom, wheel up/pinch out to zoom in. Accumulate so trackpads' many small deltas zoom at a sane rate.
+                    if (Math.sign(wheelZoomTravel) == Math.sign(deltaY)) {
+                        wheelZoomTravel = 0;
+                    }
+                    wheelZoomTravel -= deltaY;
+
+                    var steps = Math.trunc(wheelZoomTravel / WHEEL_ZOOM_STEP);
+
+                    if (steps != 0) {
+                        wheelZoomTravel -= steps * WHEEL_ZOOM_STEP;
+                        zoomGraphAtPageX(steps, e.pageX);
+                    }
+                }
+                return;
+            }
+
+            if ($(e.target).hasClass('field-quick-adjust') && deltaY != 0) {
+                var
+                    wheelUp = deltaY < 0,
+                    refreshRequired = false;
+
+                if (e.shiftKey) { // change zoom
+                    refreshRequired = changePenZoom(activeGraphConfig.getGraphs(), $(e.target).attr('graph'), $(e.target).attr('field'), wheelUp);
+                    e.preventDefault();
+                } else if (e.altKey) { // change Expo
+                    refreshRequired = changePenExpo(activeGraphConfig.getGraphs(), $(e.target).attr('graph'), $(e.target).attr('field'), wheelUp);
+                    e.preventDefault();
+                } else if (e.ctrlKey){ // Change smoothing
+                    refreshRequired = changePenSmoothing(activeGraphConfig.getGraphs(), $(e.target).attr('graph'), $(e.target).attr('field'), wheelUp);
+                    e.preventDefault();
+                }
+
+                if(refreshRequired) {
+                    graph.refreshGraphConfig();
+                    invalidateGraph();
+                    mouseNotification.show($('.log-graph'), null, null, refreshRequired, 750, null, 'bottom-right', 0);
+                }
+            }
+        }, {passive: false});
+
+        function placeMarkerAt(time) {
+            markerTime = time;
+            setMarker(true);
+            $(".marker-offset", statusBar).css('visibility', 'visible');
+            invalidateGraph();
+        }
+
+        function removeMarker() {
+            setMarker(false);
+            $(".marker-offset", statusBar).css('visibility', 'hidden');
+            invalidateGraph();
+        }
+
+        // Bookmark slots are 1 to 9, matching the Alt+1..9 recall shortcuts
+        function firstFreeBookmarkSlot() {
+            for (var slot = 1; slot <= 9; slot++) {
+                if (!bookmarkTimes || bookmarkTimes[slot] == null) {
+                    return slot;
+                }
+            }
+            return null;
+        }
+
+        function addBookmarkAt(slot, time) {
+            if (bookmarkTimes == null) {
+                bookmarkTimes = [];
+            }
+            bookmarkTimes[slot] = time;
+
+            $('.bookmark-' + slot, statusBar).css('visibility', 'visible');
+            $('.bookmark-clear', statusBar).css('visibility', 'visible');
+            invalidateGraph();
+        }
+
+        function showGraphContextMenu(time, pageX, pageY) {
+            var
+                hasRange = videoExportInTime !== false || videoExportOutTime !== false,
+                bookmarkSlot = firstFreeBookmarkSlot(),
+                canExportVideo = !$(".btn-video-export").hasClass("disabled");
+
+            ContextMenu.show([
+                {header: "At " + formatTime((time - flightLog.getMinTime()) / 1000, true)},
+                {label: "Go to here", action: function() {
+                    setCurrentBlackboxTime(time);
+                    setGraphState(GRAPH_STATE_PAUSED);
+                }},
+                {divider: true},
+                {label: "Set start here", shortcut: "I", action: function() { setVideoInTime(time); }},
+                {label: "Set end here", shortcut: "O", action: function() { setVideoOutTime(time); }},
+                {label: "Clear start and end", disabled: !hasRange, action: function() {
+                    setVideoInTime(false);
+                    setVideoOutTime(false);
+                }},
+                {divider: true},
+                hasMarker
+                    ? {label: "Remove marker", shortcut: "M", action: removeMarker}
+                    : {label: "Place marker here", shortcut: "M", action: function() { placeMarkerAt(time); }},
+                bookmarkSlot
+                    ? {label: "Add bookmark " + bookmarkSlot + " here", shortcut: "Alt+Shift+" + bookmarkSlot, action: function() { addBookmarkAt(bookmarkSlot, time); }}
+                    : {label: "All 9 bookmarks in use", disabled: true},
+                {divider: true},
+                {label: "Zoom in here", shortcut: "Wheel", action: function() {
+                    setCurrentBlackboxTime(time);
+                    setGraphZoomLevel(graphZoom + 2, true);
+                    setGraphState(GRAPH_STATE_PAUSED);
+                }},
+                {label: "Zoom out", action: function() { setGraphZoomLevel(graphZoom - 2, true); }},
+                {label: "Reset zoom", disabled: graphZoom == GRAPH_DEFAULT_ZOOM, action: function() { setGraphZoomLevel(GRAPH_DEFAULT_ZOOM, true); }},
+                {divider: true},
+                {label: hasRange ? "Export video of start to end…" : "Export video…", disabled: !canExportVideo, action: function() {
+                    $(".btn-video-export").first().trigger("click");
+                }},
+                {label: "Save graph as image…", shortcut: "Alt+S", action: makeScreenshot},
+            ], pageX, pageY);
+        }
+
+        $(canvas).on("contextmenu", function(e) {
+            if (!graph) {
+                return;
+            }
+            e.preventDefault();
+            showGraphContextMenu(clampToLog(graphTimeAtPageX(e.pageX)), e.pageX, e.pageY);
+        });
+
+        $(seekBarCanvas).on("contextmenu", function(e) {
+            if (!graph) {
+                return;
+            }
+            e.preventDefault();
+            showGraphContextMenu(seekBar.getTimeAtPageX(e.pageX), e.pageX, e.pageY);
         });
 
         $(document).keydown(function(e) {
