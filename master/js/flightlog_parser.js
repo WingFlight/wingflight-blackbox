@@ -315,7 +315,8 @@ var FlightLogParser = function(logData) {
             dterm_differentiator:null,              // DTerm Differentiator
             H_sensitivity:null,                     // Horizon Sensitivity
             iterm_reset_offset:null,                // I-Term reset offset
-            deadband:null,                          // Roll, Pitch Deadband
+            roll_deadband:null,                     // Roll Deadband
+            pitch_deadband:null,                    // Pitch Deadband
             yaw_deadband:null,                      // Yaw Deadband
             gyro_lpf:null,                          // Gyro lpf setting.
             gyro_32khz_hardware_lpf:null,           // Gyro 32khz hardware lpf setting. (post BF3.4)
@@ -734,7 +735,8 @@ var FlightLogParser = function(logData) {
             case "dynamic_dterm_threshold":
             case "dynamic_pterm":
             case "iterm_reset_offset":
-            case "deadband":
+            case "roll_deadband":
+            case "pitch_deadband":
             case "yaw_deadband":
             case "gyro_lpf":
             case "gyro_hardware_lpf":
