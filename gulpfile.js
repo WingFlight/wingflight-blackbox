@@ -90,6 +90,7 @@ const APP_ASSET_SOURCES = [
     './js/vendor/three.js',
     './js/vendor/three.min.js',
     './js/vendor/GLTFLoader.js',
+    './js/save_file.js',
     './js/screenshot.js',
     './js/default_workspaces.js',
 
