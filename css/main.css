@@ -152,14 +152,6 @@ a.disabled {
         top: 70px!important;
     }
 
-    div.navbar-logo .log-filename {
-        font-size: 12px;
-    }
-
-    div.navbar-logo img {
-        height: 25px;
-    }
-
     html.has-log button.log-jump-start,
     html.has-log button.log-jump-back,
     html.has-log button.log-jump-forward,
@@ -1115,10 +1107,6 @@ progress {
     font-size: 1.5em;
 }
 
-.navbar-inverse .navbar-brand {
-    color: #EAEAEA;
-}
-
 .navbar {
     margin-bottom:5px;
 }
@@ -1149,45 +1137,6 @@ progress {
 .btn-svg-icon {
     padding: 3px 7px;
     line-height: 1em;
-}
-
-.navbar-logo {
-	position: absolute;
-	display:block;
-	left: 50px;
-}
-
-/* Always WingFlight-branded, regardless of which firmware recorded the loaded log --
-   deliberately not per-firmware (unlike .view-*/switch/graph-header rules elsewhere in this
-   file, which do still vary with html.isCF/isBF/isRF/isINAV/isWF for legitimate per-firmware
-   UI differences). No adjacent "Blackbox Explorer" text anymore either (removed from
-   index.html) -- the logo has the whole .navbar-logo box to itself, sized up accordingly. */
-.navbar-logo img {
-	position:relative;
-	content: url(".././images/wf_logo_white.svg");
-	height: 45px;
-	width: 155px;
-	margin-top: 5px !important;
-	margin-left: 5px !important;
-	padding: 0;
-	display:block;
-}
-
-.navbar-logo a {
-    padding: 0;
-    position: absolute;
-    top: 32%;
-    font-size: 15px;
-    /* Fixed, not a %: .navbar-logo has no explicit width, so it shrink-to-fits around its
-       content, and this <a> is itself one of the absolutely-positioned children that gets
-       excluded from that shrink-to-fit calculation -- a % here was computed against
-       whatever the *other* sibling (the logo image, plus the "Blackbox Explorer" text that
-       used to sit next to it) happened to add up to, which is exactly why removing that
-       text pulled this back into range and made it overlap the now-wider logo. left: 180px
-       clears the logo image's own right edge (margin-left 5px + width 155px = 160px) with
-       a fixed 20px gap that doesn't depend on sibling content width at all. */
-    left: 180px;
-    width: 100%;
 }
 
 html.has-video .navbar-static-top,

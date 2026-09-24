@@ -30,6 +30,159 @@
     border-bottom: 2px solid var(--wf-red);
 }
 
+/* The toolbar below is fixed at top: 50px, so the bar must stay exactly 50px tall including its border */
+.wf-navbar {
+    height: 50px;
+    min-height: 50px;
+    margin: 0;
+    border-width: 0 0 2px;
+    border-radius: 0;
+    box-shadow: none;
+    font-family: var(--wf-font);
+    z-index: 1030;
+}
+
+.wf-navbar-inner {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    height: 48px;
+    padding: 0 16px 0 20px;
+}
+
+.wf-navbar-logo {
+    flex: none;
+    height: 26px;
+    width: auto;
+}
+
+.wf-navbar-divider {
+    flex: none;
+    width: 1px;
+    height: 24px;
+    background: var(--wf-chrome-border);
+}
+
+.wf-navbar-file {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--wf-text);
+}
+
+.wf-navbar-actions {
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.wf-nav-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    height: 32px;
+    padding: 0 12px;
+    border: 1px solid var(--wf-chrome-border);
+    border-radius: 6px;
+    background: var(--wf-chrome-bg-raised);
+    color: var(--wf-text);
+    font-size: 13px;
+    font-weight: 600;
+    text-shadow: none;
+    box-shadow: none;
+    transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.wf-nav-btn:hover,
+.wf-nav-btn:focus,
+.open > .wf-nav-btn {
+    background: hsl(220, 9%, 23%);
+    border-color: hsl(220, 10%, 30%);
+    color: #fff;
+    box-shadow: none;
+}
+
+.wf-nav-btn-primary {
+    background: var(--wf-red);
+    border-color: var(--wf-red);
+    color: #fff;
+}
+
+.wf-nav-btn-primary:hover,
+.wf-nav-btn-primary:focus-within {
+    background: var(--wf-red-hover);
+    border-color: var(--wf-red-hover);
+}
+
+.wf-nav-btn svg,
+.wf-nav-icon svg {
+    width: 16px;
+    height: 16px;
+    flex: none;
+}
+
+.wf-nav-btn .caret {
+    margin-left: 2px;
+    opacity: 0.7;
+}
+
+.wf-nav-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--wf-text-muted);
+    box-shadow: none;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.wf-nav-icon:hover,
+.wf-nav-icon:focus {
+    background: var(--wf-chrome-bg-raised);
+    color: #fff;
+    outline: 0;
+}
+
+/* Only shown once a log is loaded, not for a video on its own */
+.wf-nav-icon.open-flight-analysis-dialog {
+    display: none;
+}
+
+html.has-log .wf-nav-icon.open-flight-analysis-dialog {
+    display: inline-flex;
+}
+
+.wf-export-menu .dropdown-menu {
+    min-width: 160px;
+    width: auto;
+    margin-top: 6px;
+}
+
+html.has-log .wf-export-menu .btn-video-export {
+    display: block;
+}
+
+@media (max-width: 900px) {
+    .wf-nav-label {
+        display: none;
+    }
+
+    .wf-navbar-divider:first-of-type,
+    .wf-navbar-logo {
+        display: none;
+    }
+}
+
 .btn-primary {
     background-image: none;
     background-color: var(--wf-red);
