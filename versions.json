@@ -85,11 +85,6 @@
       "type": "snapshot",
       "name": "0.0.11",
       "path": "./snapshot/0.0.11/"
-    },
-    {
-      "type": "branch",
-      "name": "feature-servo-trim-field",
-      "path": "./feature-servo-trim-field/"
     }
   ]
 }
