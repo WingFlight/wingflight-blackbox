@@ -32,6 +32,7 @@ const WEB_DIST_DIR = './web-dist/';
 // references into one folder", they only differ in how they source their third-party deps.
 const APP_ASSET_SOURCES = [
     // CSS files
+    './css/branding.css',
     './css/flight_analysis_dialog.css',
     './css/header_dialog.css',
     './css/jquery.nouislider.min.css',

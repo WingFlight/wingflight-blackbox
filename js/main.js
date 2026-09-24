@@ -1058,7 +1058,7 @@ function BlackboxLogViewer() {
         });
 
         // Get Latest Version Information
-        $("#viewer-version").text('You are using version ' + VIEWER_VERSION);
+        $("#viewer-version").text('Blackbox Explorer v' + VIEWER_VERSION);
         $(".viewer-version", statusBar).text('v'+VIEWER_VERSION);
         try {
             $.getJSON('https://api.github.com/repos/WingFlight/wingflight-blackbox/releases/latest',{},function(data){
@@ -1203,23 +1203,6 @@ function BlackboxLogViewer() {
 
         $(".toggle-grid").click(function () {
             toggleOverrideStatus('graphGridOverride', 'has-grid-override');
-        });
-
-        /** changelog trigger **/
-        $("#changelog_toggle").on('click', function() {
-            var state = $(this).data('state2');
-            if (state) { // log closed
-                $("#changelog").animate({right: -695}, 200, function () {
-                    html.removeClass('log_open');
-                });
-                state = false;
-            } else { // log open
-                $("#changelog").animate({right: 0}, 200);
-                html.addClass('log_open');
-                state = true;
-            }
-            $(this).text(state ? 'Close' : 'Changelog');
-            $(this).data('state2', state);
         });
 
         var logJumpBack = function(fast, slow) {
@@ -2181,16 +2164,29 @@ function BlackboxLogViewer() {
 
         /* drag and drop support */
 
+        // dragover fires continuously while a drag is over the page, so clear the highlight shortly after it stops
+        var dragHighlightTimer = null;
+
+        function clearDragHighlight() {
+            clearTimeout(dragHighlightTimer);
+            html.removeClass("is-dragging");
+        }
+
         window.ondragover = function(e) {
             // prevent default behavior from changing page on dropped file
             // NOTE: ondrop events WILL NOT WORK if you do not "preventDefault" in the ondragover event!!
             e.preventDefault();
             e.dataTransfer.dropEffect = 'copy';
+
+            html.addClass("is-dragging");
+            clearTimeout(dragHighlightTimer);
+            dragHighlightTimer = setTimeout(clearDragHighlight, 150);
             return false;
         };
 
         window.ondrop = function(e) {
             e.preventDefault();
+            clearDragHighlight();
 
             const item = e.dataTransfer.items[0];
             const entry = item.webkitGetAsEntry();
