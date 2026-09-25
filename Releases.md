@@ -1,3 +1,10 @@
+# 0.0.28
+
+Add wheel zoom around the mouse pointer (pinch on a trackpad), Shift+wheel or sideways swipe to scrub, and right-click menus on the graph and seek bar (go to time, set/clear start and end, markers, bookmarks, zoom, export video, save graph image).
+Prompt for a save location when exporting video, CSV, workspaces and screenshots, falling back to a download where the browser can't.
+Rebrand the welcome screen and navbar to match the WingFlight sites, with one Export menu in place of three buttons.
+Say so when a CLI dump is opened instead of a log, rather than leaving "Trying to load file..." up.
+
 # 0.0.27
 
 Show separate roll and pitch deadbands in the log header dialog, following the 0.0.27 firmware header change.
