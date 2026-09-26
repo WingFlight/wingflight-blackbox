@@ -865,11 +865,12 @@ var
     // Positions mirror debugType_e in wingflight-firmware's build/debug.h, not
     // DEBUG_MODE_RF_4_6: the "Remove OSD" refactor deleted DEBUG_MAX7456_SIGNAL/
     // SPICLOCK outright (no reserved placeholder), renumbering every slot from
-    // SBUS onward, and appended GYRO_CALIBRATION/AUTOHOVER/ATTHOLD at the end
-    // (there is no POLAR_RATE or USER1-4 debug mode in this firmware). The
-    // governor/rescue/cyclic slots that lost their populating code keep their
-    // old positions and are relabeled here to make clear they're dead for
-    // WingFlight logs.
+    // SBUS onward, and appended GYRO_CALIBRATION/AUTOHOVER/ATTHOLD/TVHOLD at the
+    // end (there is no POLAR_RATE or USER1-4 debug mode in this firmware).
+    // Slots whose populating code is gone are UNUSED_<n> in the firmware too;
+    // they keep their positions so the modes after them keep their numbers.
+    // A few live labels differ from the firmware names (GYRO, RX_SPECTRUM_SPI)
+    // because they key DEBUG_FRIENDLY_FIELD_NAMES shared with Rotorflight.
     DEBUG_MODE_WF = makeReadOnly([
         "NONE",
         "CYCLETIME",
@@ -879,7 +880,7 @@ var
         "PIDLOOP",
         "GYRO_SCALED",
         "RC_COMMAND",
-        "ANGLERATE",
+        "UNUSED_8",
         "ESC_SENSOR",
         "SCHEDULER",
         "STACK",
@@ -896,15 +897,15 @@ var
         "DUAL_GYRO_DIFF",
         "SBUS",
         "FPORT",
-        "RANGEFINDER",
-        "RANGEFINDER_QUALITY",
-        "LIDAR_TF",
+        "UNUSED_25",
+        "UNUSED_26",
+        "UNUSED_27",
         "ADC_INTERNAL",
-        "GOVERNOR_UNUSED",
-        "SDIO",
+        "UNUSED_29",
+        "UNUSED_30",
         "CURRENT_SENSOR",
         "USB",
-        "SMARTAUDIO",
+        "UNUSED_33",
         "RTH",
         "ITERM_RELAX",
         "ACRO_TRAINER",
@@ -917,7 +918,7 @@ var
         "DSHOT_RPM_TELEMETRY",
         "RPM_FILTER",
         "RPM_SOURCE",
-        "TTA_UNUSED",
+        "UNUSED_46",
         "AIRBORNE",
         "DUAL_GYRO_SCALED",
         "DSHOT_RPM_ERRORS",
@@ -927,28 +928,28 @@ var
         "BARO",
         "GPS_RESCUE_THROTTLE_PID",
         "FREQ_SENSOR",
-        "FEEDFORWARDD_LIMIT",
-        "FEEDFORWARD",
+        "UNUSED_56",
+        "UNUSED_57",
         "BLACKBOX_OUTPUT",
         "GYRO_SAMPLE",
         "RX_TIMING",
-        "D_LPF",
-        "VTX_TRAMP",
+        "UNUSED_61",
+        "UNUSED_62",
         "GHST",
         "SCHEDULER_DETERMINISM",
         "TIMING_ACCURACY",
         "RX_EXPRESSLRS_SPI",
         "RX_EXPRESSLRS_PHASELOCK",
         "RX_STATE_TIME",
-        "PITCH_PRECOMP",
-        "YAW_PRECOMP",
-        "RESCUE_UNUSED",
-        "RESCUE_ALTHOLD_UNUSED",
-        "CROSS_COUPLING_UNUSED",
-        "ERROR_DECAY",
-        "HS_OFFSET_UNUSED",
-        "HS_BLEED_UNUSED",
-        "GOV_MOTOR_UNUSED",
+        "UNUSED_69",
+        "UNUSED_70",
+        "UNUSED_71",
+        "UNUSED_72",
+        "UNUSED_73",
+        "UNUSED_74",
+        "UNUSED_75",
+        "UNUSED_76",
+        "UNUSED_77",
         "GYRO_CALIBRATION",
         "AUTOHOVER",
         "ATTHOLD",
