@@ -76,6 +76,17 @@ function GraphConfig(graphConfig) {
                          */
                         field.curve.offset = defaultCurve.offset;
                         field.curve.inputRange = defaultCurve.inputRange;
+
+                        /* Callers copy the curve with $.extend({}, field.curve), which turns a missing curve into {}
+                         * (e.g. the example graphs a first-time user gets) -- fill in whatever it doesn't set, or
+                         * power/outputRange stay undefined and every value on the graph becomes NaN.
+                         */
+                        if (field.curve.power === undefined) {
+                            field.curve.power = defaultCurve.power;
+                        }
+                        if (field.curve.outputRange === undefined) {
+                            field.curve.outputRange = defaultCurve.outputRange;
+                        }
                     }
 
                     if(colorIndexOffset!=null && field.color != undefined) { // auto offset the actual color (to expand [all] selections)
