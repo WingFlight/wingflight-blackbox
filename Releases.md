@@ -3,7 +3,7 @@
 Read the per-axis I-term decay header (roll, pitch, yaw in 0.01 s, then max rate) from Wingflight API 22.7 logs; it showed a tenth of the real time and the pitch value as the max rate. Older single-value logs still read in 0.1 s. Decay now sits with relax in Iterm Settings.
 Show the I-term relax level from API 22.8 logs, and hide the relax type there (relax is always on).
 Name in-flight adjustment functions 114-125 (per-axis decay time and relax cutoff, main and TV loop), which showed as "Unknown (N)".
-Use the pilot-facing Flight Feel names: Gain, Lock (I-term decay time) and Bounce-back Suppression, including the adjustment functions. API 22.9 logs carry the 1-10 Bounce-back Suppression score in place of the relax cutoff in Hz; the header dialog shows whichever the log has.
+Use the pilot-facing Flight Feel names: Gain, Lock (I-term decay time) and Bounce Back, including the adjustment functions. API 22.9 logs carry the 1-10 Bounce Back score in place of the relax cutoff in Hz; the header dialog shows whichever the log has.
 
 # 0.0.28
 

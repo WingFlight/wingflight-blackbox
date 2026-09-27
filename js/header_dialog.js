@@ -908,11 +908,11 @@ function HeaderDialog(dialog, onSave) {
         if (sysConfig.iterm_relax_type == null && sysConfig.iterm_relax_level[0] != null) {
             $('.parameter td[name="iterm_relax_type"]').css('display', 'none');
         }
-        // Wingflight API 22.9+ logs the Bounce-back Suppression score (1-10,
+        // Wingflight API 22.9+ logs the Bounce Back score (1-10,
         // higher = less bounce-back) instead of the relax cutoff in Hz.
         var bounceback = sysConfig.bounceback && sysConfig.bounceback[0] != null;
         var relaxRow = bounceback ? sysConfig.bounceback : sysConfig.iterm_relax_cutoff;
-        $('#iterm_relax_row_label').text(bounceback ? 'Bounce-back Suppression (1-10)' : 'Iterm Relax Cutoff [Hz]');
+        $('#iterm_relax_row_label').text(bounceback ? 'Bounce Back (1-10)' : 'Iterm Relax Cutoff [Hz]');
         setParameter('iterm_relax_r'   , relaxRow[0], 0);
         setParameter('iterm_relax_p'   , relaxRow[1], 0);
         setParameter('iterm_relax_y'   , relaxRow[2], 0);

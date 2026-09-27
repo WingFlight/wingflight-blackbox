@@ -241,19 +241,19 @@ var FlightLogParser = function(logData) {
             { name: 'Flap Compensation Gain'                         },
             { name: 'Diff Thrust Yaw Gain'                           },
 
-            // Per-axis Lock (I-term decay time, 0.01 s) and Bounce-back Suppression (1-10), main then TV loop
+            // Per-axis Lock (I-term decay time, 0.01 s) and Bounce Back (1-10), main then TV loop
             { name: 'Lock [roll]',    scale: 0.01     },
             { name: 'Lock [pitch]',   scale: 0.01     },
             { name: 'Lock [yaw]',     scale: 0.01     },
             { name: 'TV Lock [roll]', scale: 0.01     },
             { name: 'TV Lock [pitch]', scale: 0.01    },
             { name: 'TV Lock [yaw]',  scale: 0.01     },
-            { name: 'Bounce-back Suppression [roll]' },
-            { name: 'Bounce-back Suppression [pitch]' },
-            { name: 'Bounce-back Suppression [yaw]' },
-            { name: 'TV Bounce-back Suppression [roll]' },
-            { name: 'TV Bounce-back Suppression [pitch]' },
-            { name: 'TV Bounce-back Suppression [yaw]' },
+            { name: 'Bounce Back [roll]' },
+            { name: 'Bounce Back [pitch]' },
+            { name: 'Bounce Back [yaw]' },
+            { name: 'TV Bounce Back [roll]' },
+            { name: 'TV Bounce Back [pitch]' },
+            { name: 'TV Bounce Back [yaw]' },
 
         ];
 
@@ -394,7 +394,7 @@ var FlightLogParser = function(logData) {
             iterm_relax_type: null,                 // ITerm Relax type
             iterm_relax_cutoff: [null, null, null], // ITerm Relax cutoff
             iterm_relax_level: [null, null, null],  // ITerm Relax level (Wingflight, replaces the type)
-            bounceback: [null, null, null],         // Bounce-back Suppression score 1-10 (Wingflight 22.9+, replaces iterm_relax_cutoff)
+            bounceback: [null, null, null],         // Bounce Back score 1-10 (Wingflight 22.9+, replaces iterm_relax_cutoff)
             error_limit: [null, null, null],        // Error Limit
             iterm_decay: [null, null],              // I-term Decay: time, max rate (Wingflight 22.7+: roll, pitch, yaw time in 0.01 s, then max rate)
             error_decay_ground: null,               // Ground Error Decay
