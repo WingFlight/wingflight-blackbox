@@ -903,9 +903,33 @@ function HeaderDialog(dialog, onSave) {
         }
 
         renderSelect('iterm_relax_type', sysConfig.iterm_relax_type, ITERM_RELAX_TYPE);
+        // Wingflight API 22.8+ logs the relax level instead of a type (relax is
+        // always on for every axis), so hide the type box rather than show it missing.
+        if (sysConfig.iterm_relax_type == null && sysConfig.iterm_relax_level[0] != null) {
+            $('.parameter td[name="iterm_relax_type"]').css('display', 'none');
+        }
         setParameter('iterm_relax_r'   , sysConfig.iterm_relax_cutoff[0], 0);
         setParameter('iterm_relax_p'   , sysConfig.iterm_relax_cutoff[1], 0);
         setParameter('iterm_relax_y'   , sysConfig.iterm_relax_cutoff[2], 0);
+        setParameter('iterm_relax_level_r', sysConfig.iterm_relax_level[0], 0);
+        setParameter('iterm_relax_level_p', sysConfig.iterm_relax_level[1], 0);
+        setParameter('iterm_relax_level_y', sysConfig.iterm_relax_level[2], 0);
+
+        // iterm_decay is "roll,pitch,yaw,max rate" with the times in 0.01 s on
+        // Wingflight API 22.7+, and "time,max rate" with one time in 0.1 s for
+        // every axis before that.
+        var itermDecay = sysConfig.iterm_decay || [];
+        if (itermDecay.length >= 4) {
+            setParameter('iterm_decay_time_r'  , itermDecay[0], 2);
+            setParameter('iterm_decay_time_p'  , itermDecay[1], 2);
+            setParameter('iterm_decay_time_y'  , itermDecay[2], 2);
+            setParameter('iterm_decay_rate_max', itermDecay[3], 0);
+        } else {
+            setParameter('iterm_decay_time_r'  , itermDecay[0], 1);
+            setParameter('iterm_decay_time_p'  , itermDecay[0], 1);
+            setParameter('iterm_decay_time_y'  , itermDecay[0], 1);
+            setParameter('iterm_decay_rate_max', itermDecay[1], 0);
+        }
         setParameter('error_limit_r'   , sysConfig.error_limit[0], 0);
         setParameter('error_limit_p'   , sysConfig.error_limit[1], 0);
         setParameter('error_limit_y'   , sysConfig.error_limit[2], 0);
@@ -931,8 +955,6 @@ function HeaderDialog(dialog, onSave) {
         setParameter('cyclic_coupling_ratio'      , sysConfig.cyclic_coupling[1], 0);
         setParameter('cyclic_coupling_cutoff'     , sysConfig.cyclic_coupling[2], 1);
 
-        setParameter('iterm_decay_time'           , sysConfig.iterm_decay[0], 1);
-        setParameter('iterm_decay_rate_max'       , sysConfig.iterm_decay[1], 0);
         setParameter('error_decay_ground'         , sysConfig.error_decay_ground, 1);
 
         renderSelect('unsynced_fast_pwm'                ,sysConfig.unsynced_fast_pwm, MOTOR_SYNC);
