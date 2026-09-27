@@ -95,11 +95,6 @@
       "type": "snapshot",
       "name": "0.0.11",
       "path": "./snapshot/0.0.11/"
-    },
-    {
-      "type": "branch",
-      "name": "feature-flight-feel",
-      "path": "./feature-flight-feel/"
     }
   ]
 }
