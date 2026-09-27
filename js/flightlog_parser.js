@@ -241,6 +241,20 @@ var FlightLogParser = function(logData) {
             { name: 'Flap Compensation Gain'                         },
             { name: 'Diff Thrust Yaw Gain'                           },
 
+            // Per-axis I-term decay time (0.01 s) and relax cutoff (Hz), main then TV loop
+            { name: 'I-term Decay Time [roll]',    scale: 0.01     },
+            { name: 'I-term Decay Time [pitch]',   scale: 0.01     },
+            { name: 'I-term Decay Time [yaw]',     scale: 0.01     },
+            { name: 'TV I-term Decay Time [roll]', scale: 0.01     },
+            { name: 'TV I-term Decay Time [pitch]', scale: 0.01    },
+            { name: 'TV I-term Decay Time [yaw]',  scale: 0.01     },
+            { name: 'I-term Relax Cutoff [roll]'                     },
+            { name: 'I-term Relax Cutoff [pitch]'                    },
+            { name: 'I-term Relax Cutoff [yaw]'                      },
+            { name: 'TV I-term Relax Cutoff [roll]'                  },
+            { name: 'TV I-term Relax Cutoff [pitch]'                 },
+            { name: 'TV I-term Relax Cutoff [yaw]'                   },
+
         ];
 
     //Private variables:
@@ -379,8 +393,9 @@ var FlightLogParser = function(logData) {
             filter_process_denom : null,            // Filter denom
             iterm_relax_type: null,                 // ITerm Relax type
             iterm_relax_cutoff: [null, null, null], // ITerm Relax cutoff
+            iterm_relax_level: [null, null, null],  // ITerm Relax level (Wingflight, replaces the type)
             error_limit: [null, null, null],        // Error Limit
-            iterm_decay: [null, null],              // I-term Decay
+            iterm_decay: [null, null],              // I-term Decay: time, max rate (Wingflight 22.7+: roll, pitch, yaw time in 0.01 s, then max rate)
             error_decay_ground: null,               // Ground Error Decay
             cyclic_coupling: [null, null, null],          // Cyclic Cross-Coupling
             dyn_notch_range: null,                  // Dyn Notch Range (LOW, MED, HIGH or AUTO)
@@ -952,6 +967,7 @@ var FlightLogParser = function(logData) {
             case "dterm_lpf_dyn_hz":
             case "d_min":
             case "iterm_relax_cutoff":
+            case "iterm_relax_level":
             case "error_limit":
             case "yaw_stop_gain":
             case "yaw_precomp":

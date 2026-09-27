@@ -1114,7 +1114,7 @@
                                                 </tr>
                                                 <tr>
                                                     <td class="bf-only">
-                                                        <label>Iterm Relax</label>
+                                                        <label>Iterm Relax Cutoff [Hz]</label>
                                                     </td>
                                                     <td name="iterm_relax_r" class="bf-only">
                                                         <input type="text" step="1" min="0" max="999" />
@@ -1125,6 +1125,44 @@
                                                     <td name="iterm_relax_y" class="bf-only">
                                                         <input type="text" step="1" min="0" max="999" />
                                                     </td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="bf-only">
+                                                        <label>Iterm Relax Level [deg/s]</label>
+                                                    </td>
+                                                    <td name="iterm_relax_level_r" class="bf-only">
+                                                        <input type="text" step="1" min="0" max="999" />
+                                                    </td>
+                                                    <td name="iterm_relax_level_p" class="bf-only">
+                                                        <input type="text" step="1" min="0" max="999" />
+                                                    </td>
+                                                    <td name="iterm_relax_level_y" class="bf-only">
+                                                        <input type="text" step="1" min="0" max="999" />
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="bf-only">
+                                                        <label>Iterm Decay Time [s]</label>
+                                                    </td>
+                                                    <td name="iterm_decay_time_r" class="bf-only">
+                                                        <input type="text" step="1" min="0" max="999" />
+                                                    </td>
+                                                    <td name="iterm_decay_time_p" class="bf-only">
+                                                        <input type="text" step="1" min="0" max="999" />
+                                                    </td>
+                                                    <td name="iterm_decay_time_y" class="bf-only">
+                                                        <input type="text" step="1" min="0" max="999" />
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="bf-only">
+                                                        <label>Iterm Decay Max Rate [deg/s]</label>
+                                                    </td>
+                                                    <td name="iterm_decay_rate_max" class="bf-only">
+                                                        <input type="text" step="1" min="0" max="999" />
+                                                    </td>
+                                                    <td>&nbsp;</td>
+                                                    <td>&nbsp;</td>
                                                 </tr>
                                                 <tr>
                                                     <td class="bf-only">
@@ -1210,14 +1248,6 @@
                                                     </td>
                                                 </tr>
                                                 <tr>
-                                                    <td name="iterm_decay_time" class="bf-only">
-                                                        <label>I-Term Decay Time [s]</label>
-                                                        <input type="text" step="1" min="0" max="999" />
-                                                    </td>
-                                                    <td name="iterm_decay_rate_max" class="bf-only">
-                                                        <label>I-Term Decay Max Rate [deg/s]</label>
-                                                        <input type="text" step="1" min="0" max="999" />
-                                                    </td>
                                                     <td name="error_decay_ground" class="bf-only">
                                                         <label>Ground Error Decay Time [s]</label>
                                                         <input type="text" step="1" min="0" max="999" />
