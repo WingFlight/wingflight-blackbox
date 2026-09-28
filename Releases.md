@@ -4,6 +4,11 @@ Read the per-axis I-term decay header (roll, pitch, yaw in 0.01 s, then max rate
 Show the I-term relax level from API 22.8 logs, and hide the relax type there (relax is always on).
 Name in-flight adjustment functions 114-125 (per-axis decay time and relax cutoff, main and TV loop), which showed as "Unknown (N)".
 Name the Flight Feel values by their real names: Master Gain, I-term Decay and I-term Relax, including the adjustment functions. API 22.9 logs carry the 1-10 I-term Relax score in place of the relax cutoff in Hz; the header dialog shows whichever the log has.
+Decode the 0.0.29 firmware's GAIN_ATTEN debug mode (TPA and SPA scales, filtered and raw GPS speed, GPS fix) and show its fw_spa header.
+Add a Step Response view beside the Analyser that estimates roll, pitch and yaw tracking from ordinary flight logs (ported from Rotorflight).
+Show 8 numbered harmonic lines, each with its frequency and rpm, in the frequency spectrum overlay.
+Label unused firmware debug modes UNUSED_<slot>, matching the firmware.
+Fix the example graphs for first-time users drawing blank.
 
 # 0.0.28
 
