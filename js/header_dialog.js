@@ -908,11 +908,13 @@ function HeaderDialog(dialog, onSave) {
         if (sysConfig.iterm_relax_type == null && sysConfig.iterm_relax_level[0] != null) {
             $('.parameter td[name="iterm_relax_type"]').css('display', 'none');
         }
-        // Wingflight API 22.9+ logs the I-term Relax score (1-10,
-        // higher = less bounce-back) instead of the relax cutoff in Hz.
-        var bounceback = sysConfig.bounceback && sysConfig.bounceback[0] != null;
-        var relaxRow = bounceback ? sysConfig.bounceback : sysConfig.iterm_relax_cutoff;
-        $('#iterm_relax_row_label').text(bounceback ? 'I-Term Relax (1-10)' : 'Iterm Relax Cutoff [Hz]');
+        // Wingflight API 22.9+ logs the I-term Relax score (1-10, higher =
+        // more relax, less bounce-back) instead of the relax cutoff in Hz; the
+        // header is iterm_relax, or bounceback on early 22.9 builds.
+        var relaxScore = (sysConfig.iterm_relax && sysConfig.iterm_relax[0] != null) ? sysConfig.iterm_relax
+            : (sysConfig.bounceback && sysConfig.bounceback[0] != null) ? sysConfig.bounceback : null;
+        var relaxRow = relaxScore || sysConfig.iterm_relax_cutoff;
+        $('#iterm_relax_row_label').text(relaxScore ? 'I-Term Relax (1-10)' : 'Iterm Relax Cutoff [Hz]');
         setParameter('iterm_relax_r'   , relaxRow[0], 0);
         setParameter('iterm_relax_p'   , relaxRow[1], 0);
         setParameter('iterm_relax_y'   , relaxRow[2], 0);

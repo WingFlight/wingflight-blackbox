@@ -394,7 +394,8 @@ var FlightLogParser = function(logData) {
             iterm_relax_type: null,                 // ITerm Relax type
             iterm_relax_cutoff: [null, null, null], // ITerm Relax cutoff
             iterm_relax_level: [null, null, null],  // ITerm Relax level (Wingflight, replaces the type)
-            bounceback: [null, null, null],         // I-term Relax score 1-10 (Wingflight 22.9+, replaces iterm_relax_cutoff)
+            iterm_relax: [null, null, null],        // I-term Relax score 1-10 (Wingflight 22.9+, replaces iterm_relax_cutoff)
+            bounceback: [null, null, null],         // Same score, as early 22.9 builds named the header
             error_limit: [null, null, null],        // Error Limit
             iterm_decay: [null, null],              // I-term Decay: time, max rate (Wingflight 22.7+: roll, pitch, yaw time in 0.01 s, then max rate)
             error_decay_ground: null,               // Ground Error Decay
@@ -969,6 +970,7 @@ var FlightLogParser = function(logData) {
             case "d_min":
             case "iterm_relax_cutoff":
             case "iterm_relax_level":
+            case "iterm_relax":
             case "bounceback":
             case "error_limit":
             case "yaw_stop_gain":
