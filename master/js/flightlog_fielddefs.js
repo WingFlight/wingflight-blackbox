@@ -247,14 +247,15 @@ var
     // Order must match boxId_e in src/main/fc/rc_modes.h exactly -- this decodes the
     // rcModeActivationMask-derived flightModeFlags/flightModeFlags2 S-frame fields bit-for-bit,
     // not the flightModeBits_e enum. 'UNUSED' entries are reserved boxIds kept only so later
-    // ids don't get renumbered (BOXHORIZON, BOXRESCUE, BOXOSD, BOXGOVSUSPEND, BOXGOVBYPASS).
+    // ids don't get renumbered (BOXHORIZON, BOXALTHOLD, BOXRESCUE, BOXPARALYZE, BOXCALIB,
+    // BOXOSD, BOXSTICKCOMMANDDISABLE, BOXGOVSUSPEND, BOXGOVBYPASS).
     FLIGHT_LOG_FLIGHT_MODE_NAME_WF = makeReadOnly([
         'ARM',
         'ANGLE',
         'UNUSED',
         'TRAINER',
         'ATTHOLD',
-        'ALTHOLD',
+        'UNUSED',
         'UNUSED',
         'GPSRESCUE',
         'LOITER',
@@ -262,11 +263,11 @@ var
         'FAILSAFE',
         'PASSTHROUGH',
         'PREARM',
-        'PARALYZE',
+        'UNUSED',
         'BEEPERON',
         'BEEPERMUTE',
         'LEDLOW',
-        'CALIB',
+        'UNUSED',
         'UNUSED',
         'TELEMETRY',
         'BEEPGPSCOUNT',
@@ -277,7 +278,7 @@ var
         'CAMERA3',
         'VTXPITMODE',
         'VTXCONTROLDISABLE',
-        'STICKCOMMANDDISABLE',
+        'UNUSED',
         'GOVERNOR',
         'UNUSED',
         'UNUSED',
