@@ -137,7 +137,7 @@ var FlightLogParser = function(logData) {
 
             // Leveling
             { name: 'Angle Level Gain',                              },
-            { name: 'Horizon Level Gain',                            },
+            { name: 'Unused'                                         }, // reserved (HORIZON removed), see fc/rc_adjustments.h
             { name: 'Acro Trainer Gain',                             },
 
             // Governor
@@ -314,7 +314,7 @@ var FlightLogParser = function(logData) {
             posPID:[null, null, null],              // Position Hold [P, I, D]
             posrPID:[null, null, null],             // Position Rate [P, I, D]
             navrPID:[null, null, null],             // Nav Rate      [P, I, D]
-            levelPID:[null, null, null],            // Level Mode    [P, I, D]
+            levelPID:[null, null],                  // Angle Mode    [strength, limit]
             magPID:null,                            // Magnetometer   P
             velPID:[null, null, null],              // Velocity      [P, I, D]
             yaw_p_limit:null,                       // Yaw P Limit
