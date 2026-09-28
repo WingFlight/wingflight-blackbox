@@ -198,9 +198,9 @@ var FlightLogParser = function(logData) {
             { name: 'Unused'                                         }, // reserved, see fc/rc_adjustments.h
 
             // Live per-axis P/I/D scale -- in-flight tuning aid, doesn't alter the underlying gains
-            { name: 'Gain [pitch]'                                   },
-            { name: 'Gain [roll]'                                    },
-            { name: 'Gain [yaw]'                                     },
+            { name: 'Master Gain [pitch]'                                   },
+            { name: 'Master Gain [roll]'                                    },
+            { name: 'Master Gain [yaw]'                                     },
 
             { name: 'Auto Hover Gain'                                },
 
@@ -212,9 +212,9 @@ var FlightLogParser = function(logData) {
             { name: 'Servo Trim [yaw]'                               },
 
             // Thrust Vector -- independent PID loop (FEATURE_THRUST_VECTOR)
-            { name: 'TV Gain [roll]'                                 },
-            { name: 'TV Gain [pitch]'                                },
-            { name: 'TV Gain [yaw]'                                  },
+            { name: 'TV Master Gain [roll]'                                 },
+            { name: 'TV Master Gain [pitch]'                                },
+            { name: 'TV Master Gain [yaw]'                                  },
             { name: 'TV Roll P-gain'                                 },
             { name: 'TV Roll I-gain'                                 },
             { name: 'TV Roll D-gain'                                 },
@@ -241,19 +241,19 @@ var FlightLogParser = function(logData) {
             { name: 'Flap Compensation Gain'                         },
             { name: 'Diff Thrust Yaw Gain'                           },
 
-            // Per-axis Lock (I-term decay time, 0.01 s) and Bounce Back (1-10), main then TV loop
-            { name: 'Lock [roll]',    scale: 0.01     },
-            { name: 'Lock [pitch]',   scale: 0.01     },
-            { name: 'Lock [yaw]',     scale: 0.01     },
-            { name: 'TV Lock [roll]', scale: 0.01     },
-            { name: 'TV Lock [pitch]', scale: 0.01    },
-            { name: 'TV Lock [yaw]',  scale: 0.01     },
-            { name: 'Bounce Back [roll]' },
-            { name: 'Bounce Back [pitch]' },
-            { name: 'Bounce Back [yaw]' },
-            { name: 'TV Bounce Back [roll]' },
-            { name: 'TV Bounce Back [pitch]' },
-            { name: 'TV Bounce Back [yaw]' },
+            // Per-axis I-term Decay (0.01 s) and I-term Relax score (1-10), main then TV loop
+            { name: 'I-term Decay [roll]',    scale: 0.01     },
+            { name: 'I-term Decay [pitch]',   scale: 0.01     },
+            { name: 'I-term Decay [yaw]',     scale: 0.01     },
+            { name: 'TV I-term Decay [roll]', scale: 0.01     },
+            { name: 'TV I-term Decay [pitch]', scale: 0.01    },
+            { name: 'TV I-term Decay [yaw]',  scale: 0.01     },
+            { name: 'I-term Relax [roll]' },
+            { name: 'I-term Relax [pitch]' },
+            { name: 'I-term Relax [yaw]' },
+            { name: 'TV I-term Relax [roll]' },
+            { name: 'TV I-term Relax [pitch]' },
+            { name: 'TV I-term Relax [yaw]' },
 
         ];
 
@@ -394,7 +394,7 @@ var FlightLogParser = function(logData) {
             iterm_relax_type: null,                 // ITerm Relax type
             iterm_relax_cutoff: [null, null, null], // ITerm Relax cutoff
             iterm_relax_level: [null, null, null],  // ITerm Relax level (Wingflight, replaces the type)
-            bounceback: [null, null, null],         // Bounce Back score 1-10 (Wingflight 22.9+, replaces iterm_relax_cutoff)
+            bounceback: [null, null, null],         // I-term Relax score 1-10 (Wingflight 22.9+, replaces iterm_relax_cutoff)
             error_limit: [null, null, null],        // Error Limit
             iterm_decay: [null, null],              // I-term Decay: time, max rate (Wingflight 22.7+: roll, pitch, yaw time in 0.01 s, then max rate)
             error_decay_ground: null,               // Ground Error Decay
