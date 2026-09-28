@@ -717,6 +717,15 @@ function FlightLogFieldPresenter() {
             'debug[5]':'Last Recapture Axis',
             'debug[6]':'Tracking Axes',
         },
+        // Wingflight throttle (TPA) and GPS speed (SPA) gain attenuation
+        'GAIN_ATTEN' : {
+            'debug[all]':'Gain Attenuation',
+            'debug[0]':'TPA Scale',
+            'debug[1]':'SPA Scale',
+            'debug[2]':'SPA Speed (filtered)',
+            'debug[3]':'GPS Speed (raw)',
+            'debug[4]':'GPS Fix',
+        },
     };
 
     let DEBUG_FRIENDLY_FIELD_NAMES = null;
@@ -1465,6 +1474,19 @@ function FlightLogFieldPresenter() {
                             const tracking = ['Roll', 'Pitch', 'Yaw'].filter((_, i) => value & (1 << i));
                             return tracking.length ? tracking.join('+') : 'Holding';
                         }
+                    }
+                    break;
+                case 'GAIN_ATTEN':
+                    switch (fieldName) {
+                        case 'debug[0]': // TPA scale x1000
+                        case 'debug[1]': // SPA scale x1000
+                            return (value / 10).toFixed(1) + "%";
+                        case 'debug[2]': // filtered speed, 0.1 km/h
+                            return (value / 10).toFixed(1) + " km/h";
+                        case 'debug[3]': // raw GPS speed, cm/s
+                            return (value * 0.036).toFixed(1) + " km/h";
+                        case 'debug[4]': // GPS fix
+                            return value ? 'Fix' : 'No fix';
                     }
                     break;
             }

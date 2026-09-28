@@ -865,7 +865,7 @@ var
     // Positions mirror debugType_e in wingflight-firmware's build/debug.h, not
     // DEBUG_MODE_RF_4_6: the "Remove OSD" refactor deleted DEBUG_MAX7456_SIGNAL/
     // SPICLOCK outright (no reserved placeholder), renumbering every slot from
-    // SBUS onward, and appended GYRO_CALIBRATION/AUTOHOVER/ATTHOLD/TVHOLD at the
+    // SBUS onward, and appended GYRO_CALIBRATION/AUTOHOVER/ATTHOLD/TVHOLD/GAIN_ATTEN at the
     // end (there is no POLAR_RATE or USER1-4 debug mode in this firmware).
     // Slots whose populating code is gone are UNUSED_<n> in the firmware too;
     // they keep their positions so the modes after them keep their numbers.
@@ -954,6 +954,7 @@ var
         "AUTOHOVER",
         "ATTHOLD",
         "TVHOLD",
+        "GAIN_ATTEN",
     ]),
 
     SUPER_EXPO_YAW = makeReadOnly([
