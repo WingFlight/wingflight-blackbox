@@ -314,7 +314,7 @@ var FlightLogParser = function(logData) {
             posPID:[null, null, null],              // Position Hold [P, I, D]
             posrPID:[null, null, null],             // Position Rate [P, I, D]
             navrPID:[null, null, null],             // Nav Rate      [P, I, D]
-            levelPID:[null, null],                  // Angle Mode    [strength, limit]
+            levelPID:[null, null, null],            // Angle Mode    [strength, limit, damping]
             magPID:null,                            // Magnetometer   P
             velPID:[null, null, null],              // Velocity      [P, I, D]
             yaw_p_limit:null,                       // Yaw P Limit
@@ -1017,6 +1017,10 @@ var FlightLogParser = function(logData) {
                 that.sysConfig["rollPID"].push(ffValues[0]);
                 that.sysConfig["pitchPID"].push(ffValues[1]);
                 that.sysConfig["yawPID"].push(ffValues[2]);
+            break;
+            case "level_damping":
+                // Wingflight 22.13+: Angle mode damping, shown as the third LEVEL value
+                that.sysConfig.levelPID[2] = parseInt(fieldValue, 10);
             break;
             /* End of CSV packed values */
 
