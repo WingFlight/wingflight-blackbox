@@ -726,6 +726,16 @@ function FlightLogFieldPresenter() {
             'debug[3]':'GPS Speed (raw)',
             'debug[4]':'GPS Fix',
         },
+        // Wingflight snap relax: roll/pitch feedback relaxed against a pop top, pinwheel or snap
+        'SNAP_RELAX' : {
+            'debug[all]':'Snap Relax',
+            'debug[0]':'Relax',
+            'debug[1]':'Snap Active',
+            'debug[2]':'Stick Spread',
+            'debug[3]':'Roll Stick',
+            'debug[4]':'Pitch Stick',
+            'debug[5]':'Yaw Stick',
+        },
     };
 
     let DEBUG_FRIENDLY_FIELD_NAMES = null;
@@ -1487,6 +1497,19 @@ function FlightLogFieldPresenter() {
                             return (value * 0.036).toFixed(1) + " km/h";
                         case 'debug[4]': // GPS fix
                             return value ? 'Fix' : 'No fix';
+                    }
+                    break;
+                case 'SNAP_RELAX':
+                    switch (fieldName) {
+                        case 'debug[0]': // relax amount x1000
+                        case 'debug[3]': // stick deflection x1000
+                        case 'debug[4]':
+                        case 'debug[5]':
+                            return (value / 10).toFixed(1) + "%";
+                        case 'debug[1]':
+                            return value ? 'Active' : 'Off';
+                        case 'debug[2]': // time between the first and last stick crossing
+                            return value.toFixed(0) + " ms";
                     }
                     break;
             }
