@@ -1,3 +1,10 @@
+# 0.0.30
+
+Decode the 0.0.30 firmware's SNAP_RELAX debug mode (relax amount, snap active, stick spread, and roll, pitch and yaw stick).
+Show Angle mode damping in the header dialog as a third LEVEL value.
+Show PASSTHROUGH as SETUP and MANUAL as GYRO OFF.
+Decode the removed HORIZON, PARALYZE, STICK COMMANDS DISABLE, ALTHOLD and CALIB modes as UNUSED, and drop the Horizon columns from the header view.
+
 # 0.0.29
 
 Read the per-axis I-term decay header (roll, pitch, yaw in 0.01 s, then max rate) from Wingflight API 22.7 logs; it showed a tenth of the real time and the pitch value as the max rate. Older single-value logs still read in 0.1 s. Decay now sits with relax in Iterm Settings.
