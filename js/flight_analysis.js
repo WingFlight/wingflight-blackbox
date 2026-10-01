@@ -98,8 +98,63 @@ var FlightAnalysis = (function() {
         "tvAxisI[0]", "tvAxisI[1]", "tvAxisI[2]",
         "tvAxisD[0]", "tvAxisD[1]", "tvAxisD[2]",
         "tvAxisF[0]", "tvAxisF[1]", "tvAxisF[2]",
-        "tvAxisB[0]", "tvAxisB[1]", "tvAxisB[2]"
+        "tvAxisB[0]", "tvAxisB[1]", "tvAxisB[2]",
+        "flightModeFlags", "flightModeFlags2"
     ];
+
+    // ------------------------------------------------------------------
+    // Flying mask -- which samples are real flight. The stable-flight search
+    // and the handling labs only look at these, so armed time on the ground,
+    // closed-throttle glides and modes that drive the surfaces without the
+    // gyro don't get graded as flight.
+    // ------------------------------------------------------------------
+
+    var FLYING_MIN_THROTTLE = 50;   // rcCommand[4] is 0..1000
+    var BYPASS_MODES = ["GYRO OFF", "SETUP", "MANUAL", "PASSTHROUGH"];
+    var LEVELING_MODES = ["ANGLE", "HORIZON", "TRAINER", "ATTHOLD", "GPSRESCUE", "RESCUE", "LOITER", "RTH", "FAILSAFE"];
+
+    function modeBits(names) {
+        var table = (typeof FLIGHT_LOG_FLIGHT_MODE_NAME !== "undefined") ? FLIGHT_LOG_FLIGHT_MODE_NAME : [];
+        var bits = [];
+        for (var i = 0; i < names.length; i++) {
+            var bit = table.indexOf(names[i]);
+            if (bit >= 0) bits.push(bit);
+        }
+        return bits;
+    }
+
+    // Mode flags as one per-sample boolean array (any of `bits` set), or null
+    // when the log has no flags or none of the modes exist for this firmware.
+    function modeMask(columns, bits) {
+        var flags1 = columns.flightModeFlags, flags2 = columns.flightModeFlags2;
+        if (!flags1 || !bits.length) return null;
+        var mask = new Array(flags1.length);
+        var last1 = null, last2 = null, lastValue = false;
+        for (var i = 0; i < flags1.length; i++) {
+            var w1 = flags1[i] || 0, w2 = flags2 ? (flags2[i] || 0) : 0;
+            if (w1 !== last1 || w2 !== last2) {
+                last1 = w1; last2 = w2; lastValue = false;
+                for (var b = 0; b < bits.length; b++) {
+                    var word = bits[b] < 32 ? w1 : w2;
+                    if (Math.floor(word / Math.pow(2, bits[b] % 32)) % 2 === 1) { lastValue = true; break; }
+                }
+            }
+            mask[i] = lastValue;
+        }
+        return mask;
+    }
+
+    function buildModeMasks(columns, n) {
+        var armed = modeMask(columns, modeBits(["ARM"]));
+        var bypass = modeMask(columns, modeBits(BYPASS_MODES));
+        var leveling = modeMask(columns, modeBits(LEVELING_MODES));
+        var throttle = columns["rcCommand[4]"];
+        var flying = new Array(n);
+        for (var i = 0; i < n; i++) {
+            flying[i] = (!armed || armed[i]) && (!throttle || throttle[i] > FLYING_MIN_THROTTLE);
+        }
+        return { flying: flying, bypass: bypass, leveling: leveling };
+    }
 
     function readColumns(flightLog, startTime, endTime) {
         var fieldIndexByName = {};
@@ -170,7 +225,11 @@ var FlightAnalysis = (function() {
         return sortedValues[idx];
     }
 
-    function detectStableFlightPhase(time, motorSpeed, governorTarget, gyroActivity) {
+    // `flying` (optional, per sample) limits the search to real flight: see
+    // buildModeMasks. Samples outside it are never stable, and the calm floor
+    // below is taken from flying samples only -- otherwise on an aerobatic
+    // flight the calmest 10 % is time on the ground and "stable" means parked.
+    function detectStableFlightPhase(time, motorSpeed, governorTarget, gyroActivity, flying) {
         var n = time.length;
 
         if (n < 50 || time[n - 1] - time[0] <= 0) {
@@ -234,7 +293,11 @@ var FlightAnalysis = (function() {
             basis = "gyro-activity";
 
             var smoothed = movingAverage(gyroActivity, Math.round(sampleRateHz));
-            var sorted = smoothed.slice(0).sort(function(a, b) { return a - b; });
+            var sorted = (flying ? smoothed.filter(function(v, k) { return flying[k]; }) : smoothed.slice(0))
+                .sort(function(a, b) { return a - b; });
+            if (!sorted.length) {
+                return { stableIndexes: [], stableSampleCount: 0, reason: "No powered, armed flight was found in this log." };
+            }
             // Anchor on a low percentile of the *whole* flight as the calm
             // floor -- robust regardless of how much of the flight is spent
             // maneuvering (a high/low percentile split like quiet-vs-busy
@@ -265,6 +328,10 @@ var FlightAnalysis = (function() {
             }
         } else {
             return { stableIndexes: [], stableSampleCount: 0, reason: "No motor-speed or gyro data logged, so a steady-flight window can't be identified." };
+        }
+
+        if (flying) {
+            for (i = 0; i < n; i++) candidate[i] = candidate[i] && flying[i];
         }
 
         // Keep only contiguous runs of >=3s, trimming 3s off each end
@@ -314,7 +381,34 @@ var FlightAnalysis = (function() {
         // motor speed reaches the log. If a target ever does show up (older or
         // future logs), prefer the more precise sag-vs-target read; otherwise
         // fall back to scoring how steady the motor held its own speed.
-        return target ? analyzeGovernorAgainstTarget(speedStable, pickAtIndexes(target, idx)) : analyzeGovernorSteadiness(speedStable);
+        if (target) return analyzeGovernorAgainstTarget(speedStable, pickAtIndexes(target, idx));
+
+        // Without a target, speed only means something against the throttle that
+        // asked for it: keep samples where the throttle stick held steady, and
+        // score each against the usual speed at that throttle.
+        var throttle = ctx.columns["rcCommand[4]"];
+        if (!throttle) return analyzeGovernorSteadiness(speedStable);
+        var steady = steadyThrottleIndexes(ctx.time, throttle, idx);
+        if (steady.length < MIN_STABLE_SAMPLES) {
+            return insufficient("The throttle never held steady long enough during stable flight to judge motor-speed steadiness.");
+        }
+        return analyzeGovernorSteadiness(pickAtIndexes(motorSpeed, steady), pickAtIndexes(throttle, steady));
+    }
+
+    var STEADY_THROTTLE_SPREAD = 20;     // rcCommand[4] units (0..1000) over +- STEADY_THROTTLE_SECONDS
+    var STEADY_THROTTLE_SECONDS = 1;
+    var THROTTLE_BIN = 25;               // speed is compared within throttle bands this wide
+
+    function steadyThrottleIndexes(time, throttle, indexes) {
+        var n = time.length;
+        var rate = n > 1 ? n / (time[n - 1] - time[0]) : 1;
+        var half = Math.max(1, Math.round(rate * STEADY_THROTTLE_SECONDS));
+        var result = [];
+        for (var i = 0; i < indexes.length; i++) {
+            var k = indexes[i];
+            if (spread(throttle, Math.max(0, k - half), Math.min(n - 1, k + half)) < STEADY_THROTTLE_SPREAD) result.push(k);
+        }
+        return result;
     }
 
     function analyzeGovernorAgainstTarget(speedStable, targetStable) {
@@ -360,21 +454,44 @@ var FlightAnalysis = (function() {
     // No governor-target telemetry available (the normal case on current
     // firmware) -- score on how steady the motor held its own speed during
     // stable flight instead of sag-vs-target.
-    function analyzeGovernorSteadiness(speedStable) {
+    // `throttleSteady` (optional): the throttle for each sample. When given,
+    // each sample is compared with the average speed in its throttle band, and
+    // the largest deviation is the 95th percentile rather than a single spike.
+    function analyzeGovernorSteadiness(speedStable, throttleSteady) {
         var avgSpeed = average(speedStable);
-        var maxDeviation = 0;
+        var reference = new Array(speedStable.length);
+        var i;
+        if (throttleSteady) {
+            var bandSum = {}, bandCount = {};
+            for (i = 0; i < speedStable.length; i++) {
+                var band = Math.round(throttleSteady[i] / THROTTLE_BIN);
+                bandSum[band] = (bandSum[band] || 0) + speedStable[i];
+                bandCount[band] = (bandCount[band] || 0) + 1;
+            }
+            for (i = 0; i < speedStable.length; i++) {
+                var b = Math.round(throttleSteady[i] / THROTTLE_BIN);
+                reference[i] = bandSum[b] / bandCount[b];
+            }
+        } else {
+            for (i = 0; i < speedStable.length; i++) reference[i] = avgSpeed;
+        }
+
         var deviations = new Array(speedStable.length);
-        for (var i = 0; i < speedStable.length; i++) {
-            var deviation = speedStable[i] - avgSpeed;
-            deviations[i] = deviation;
-            if (Math.abs(deviation) > maxDeviation) maxDeviation = Math.abs(deviation);
+        var relative = new Array(speedStable.length);
+        for (i = 0; i < speedStable.length; i++) {
+            deviations[i] = speedStable[i] - reference[i];
+            relative[i] = reference[i] ? Math.abs(deviations[i]) / reference[i] : 0;
         }
         var rmsDeviation = rms(deviations);
-        var variabilityPercent = avgSpeed ? (maxDeviation / avgSpeed) * 100 : 0;
+        var sortedRelative = relative.slice(0).sort(function(a, c) { return a - c; });
+        var variabilityPercent = (throttleSteady ? percentile(sortedRelative, 0.95) : maxOf(relative)) * 100;
+        var maxDeviation = variabilityPercent / 100 * avgSpeed;
 
         var status = variabilityPercent > 3 ? "attention" : variabilityPercent > 1.2 ? "watch" : "good";
 
-        var caveat = " (This firmware doesn't log a governor target, so this reflects motor-speed steadiness, not tracking accuracy.)";
+        var caveat = throttleSteady
+            ? " (No governor target is logged, so this compares speed only at a steady throttle, against the usual speed at that throttle.)"
+            : " (This firmware doesn't log a governor target, so this reflects motor-speed steadiness, not tracking accuracy.)";
         var story;
         if (status === "good") {
             story = "Motor speed held steady during stable flight: averaged " + Math.round(avgSpeed) +
@@ -384,7 +501,8 @@ var FlightAnalysis = (function() {
                 variabilityPercent.toFixed(1) + "%) during stable flight — worth keeping an eye on." + caveat;
         } else {
             story = "Motor speed varied noticeably during stable flight: up to " + Math.round(maxDeviation) + " rpm (" +
-                variabilityPercent.toFixed(1) + "%) away from its average. Consider more governor gain, or check for a power-system limit." + caveat;
+                variabilityPercent.toFixed(1) + "%) away from its " + (throttleSteady ? "usual speed at that throttle" : "average") +
+                ". Consider more governor gain, or check for a power-system limit." + caveat;
         }
 
         return {
@@ -867,53 +985,56 @@ var FlightAnalysis = (function() {
     // step-response/overshoot/ringing analysis).
     // ------------------------------------------------------------------
 
+    // PID tracking is graded on the step response (js/graph_stepresponse_calc.js)
+    // over the analysed range: how far each axis settles from the commanded rate,
+    // using only windows that measure the rate loop (see that file). Calm-flight
+    // error ratios were tried first and divided gust error by stick inputs of a
+    // few deg/s, reporting 100 %+ errors on a well-tuned model.
+    var TRACKING_GOOD = 0.2;    // |settled - 1| up to this is good
+    var TRACKING_WATCH = 0.35;  // up to this is worth watching, beyond is attention
+    var F_GAIN_MIN = 50;        // Wingflight's minimum F (PID_F_GAIN_MIN)
+    var TRACKING_MIN_WINDOWS = 30;              // fewer step-response windows than this aren't graded
+    var TRACKING_PLAUSIBLE = [0.3, 3];          // a settled value outside this isn't a tracking result
+    var F_ADVICE_RANGE = [0.5, 2];              // only suggest an F change inside this
+
     function analyzePidLab(ctx, flightLog) {
-        var haveError = false;
-        for (var a = 0; a < 3; a++) if (ctx.columns["axisError[" + a + "]"]) haveError = true;
-        if (!haveError) return insufficient("No setpoint/gyro tracking data was logged for this flight.");
-        if (ctx.stable.stableSampleCount < MIN_STABLE_SAMPLES) return insufficient(ctx.stable.reason);
+        var sysConfig = flightLog.getSysConfig();
+        var step = ctx.stepResponse;
+        if (!step) return insufficient("No setpoint/gyro tracking data was logged for this flight.");
 
         var idx = ctx.stable.stableIndexes;
-        var sysConfig = flightLog.getSysConfig();
         var pidSumLimit = { 0: sysConfig.pidSumLimit, 1: sysConfig.pidSumLimit, 2: sysConfig.pidSumLimitYaw };
+        var pidFields = ["rollPID", "pitchPID", "yawPID"];
 
         var axisResults = [];
-        var worstTrackingPercent = -1, worstAxis = null;
+        var worstDeviation = -1, worstAxis = null, worstSettled = null, worstF = null;
         var worstSaturationPercent = 0, saturatedAxis = null;
+        var ungraded = [];
 
         for (var axis = 0; axis < 3; axis++) {
-            var errorField = ctx.columns["axisError[" + axis + "]"];
-            var setpointField = ctx.columns["setpoint[" + axis + "]"];
-            if (!errorField) continue;
-
-            var errorStable = pickAtIndexes(errorField, idx);
-            var rmsError = rms(errorStable);
-
-            var trackingPercent = null;
-            if (setpointField) {
-                var setpointStable = pickAtIndexes(setpointField, idx);
-                var activeError = [], activeSetpoint = [];
-                for (var i = 0; i < setpointStable.length; i++) {
-                    if (Math.abs(setpointStable[i]) > 5) {
-                        activeError.push(errorStable[i]);
-                        activeSetpoint.push(setpointStable[i]);
-                    }
-                }
-                if (activeSetpoint.length > 20) {
-                    var rmsSetpoint = rms(activeSetpoint);
-                    trackingPercent = rmsSetpoint ? (rms(activeError) / rmsSetpoint) * 100 : null;
-                }
+            var axisStep = step[["roll", "pitch", "yaw"][axis]];
+            var settled = null;
+            if (axisStep && axisStep.windowCount > 0) {
+                var rate = 1 / (axisStep.time[1] - axisStep.time[0]);
+                settled = average(Array.prototype.slice.call(axisStep.response, Math.round(0.3 * rate)));
             }
-
-            if (trackingPercent !== null && trackingPercent > worstTrackingPercent) {
-                worstTrackingPercent = trackingPercent;
+            var graded = axisStep && axisStep.valid && settled !== null &&
+                axisStep.windowCount >= TRACKING_MIN_WINDOWS &&
+                settled >= TRACKING_PLAUSIBLE[0] && settled <= TRACKING_PLAUSIBLE[1];
+            if (!graded) {
+                ungraded.push(AXIS_NAMES[axis]);
+            } else if (Math.abs(settled - 1) > worstDeviation) {
+                worstDeviation = Math.abs(settled - 1);
                 worstAxis = AXIS_NAMES[axis];
+                worstSettled = settled;
+                var pid = sysConfig[pidFields[axis]];
+                worstF = pid && pid[3] ? pid[3] : null;
             }
 
             var saturationPercent = null;
             var sumField = ctx.columns["axisSum[" + axis + "]"];
             var limit = pidSumLimit[axis];
-            if (sumField && limit) {
+            if (sumField && limit && idx.length) {
                 var sumStable = pickAtIndexes(sumField, idx);
                 var saturated = 0;
                 for (var s = 0; s < sumStable.length; s++) if (Math.abs(sumStable[s]) >= limit * 0.98) saturated++;
@@ -926,40 +1047,207 @@ var FlightAnalysis = (function() {
 
             axisResults.push({
                 axis: AXIS_NAMES[axis],
-                rmsError: rmsError,
-                trackingPercent: trackingPercent,
+                settled: settled,
+                valid: !!graded,
+                windows: axisStep ? axisStep.windowCount : 0,
+                coherence: axisStep ? axisStep.coherence : null,
                 saturationPercent: saturationPercent
             });
         }
 
-        if (!axisResults.length) return insufficient("Not enough tracking data to assess PID performance.");
+        if (!worstAxis && !saturatedAxis) {
+            return insufficient("Not enough clean stick inputs to judge rate tracking" +
+                (ungraded.length ? " (" + ungraded.join(", ") + ": too few windows, or the gyro mostly didn't follow the stick)" : "") + ".");
+        }
 
         var status = "good";
-        if (worstTrackingPercent > 35 || worstSaturationPercent > 5) status = "attention";
-        else if (worstTrackingPercent > 20 || worstSaturationPercent > 1) status = "watch";
+        if (worstDeviation > TRACKING_WATCH || worstSaturationPercent > 5) status = "attention";
+        else if (worstDeviation > TRACKING_GOOD || worstSaturationPercent > 1) status = "watch";
 
         var storyParts = [];
+        var action = null;
         if (worstAxis) {
-            storyParts.push(worstAxis + " has the highest tracking error during stable flight (" +
-                worstTrackingPercent.toFixed(0) + "% of the commanded rate).");
+            var percentOfStick = Math.round(worstSettled * 100);
+            if (worstDeviation <= TRACKING_GOOD) {
+                storyParts.push("Rate tracking is close on every graded axis; " + worstAxis + " is furthest off, settling at " +
+                    percentOfStick + "% of the commanded rate.");
+            } else {
+                storyParts.push(worstAxis + " settles at " + percentOfStick + "% of the commanded rate after a stick input" +
+                    (worstSettled < 1 ? ", so the model falls short of the stick." : ", so the model runs ahead of the stick."));
+                if (worstF && worstSettled >= F_ADVICE_RANGE[0] && worstSettled <= F_ADVICE_RANGE[1]) {
+                    var suggestedF = Math.max(F_GAIN_MIN, Math.round(worstF / worstSettled / 5) * 5);
+                    action = (worstSettled < 1 ? "Raise " : "Lower ") + worstAxis + " F from " + worstF + " towards about " + suggestedF +
+                        ", then check the Step Response again." +
+                        (worstSettled > 1 && suggestedF === F_GAIN_MIN ? " F can't go below " + F_GAIN_MIN + "; lower the rate instead if it's still ahead." : "");
+                    storyParts.push("F sets most of the surface throw for a commanded rate.");
+                }
+            }
+        }
+        if (ungraded.length) {
+            storyParts.push(ungraded.join(" and ") + " not graded: too few clean stick inputs, or the gyro mostly didn't follow the stick.");
         }
         if (saturatedAxis && worstSaturationPercent > 1) {
             storyParts.push(saturatedAxis + "'s PID sum sat near its configured limit for " +
                 worstSaturationPercent.toFixed(1) + "% of stable flight — the controller had little headroom left there.");
         }
-        if (!storyParts.length) {
-            storyParts.push("Roll, pitch and yaw all tracked their commands closely during stable flight, with no sign of PID-sum saturation.");
-        }
 
         return {
             status: status,
             story: storyParts.join(" "),
+            action: action,
             metrics: axisResults.map(function(r) {
                 return {
                     label: r.axis + " tracking",
-                    value: (r.trackingPercent !== null ? r.trackingPercent.toFixed(0) + "% error" : Math.round(r.rmsError) + " deg/s RMS error") +
+                    value: (r.settled !== null && r.valid
+                        ? "settles at " + Math.round(r.settled * 100) + "% (" + r.windows + " windows, coherence " + r.coherence.toFixed(2) + ")"
+                        : "not graded") +
                         (r.saturationPercent !== null ? ", " + r.saturationPercent.toFixed(1) + "% saturated" : "")
                 };
+            })
+        };
+    }
+
+    // ------------------------------------------------------------------
+    // Bounce-back lab -- how far the model swings back past level when the
+    // stick returns to centre after a roll or loop. Same release detection as
+    // the Wingflight blackbox skill's bbtune.py.
+    // ------------------------------------------------------------------
+
+    var BOUNCE_CENTRE = 5;            // deg/s: stick setpoint counted as centred
+    var BOUNCE_MIN_RATE = 60;         // deg/s: stick and gyro peak before release
+    var BOUNCE_LOOKBACK_S = 0.4;      // look for the peak this far before release
+    var BOUNCE_MIN_QUIET_S = 0.15;    // stick must stay centred at least this long
+    var BOUNCE_MAX_QUIET_S = 0.8;     // and the rebound is searched this far
+    var BOUNCE_MIN_RELEASES = 5;
+    var BOUNCE_WATCH = 0.15;          // median rebound above this is worth watching
+    var BOUNCE_ATTENTION = 0.30;
+
+    function findReleases(ctx, axis) {
+        var sp = ctx.columns["setpoint[" + axis + "]"], g = ctx.columns["gyroADC[" + axis + "]"];
+        if (!sp || !g) return [];
+        var n = sp.length, rate = ctx.sampleRateHz;
+        var look = Math.round(BOUNCE_LOOKBACK_S * rate), minQuiet = Math.round(BOUNCE_MIN_QUIET_S * rate);
+        var maxQuiet = Math.round(BOUNCE_MAX_QUIET_S * rate);
+        var usable = ctx.rateLoopSamples;
+        var rebounds = [];
+        for (var i = look; i < n - maxQuiet; i++) {
+            if (!(Math.abs(sp[i]) < BOUNCE_CENTRE && Math.abs(sp[i - 1]) >= BOUNCE_CENTRE)) continue;
+            var spPeak = 0;
+            for (var j = i - look; j < i; j++) if (Math.abs(sp[j]) > Math.abs(spPeak)) spPeak = sp[j];
+            if (Math.abs(spPeak) < BOUNCE_MIN_RATE) continue;
+            var dir = spPeak > 0 ? 1 : -1;
+            var gPeak = 0;
+            for (j = i - look; j < i + Math.round(0.1 * rate); j++) gPeak = Math.max(gPeak, dir * g[j]);
+            if (gPeak < BOUNCE_MIN_RATE) continue;
+            var quiet = 0;
+            while (quiet < maxQuiet && Math.abs(sp[i + quiet]) < BOUNCE_CENTRE) quiet++;
+            if (quiet < minQuiet) continue;
+            var ok = true;
+            for (j = i - look; j < i + quiet && ok; j++) ok = usable[j];
+            if (!ok) continue;
+            var back = 0;
+            for (j = i; j < i + quiet; j++) back = Math.max(back, -dir * g[j]);
+            rebounds.push(back / gPeak);
+            i += quiet;
+        }
+        return rebounds;
+    }
+
+    function analyzeBounceLab(ctx) {
+        if (!ctx.rateLoopSamples) return insufficient("No flight-mode data was logged, so stick releases can't be told apart from GYRO OFF or leveling flight.");
+        var results = [];
+        for (var axis = 0; axis < 3; axis++) {
+            var rebounds = findReleases(ctx, axis);
+            if (rebounds.length < BOUNCE_MIN_RELEASES) continue;
+            var sorted = rebounds.slice(0).sort(function(a, b) { return a - b; });
+            results.push({ axis: AXIS_NAMES[axis], count: rebounds.length, median: median(rebounds), p75: percentile(sorted, 0.75) });
+        }
+        if (!results.length) {
+            return insufficient("Not enough clean stick releases (a roll or loop stopped by centring the stick) to judge bounce-back.");
+        }
+
+        var worst = results.reduce(function(a, b) { return b.median > a.median ? b : a; });
+        var status = worst.median > BOUNCE_ATTENTION ? "attention" : worst.median > BOUNCE_WATCH ? "watch" : "good";
+        var pct = Math.round(worst.median * 100);
+        var story = status === "good"
+            ? "Rolls and loops stop cleanly: when the stick is centred the model swings back at most " + pct + "% of its rate (" + worst.axis + ")."
+            : worst.axis + " bounces back when the stick is centred: typically " + pct + "% of the rate it was turning at swings the other way.";
+
+        // B (feedforward boost) kicks the surface against the rotation as the stick
+        // returns, which is the most direct cure; with it at 0 that comes first.
+        var pid = ctx.sysConfig[worst.axis.toLowerCase() + "PID"];
+        var B = pid && pid[4] != null ? pid[4] : null;
+        var action = null;
+        if (status !== "good") {
+            action = B === 0
+                ? "B is 0 on " + worst.axis + ": set it to about 35 (the current default) so the surface kicks against the rotation as the stick returns. Then raise I-Term Relax a step at a time if it still bounces."
+                : "Raise I-Term Relax on " + worst.axis + " (Flight Feel) a step at a time" +
+                  (B != null ? ", or B (now " + B + ")" : "") + ". If neither helps, the rebound is coming from the airframe rather than the controller.";
+        }
+
+        return {
+            status: status,
+            story: story,
+            action: action,
+            metrics: results.map(function(r) {
+                return { label: r.axis + " bounce-back", value: Math.round(r.median * 100) + "% median, " + Math.round(r.p75 * 100) + "% p75 (" + r.count + " releases)" };
+            })
+        };
+    }
+
+    // ------------------------------------------------------------------
+    // GYRO OFF lab -- in GYRO OFF the surfaces move by feedforward alone, so
+    // the gyro shows the airframe's open-loop response to F. Informational:
+    // tells the pilot how GYRO OFF compares with the stabilised modes.
+    // ------------------------------------------------------------------
+
+    var GYRO_OFF_MIN_SAMPLES_S = 5;   // seconds of usable GYRO OFF flight per axis
+    var GYRO_OFF_MIN_STICK = 40;      // deg/s: samples with less stick are ignored
+    var GYRO_OFF_MAX_LAG_S = 0.15;
+
+    function analyzeGyroOffLab(ctx) {
+        var bypass = ctx.masks.bypass;
+        if (!bypass) return insufficient("No flight-mode data was logged for this flight.");
+        var rate = ctx.sampleRateHz, n = ctx.time.length;
+        var maxLag = Math.round(GYRO_OFF_MAX_LAG_S * rate), stepLag = Math.max(1, Math.round(0.005 * rate));
+        var results = [];
+
+        for (var axis = 0; axis < 2; axis++) {
+            var sp = ctx.columns["setpoint[" + axis + "]"], g = ctx.columns["gyroADC[" + axis + "]"];
+            if (!sp || !g) continue;
+            var best = null;
+            for (var lag = 0; lag <= maxLag; lag += stepLag) {
+                var sxy = 0, sxx = 0, syy = 0, count = 0;
+                for (var i = 0; i + lag < n; i++) {
+                    var k = i + lag;
+                    if (!bypass[i] || !bypass[k] || !ctx.masks.flying[i] || Math.abs(sp[i]) < GYRO_OFF_MIN_STICK) continue;
+                    // Skip snaps/autorotation: the airframe running far past the stick isn't F's doing
+                    if (Math.abs(g[k]) > 2 * Math.abs(sp[i]) + 50) continue;
+                    sxy += sp[i] * g[k]; sxx += sp[i] * sp[i]; syy += g[k] * g[k]; count++;
+                }
+                if (count < GYRO_OFF_MIN_SAMPLES_S * rate || !syy) continue;
+                // The lag that best lines the gyro up with the stick, and the gain at that lag
+                var r = sxy / Math.sqrt(sxx * syy);
+                if (!best || r > best.r) best = { r: r, gain: sxy / sxx, lag: lag / rate, count: count };
+            }
+            if (best) results.push({ axis: AXIS_NAMES[axis], gain: best.gain, lag: best.lag, seconds: best.count / rate });
+        }
+
+        if (!results.length) return insufficient("No GYRO OFF flight with clear stick inputs was found in this log.");
+
+        var parts = results.map(function(r) { return r.axis + " " + Math.round(r.gain * 100) + "%"; });
+        var soft = results.filter(function(r) { return r.gain < 0.7; }).map(function(r) { return r.axis; });
+        var lively = results.filter(function(r) { return r.gain > 1.3; }).map(function(r) { return r.axis; });
+        var feel = [];
+        if (soft.length) feel.push(soft.join(" and ") + " will feel softer than in the stabilised modes, where P and I make up the rest; more F or rate on that axis closes the gap");
+        if (lively.length) feel.push(lively.join(" and ") + " will feel livelier than in the stabilised modes");
+        return {
+            status: "info",
+            story: "In GYRO OFF the model reached " + parts.join(", ") + " of the commanded rate (stick inputs over " + GYRO_OFF_MIN_STICK +
+                " deg/s, snaps left out). GYRO OFF moves the surfaces by F alone" +
+                (feel.length ? ": " + feel.join("; ") + "." : ", and on its own F already gives close to the commanded rate."),
+            metrics: results.map(function(r) {
+                return { label: r.axis + " in GYRO OFF", value: Math.round(r.gain * 100) + "% of commanded rate (" + r.seconds.toFixed(0) + " s of stick)" };
             })
         };
     }
@@ -988,7 +1276,8 @@ var FlightAnalysis = (function() {
             status: lab.status,
             headline: lab.story.split(/(?<=[.!?])\s/)[0],
             detail: lab.story,
-            action: actionByStatus[lab.status] || "",
+            // A lab with a specific fix says so in `action`; the rest get the generic line
+            action: (lab.status !== "good" && lab.action) || actionByStatus[lab.status] || "",
             screen: screen
         };
     }
@@ -999,7 +1288,8 @@ var FlightAnalysis = (function() {
             cardFromLab("idleChop", "Idle Chop", "seekbar", labs.idleChop),
             cardFromLab("esc", "Power", "seekbar", labs.esc),
             cardFromLab("battery", "Battery", "seekbar", labs.battery),
-            cardFromLab("pid", "PID Tracking", "seekbar", labs.pid)
+            cardFromLab("pid", "PID Tracking", "seekbar", labs.pid),
+            cardFromLab("bounce", "Bounce-Back", "seekbar", labs.bounce)
         ].filter(function(c) { return c; });
 
         var worst = "good";
@@ -1119,9 +1409,39 @@ var FlightAnalysis = (function() {
             }
         }
 
-        var stable = detectStableFlightPhase(extracted.time, extracted.columns.motor1speed, extracted.columns.govTarget || extracted.columns.govRequest, gyroActivity);
+        var n = extracted.time.length;
+        var masks = buildModeMasks(extracted.columns, n);
 
-        var ctx = { time: extracted.time, columns: extracted.columns, stable: stable };
+        var stable = detectStableFlightPhase(extracted.time, extracted.columns.motor1speed, extracted.columns.govTarget || extracted.columns.govRequest, gyroActivity, masks.flying);
+
+        // Samples where the rate loop was in charge: flying, no bypass or leveling mode
+        var rateLoopSamples = null;
+        if (masks.bypass || masks.leveling) {
+            rateLoopSamples = new Array(n);
+            for (var ri = 0; ri < n; ri++) {
+                rateLoopSamples[ri] = masks.flying[ri] && !(masks.bypass && masks.bypass[ri]) && !(masks.leveling && masks.leveling[ri]);
+            }
+        }
+
+        // Step response over the same range, for PID tracking (see analyzePidLab)
+        var stepResponse = null;
+        if (typeof StepResponseCalc !== "undefined") {
+            StepResponseCalc.initialize(flightLog, sysConfig);
+            StepResponseCalc.setInTime(analysisWindow ? analysisWindow.startTime : minTime);
+            StepResponseCalc.setOutTime(analysisWindow ? analysisWindow.endTime : maxTime);
+            stepResponse = StepResponseCalc.calculate();
+        }
+
+        var ctx = {
+            time: extracted.time,
+            columns: extracted.columns,
+            stable: stable,
+            masks: masks,
+            rateLoopSamples: rateLoopSamples,
+            sampleRateHz: n > 1 ? n / ((extracted.time[n - 1] - extracted.time[0]) || 1) : 1,
+            stepResponse: stepResponse,
+            sysConfig: sysConfig
+        };
 
         var labs = {
             governor: analyzeGovernorLab(ctx),
@@ -1130,7 +1450,9 @@ var FlightAnalysis = (function() {
             battery: analyzeBatteryLab(ctx, flightLog),
             vibration: analyzeVibrationLab(ctx, flightLog),
             thrustVector: analyzeThrustVectorLab(ctx),
-            pid: analyzePidLab(ctx, flightLog)
+            pid: analyzePidLab(ctx, flightLog),
+            bounce: analyzeBounceLab(ctx),
+            gyroOff: analyzeGyroOffLab(ctx)
         };
 
         var context = {
