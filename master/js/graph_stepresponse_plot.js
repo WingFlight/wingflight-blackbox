@@ -148,6 +148,8 @@ StepResponsePlot._drawGraph = function (canvasCtx) {
     axisIndex++;
   }
 
+  this._drawExclusions(canvasCtx, WIDTH, HEIGHT);
+
   if (this._showLegend) {
     this._drawLegend(canvasCtx, WIDTH, HEIGHT);
   }
@@ -319,6 +321,10 @@ StepResponsePlot._drawAxisResponse = function (
 
   const responseLenSamples = axisData.response.length;
 
+  canvasCtx.save();
+  // Low confidence (too few windows, or a gyro that mostly isn't following the stick):
+  // still drawn, but faded so it doesn't read as a result
+  canvasCtx.globalAlpha = axisData.valid ? 1 : 0.35;
   canvasCtx.beginPath();
   canvasCtx.lineWidth = this._lineWidth;
   canvasCtx.strokeStyle = color;
@@ -334,10 +340,55 @@ StepResponsePlot._drawAxisResponse = function (
     }
   }
   canvasCtx.stroke();
+  canvasCtx.restore();
 
+  const quality =
+    " | " +
+    axisData.windowCount +
+    " windows" +
+    (axisData.coherence != null
+      ? ", coherence " + axisData.coherence.toFixed(2)
+      : "");
   const status = axisData.valid ? "" : " (low confidence)";
-  const label = (pidLabel || STEP_RESPONSE_AXIS_LABELS[axis]) + status;
+  const label = (pidLabel || STEP_RESPONSE_AXIS_LABELS[axis]) + quality + status;
   this._drawLabel(canvasCtx, label, WIDTH - 4, rowY, "right", "top", color);
+};
+
+// One line along the bottom listing the windows left out of each visible axis and why,
+// so a curve built from a fraction of the flight says so.
+StepResponsePlot._drawExclusions = function (canvasCtx, WIDTH, HEIGHT) {
+  const REASONS = [
+    ["notFlying", "not flying"],
+    ["bypass", "gyro off/setup"],
+    ["leveling", "leveling mode"],
+    ["snap", "snap/saturated"],
+  ];
+  const axes = Object.keys(STEP_RESPONSE_AXIS_LABELS).filter(
+    (axis) => this._axisVisible[axis] && this._data[axis] && this._data[axis].excluded,
+  );
+  const parts = [];
+  for (const [key, text] of REASONS) {
+    const counts = axes.map((axis) => this._data[axis].excluded[key]);
+    if (counts.some((n) => n > 0)) {
+      parts.push(text + " " + counts.join("/"));
+    }
+  }
+  if (parts.length === 0) {
+    return;
+  }
+  const prefix =
+    "Skipped windows (" +
+    axes.map((axis) => STEP_RESPONSE_AXIS_LABELS[axis][0]).join("/") +
+    "): ";
+  this._drawLabel(
+    canvasCtx,
+    prefix + parts.join(", "),
+    WIDTH - 4,
+    HEIGHT - 4,
+    "right",
+    "bottom",
+    "rgba(255,255,255,0.75)",
+  );
 };
 
 StepResponsePlot._drawMousePosition = function (canvasCtx) {
