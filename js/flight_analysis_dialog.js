@@ -22,7 +22,9 @@ function FlightAnalysisDialog(dialog) {
         { key: "battery", title: "Battery" },
         { key: "vibration", title: "Vibration" },
         { key: "thrustVector", title: "Thrust Vector" },
-        { key: "pid", title: "PID Tracking" }
+        { key: "pid", title: "PID Tracking" },
+        { key: "bounce", title: "Bounce-Back" },
+        { key: "gyroOff", title: "GYRO OFF Response" }
     ];
 
     function escapeHtml(text) {
@@ -45,7 +47,7 @@ function FlightAnalysisDialog(dialog) {
                 '<span><strong>' + escapeHtml(ctx.craftName) + '</strong></span>' +
                 (ctx.firmwareVersion ? '<span>Firmware ' + escapeHtml(ctx.firmwareVersion) + '</span>' : "") +
                 '<span>Flight length ' + formatSeconds(ctx.durationSeconds) + '</span>' +
-                '<span>' + formatSeconds(ctx.stableSeconds) + ' identified as steady, governed flight</span>' +
+                '<span>' + formatSeconds(ctx.stableSeconds) + ' identified as steady flight</span>' +
             '</div>' +
             (ctx.capped
                 ? '<p class="flight-analysis-capped-note">This flight is long enough that analyzing all of it would take several minutes ' +
