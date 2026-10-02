@@ -105,6 +105,17 @@
       "type": "snapshot",
       "name": "0.0.11",
       "path": "./snapshot/0.0.11/"
+    },
+    {
+      "type": "branch",
+      "name": "feature-pr-previews",
+      "path": "./feature-pr-previews/",
+      "branch": "feature/pr-previews",
+      "date": "2026-10-02T07:28:21Z",
+      "number": 27,
+      "title": "Deploy PR previews and group development builds by PR",
+      "url": "https://github.com/WingFlight/wingflight-blackbox/pull/27",
+      "draft": false
     }
   ]
 }
