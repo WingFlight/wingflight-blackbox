@@ -736,6 +736,16 @@ function FlightLogFieldPresenter() {
             'debug[4]':'Pitch Stick',
             'debug[5]':'Yaw Stick',
         },
+        // Wingflight prop-hang relax: roll I held back in a prop hang so the prop torque can roll the airframe
+        'PROP_HANG' : {
+            'debug[all]':'Prop-Hang Relax',
+            'debug[0]':'Roll I Relax',
+            'debug[1]':'Nose Up',
+            'debug[2]':'Vertical Speed',
+            'debug[3]':'Hang Timer',
+            'debug[4]':'Altitude Estimate',
+            'debug[5]':'Rate Flight',
+        },
     };
 
     let DEBUG_FRIENDLY_FIELD_NAMES = null;
@@ -1510,6 +1520,22 @@ function FlightLogFieldPresenter() {
                             return value ? 'Active' : 'Off';
                         case 'debug[2]': // time between the first and last stick crossing
                             return value.toFixed(0) + " ms";
+                    }
+                    break;
+                case 'PROP_HANG':
+                    switch (fieldName) {
+                        case 'debug[0]': // roll I relax x1000
+                            return (value / 10).toFixed(1) + "%";
+                        case 'debug[1]': // nose-up component x1000, 1000 = straight up
+                            return (Math.asin(Math.max(-1, Math.min(1, value / 1000))) * 180 / Math.PI).toFixed(0) + "° up";
+                        case 'debug[2]': // vertical speed, cm/s
+                            return (value / 100).toFixed(1) + " m/s";
+                        case 'debug[3]': // time the hang conditions have held, ms (detected at 500)
+                            return value.toFixed(0) + " ms";
+                        case 'debug[4]':
+                            return value ? 'Yes' : 'No';
+                        case 'debug[5]':
+                            return value ? 'Rate' : 'Leveling/hold';
                     }
                     break;
             }
