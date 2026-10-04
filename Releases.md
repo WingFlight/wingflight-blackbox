@@ -1,3 +1,12 @@
+# 0.0.32
+
+Decode the PROP_HANG debug mode (roll I relax, nose angle, vertical speed, hang timer, altitude estimate and rate flight).
+Skip Step Response windows that don't measure the tune (not rotating, GYRO OFF, SETUP or a leveling mode, gyro past 2x the setpoint, surfaces at full travel), and show per-axis coherence, faded as low confidence below 0.5 or under 10 windows.
+Grade Flight Analysis on real flight: stable flight counts only armed samples above 5% throttle, motor speed without a governor is compared at a steady throttle, and PID Tracking uses the step response, with an F suggestion when it is off.
+Add a Bounce-Back lab (rebound after the stick is centred, per axis) and a GYRO OFF lab (how much of the commanded rate F alone gives).
+
+Group development builds by pull request on the web landing page, and publish previews of pull requests labelled "preview".
+
 # 0.0.30
 
 Decode the 0.0.30 firmware's SNAP_RELAX debug mode (relax amount, snap active, stick spread, and roll, pitch and yaw stick).
