@@ -24,7 +24,7 @@ function FlightAnalysisDialog(dialog) {
         { key: "thrustVector", title: "Thrust Vector" },
         { key: "pid", title: "PID Tracking" },
         { key: "bounce", title: "Bounce-Back" },
-        { key: "gyroOff", title: "GYRO OFF Response" }
+        { key: "gyroOff", title: "MANUAL Response" }
     ];
 
     function escapeHtml(text) {
