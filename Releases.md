@@ -1,3 +1,7 @@
+# 0.0.33
+
+Name the raw-stick mode PASSTHROUGH and GYRO OFF MANUAL, matching the 0.0.33 firmware. The GYRO OFF Response lab is now MANUAL Response.
+
 # 0.0.32
 
 Decode the PROP_HANG debug mode (roll I relax, nose angle, vertical speed, hang timer, altitude estimate and rate flight).
