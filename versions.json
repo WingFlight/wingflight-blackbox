@@ -121,11 +121,7 @@
       "name": "bugfix-mode-names",
       "path": "./bugfix-mode-names/",
       "branch": "bugfix/mode-names",
-      "date": "2026-10-05T22:30:46Z",
-      "number": 29,
-      "title": "Name the raw-stick mode PASSTHROUGH and GYRO OFF MANUAL",
-      "url": "https://github.com/WingFlight/wingflight-blackbox/pull/29",
-      "draft": false
+      "date": "2026-10-05T22:30:46Z"
     }
   ]
 }
