@@ -1154,7 +1154,7 @@ var FlightAnalysis = (function() {
     }
 
     function analyzeBounceLab(ctx) {
-        if (!ctx.rateLoopSamples) return insufficient("No flight-mode data was logged, so stick releases can't be told apart from GYRO OFF or leveling flight.");
+        if (!ctx.rateLoopSamples) return insufficient("No flight-mode data was logged, so stick releases can't be told apart from MANUAL or leveling flight.");
         var results = [];
         for (var axis = 0; axis < 3; axis++) {
             var rebounds = findReleases(ctx, axis);
@@ -1196,12 +1196,12 @@ var FlightAnalysis = (function() {
     }
 
     // ------------------------------------------------------------------
-    // GYRO OFF lab -- in GYRO OFF the surfaces move by feedforward alone, so
+    // MANUAL lab -- in MANUAL the surfaces move by feedforward alone, so
     // the gyro shows the airframe's open-loop response to F. Informational:
-    // tells the pilot how GYRO OFF compares with the stabilised modes.
+    // tells the pilot how MANUAL compares with the stabilised modes.
     // ------------------------------------------------------------------
 
-    var GYRO_OFF_MIN_SAMPLES_S = 5;   // seconds of usable GYRO OFF flight per axis
+    var GYRO_OFF_MIN_SAMPLES_S = 5;   // seconds of usable MANUAL flight per axis
     var GYRO_OFF_MIN_STICK = 40;      // deg/s: samples with less stick are ignored
     var GYRO_OFF_MAX_LAG_S = 0.15;
 
@@ -1233,7 +1233,7 @@ var FlightAnalysis = (function() {
             if (best) results.push({ axis: AXIS_NAMES[axis], gain: best.gain, lag: best.lag, seconds: best.count / rate });
         }
 
-        if (!results.length) return insufficient("No GYRO OFF flight with clear stick inputs was found in this log.");
+        if (!results.length) return insufficient("No MANUAL flight with clear stick inputs was found in this log.");
 
         var parts = results.map(function(r) { return r.axis + " " + Math.round(r.gain * 100) + "%"; });
         var soft = results.filter(function(r) { return r.gain < 0.7; }).map(function(r) { return r.axis; });
@@ -1243,11 +1243,11 @@ var FlightAnalysis = (function() {
         if (lively.length) feel.push(lively.join(" and ") + " will feel livelier than in the stabilised modes");
         return {
             status: "info",
-            story: "In GYRO OFF the model reached " + parts.join(", ") + " of the commanded rate (stick inputs over " + GYRO_OFF_MIN_STICK +
-                " deg/s, snaps left out). GYRO OFF moves the surfaces by F alone" +
+            story: "In MANUAL the model reached " + parts.join(", ") + " of the commanded rate (stick inputs over " + GYRO_OFF_MIN_STICK +
+                " deg/s, snaps left out). MANUAL moves the surfaces by F alone" +
                 (feel.length ? ": " + feel.join("; ") + "." : ", and on its own F already gives close to the commanded rate."),
             metrics: results.map(function(r) {
-                return { label: r.axis + " in GYRO OFF", value: Math.round(r.gain * 100) + "% of commanded rate (" + r.seconds.toFixed(0) + " s of stick)" };
+                return { label: r.axis + " in MANUAL", value: Math.round(r.gain * 100) + "% of commanded rate (" + r.seconds.toFixed(0) + " s of stick)" };
             })
         };
     }
