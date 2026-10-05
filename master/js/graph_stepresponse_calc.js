@@ -44,7 +44,7 @@
  * reason so the plot can say what was left out:
  *   - notFlying: the aircraft wasn't rotating (armed on the ground, stick checks). The stick
  *     moves and the gyro doesn't, which drags the response towards 0.
- *   - bypass: a mode that drives the surfaces without the gyro (GYRO OFF, SETUP) was on.
+ *   - bypass: a mode that drives the surfaces without the gyro (MANUAL, PASSTHROUGH) was on.
  *     The gyro then shows the airframe's open-loop response, not the tune.
  *   - leveling: ANGLE, TRAINER, ATT HOLD or a GPS/failsafe mode was on, so the logged
  *     setpoint (the stick rate) isn't what the PID tracked. On Wingflight logs with F > 0
