@@ -1,8 +1,4 @@
 {
   "branch": "feature/roll-yaw",
-  "date": "2026-10-06T20:18:37Z",
-  "number": 30,
-  "title": "Show roll-yaw coupling and use it in the yaw PID error",
-  "url": "https://github.com/WingFlight/wingflight-blackbox/pull/30",
-  "draft": false
+  "date": "2026-10-06T20:18:37Z"
 }
