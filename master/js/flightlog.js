@@ -519,6 +519,7 @@ function FlightLog(logData) {
         let destChunkIndex;
 
         const sysConfig = that.getSysConfig();
+        const rollYawCoupling = (sysConfig.roll_yaw_coupling || 0) / 100;
 
         if (destChunks.length === 0) {
             return;
@@ -594,6 +595,11 @@ function FlightLog(logData) {
                     if (setpoint && gyroADC) {
                         for (axis = 0; axis < 3; axis++) {
                             let gyroADCdeg = (gyroADC[axis] !== undefined) ? srcFrame[gyroADC[axis]] : 0;
+                            // Wingflight roll-yaw coupling: the yaw loop takes this share of the roll
+                            // rate as yaw the airframe makes by itself and leaves it out of the error
+                            if (axis === AXIS.YAW && rollYawCoupling && gyroADC[AXIS.ROLL] !== undefined) {
+                                gyroADCdeg += rollYawCoupling * srcFrame[gyroADC[AXIS.ROLL]];
+                            }
                             destFrame[fieldIndex++] = srcFrame[setpoint[axis]] - gyroADCdeg;
                         }
                     }
