@@ -115,6 +115,13 @@
       "type": "snapshot",
       "name": "0.0.11",
       "path": "./snapshot/0.0.11/"
+    },
+    {
+      "type": "branch",
+      "name": "feature-roll-yaw",
+      "path": "./feature-roll-yaw/",
+      "branch": "feature/roll-yaw",
+      "date": "2026-10-06T20:18:37Z"
     }
   ]
 }
