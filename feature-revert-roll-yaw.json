@@ -1,4 +1,8 @@
 {
   "branch": "feature/revert-roll-yaw",
-  "date": "2026-10-06T20:56:42Z"
+  "date": "2026-10-06T20:56:42Z",
+  "number": 31,
+  "title": "Revert roll-yaw coupling in the yaw PID error",
+  "url": "https://github.com/WingFlight/wingflight-blackbox/pull/31",
+  "draft": false
 }
