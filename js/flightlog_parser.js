@@ -397,7 +397,6 @@ var FlightLogParser = function(logData) {
             iterm_relax: [null, null, null],        // I-term Relax score 1-10 (Wingflight 22.9+, replaces iterm_relax_cutoff)
             bounceback: [null, null, null],         // Same score, as early 22.9 builds named the header
             error_limit: [null, null, null],        // Error Limit
-            roll_yaw_coupling: null,                // Roll-yaw coupling, signed percent of roll rate (Wingflight)
             iterm_decay: [null, null],              // I-term Decay: time, max rate (Wingflight 22.7+: roll, pitch, yaw time in 0.01 s, then max rate)
             error_decay_ground: null,               // Ground Error Decay
             cyclic_coupling: [null, null, null],          // Cyclic Cross-Coupling
@@ -1022,11 +1021,6 @@ var FlightLogParser = function(logData) {
             case "level_damping":
                 // Wingflight 22.13+: Angle mode damping, shown as the third LEVEL value
                 that.sysConfig.levelPID[2] = parseInt(fieldValue, 10);
-            break;
-            case "roll_yaw_coupling":
-                // Wingflight: percent of the roll rate the airframe yaws by itself, positive
-                // against the roll. The yaw loop does not fight it, see injectComputedFields().
-                that.sysConfig.roll_yaw_coupling = parseInt(fieldValue, 10);
             break;
             /* End of CSV packed values */
 

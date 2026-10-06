@@ -921,7 +921,6 @@ function HeaderDialog(dialog, onSave) {
         setParameter('iterm_relax_level_r', sysConfig.iterm_relax_level[0], 0);
         setParameter('iterm_relax_level_p', sysConfig.iterm_relax_level[1], 0);
         setParameter('iterm_relax_level_y', sysConfig.iterm_relax_level[2], 0);
-        setParameter('roll_yaw_coupling', sysConfig.roll_yaw_coupling, 0);
 
         // iterm_decay is "roll,pitch,yaw,max rate" with the times in 0.01 s on
         // Wingflight API 22.7+, and "time,max rate" with one time in 0.1 s for
