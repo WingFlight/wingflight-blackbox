@@ -1,3 +1,7 @@
+# 0.0.34
+
+Version bump for release alignment; no blackbox-relevant changes this cycle.
+
 # 0.0.33
 
 Name the raw-stick mode PASSTHROUGH and GYRO OFF MANUAL, matching the 0.0.33 firmware. The GYRO OFF Response lab is now MANUAL Response.
