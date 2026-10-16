@@ -131,7 +131,11 @@
       "name": "feature-tv-gains",
       "path": "./feature-tv-gains/",
       "branch": "feature/tv-gains",
-      "date": "2026-10-16T22:29:03Z"
+      "date": "2026-10-16T22:29:03Z",
+      "number": 33,
+      "title": "Show the thrust vector tune and effective PID gains in the log header",
+      "url": "https://github.com/WingFlight/wingflight-blackbox/pull/33",
+      "draft": false
     }
   ]
 }
