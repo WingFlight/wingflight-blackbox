@@ -283,6 +283,68 @@ function HeaderDialog(dialog, onSave) {
             });
         }
 
+        // Wingflight gain curve scale at |stick deflection| x (0..1000), like the
+        // firmware's pidEvaluateGainCurve(): 1.0 without a curve.
+        function gainCurveScale(curves, index, x) {
+            var curve = index > 0 && curves ? curves[index - 1] : null;
+            if (!curve || curve.count < 2) return 1;
+            var points = curve.points.slice(0, curve.count);
+            if (x <= points[0].x) return points[0].y / 100;
+            if (x >= points[points.length - 1].x) return points[points.length - 1].y / 100;
+            for (var i = 0; i < points.length - 1; i++) {
+                var p0 = points[i], p1 = points[i + 1];
+                if (x >= p0.x && x <= p1.x) {
+                    var t = p1.x !== p0.x ? (x - p0.x) / (p1.x - p0.x) : 0;
+                    return (p0.y + t * (p1.y - p0.y)) / 100;
+                }
+            }
+            return 1;
+        }
+
+        function formatGain(value) {
+            return String(Math.round(value * 100) / 100);
+        }
+
+        // Effective gains at centre stick for each loop, from the Wingflight master_gain,
+        // gain_curve and gain_curve_N headers. Matches flight/pid.c and flight/tv_pid.c:
+        // the main loop's master gain scales P, I and D, the thrust vector loop's scales
+        // P, I, D and F; B is never scaled by it.
+        function renderGainScaling(sysConfig) {
+            var loops = [
+                { label: '', pids: ['rollPID', 'pitchPID', 'yawPID'], master: sysConfig.master_gain,
+                  curve: sysConfig.gain_curve, scaled: [true, true, true, false, false] },
+                { label: 'TV ', pids: ['tvRollPID', 'tvPitchPID', 'tvYawPID'], master: sysConfig.tv_master_gain,
+                  curve: sysConfig.tv_gain_curve, scaled: [true, true, true, true, false] },
+            ];
+            var axes = ['Roll', 'Pitch', 'Yaw'];
+            var elem = '';
+
+            loops.forEach(function(loop) {
+                if (!Array.isArray(loop.master)) return;
+                axes.forEach(function(axisName, axis) {
+                    var pid = sysConfig[loop.pids[axis]];
+                    if (!Array.isArray(pid)) return;
+                    var curveIndex = Array.isArray(loop.curve) ? loop.curve[axis] : 0;
+                    var curveScale = gainCurveScale(sysConfig.gainCurves, curveIndex, 0);
+                    var scale = loop.master[axis] / 100 * curveScale;
+                    var curveLabel = curveIndex > 0
+                        ? 'Curve ' + curveIndex + ' (' + Math.round(curveScale * 100) + '%)'
+                        : 'Flat';
+                    elem += '<tr><td>' + loop.label + axisName + '</td>' +
+                        '<td>' + loop.master[axis] + '%</td>' +
+                        '<td>' + curveLabel + '</td>';
+                    for (var term = 0; term < 5; term++) {
+                        var base = pid[term] || 0;
+                        elem += '<td>' + formatGain(loop.scaled[term] ? base * scale : base) + '</td>';
+                    }
+                    elem += '</tr>';
+                });
+            });
+
+            $('.gain_scaling table tbody').empty().append(elem);
+            $('.gain_scaling').toggle(elem !== '');
+        }
+
         function _isFeatureEnabled(name, list, value) {
                 for (var i = 0; i < list.length; i++) {
                         if (list[i].name == name && (value & 1<<list[i].bit)) {
@@ -705,6 +767,13 @@ function HeaderDialog(dialog, onSave) {
         populatePID('pitchPID'                                        , sysConfig.pitchPID);
         populatePID('yawPID'                                        , sysConfig.yawPID);
         populatePID('govPID'                                        , sysConfig.govPID);
+
+        // Wingflight thrust vector loop, only in logs that carry its tune
+        $('#pid_tv_header, #pid_tv').toggle(Array.isArray(sysConfig.tvRollPID));
+        populatePID('tvRollPID'                     , sysConfig.tvRollPID);
+        populatePID('tvPitchPID'                    , sysConfig.tvPitchPID);
+        populatePID('tvYawPID'                      , sysConfig.tvYawPID);
+        renderGainScaling(sysConfig);
 
         // Removed since GPS Rescue
         if (semver.lt(sysConfig.firmwareVersion, "3.4.0")) {

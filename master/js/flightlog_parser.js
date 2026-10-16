@@ -315,6 +315,15 @@ var FlightLogParser = function(logData) {
             posrPID:[null, null, null],             // Position Rate [P, I, D]
             navrPID:[null, null, null],             // Nav Rate      [P, I, D]
             levelPID:[null, null, null],            // Angle Mode    [strength, limit, damping]
+            // Wingflight gain scaling and thrust vector tune. null when the log doesn't have them.
+            master_gain:null,                       // Master gain [ROLL, PITCH, YAW], percent
+            gain_curve:null,                        // Master gain curve [ROLL, PITCH, YAW], 0 = none, else 1..8
+            tvRollPID:null,                         // Thrust vector Roll  [P, I, D, F, B]
+            tvPitchPID:null,                        // Thrust vector Pitch [P, I, D, F, B]
+            tvYawPID:null,                          // Thrust vector Yaw   [P, I, D, F, B]
+            tv_master_gain:null,                    // Thrust vector master gain [ROLL, PITCH, YAW], percent
+            tv_gain_curve:null,                     // Thrust vector master gain curve [ROLL, PITCH, YAW]
+            gainCurves:null,                        // gain_curve_1..8: [{count, points: [{x, y}]}]
             magPID:null,                            // Magnetometer   P
             velPID:[null, null, null],              // Velocity      [P, I, D]
             yaw_p_limit:null,                       // Yaw P Limit
@@ -998,11 +1007,36 @@ var FlightLogParser = function(logData) {
             case "gyro_rpm_filter_bank_rpm_source":
             case "gyro_rpm_filter_bank_rpm_limit":
             case "gyro_rpm_filter_bank_notch_q":
-            // loiter_radius, loiter_direction, rth_altitude, min_sats, max_bank_angle,
-            // max_pitch_angle, bearing_kp, altitude_kp, altitude_kd, throttle, turn_coordination
+            case "master_gain":
+            case "gain_curve":
+            case "tvRollPID":
+            case "tvPitchPID":
+            case "tvYawPID":
+            case "tv_master_gain":
+            case "tv_gain_curve":
             case "gps_nav":
+                // gps_nav: loiter_radius, loiter_direction, rth_altitude, min_sats, max_bank_angle,
+                // max_pitch_angle, bearing_kp, altitude_kp, altitude_kd, throttle, turn_coordination
                     that.sysConfig[fieldName] = parseCommaSeparatedString(fieldValue);
             break;
+            // Wingflight gain curve: point count, then x,y for each point slot
+            case "gain_curve_1":
+            case "gain_curve_2":
+            case "gain_curve_3":
+            case "gain_curve_4":
+            case "gain_curve_5":
+            case "gain_curve_6":
+            case "gain_curve_7":
+            case "gain_curve_8": {
+                var curveValues = parseCommaSeparatedString(fieldValue);
+                var curve = { count: curveValues[0], points: [] };
+                for (var p = 1; p + 1 < curveValues.length; p += 2) {
+                    curve.points.push({ x: curveValues[p], y: curveValues[p + 1] });
+                }
+                if (that.sysConfig.gainCurves == null) that.sysConfig.gainCurves = [];
+                that.sysConfig.gainCurves[parseInt(fieldName.slice(11), 10) - 1] = curve;
+            break;
+            }
             case "error_decay":
                     // Backward compatibility for logs recorded before this header
                     // was renamed to iterm_decay.
