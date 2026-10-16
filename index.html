@@ -754,6 +754,84 @@
                                             </tr>
                                         </table>
 
+                                        <!-- Wingflight: thrust vector loop and gain scaling, hidden for logs without these headers -->
+                                        <table id="pid_tv_header" class="parameter cf">
+                                            <thead>
+                                                <tr>
+                                                    <th>Thrust Vector PID Values</th>
+                                                </tr>
+                                            </thead>
+                                        </table>
+                                        <table id="pid_tv" class="pid_tuning">
+                                            <tr class="pid_labels">
+                                                <th name="Blank">
+                                                    <label>&nbsp;</label>
+                                                </th>
+                                                <th name="Proportional">
+                                                    <label>Proportional</label>
+                                                </th>
+                                                <th name="Integral">
+                                                    <label>Integral</label>
+                                                </th>
+                                                <th name="Derivative">
+                                                    <label>Derivative</label>
+                                                </th>
+                                                <th name="Feedforward">
+                                                    <label>Feedforward</label>
+                                                </th>
+                                                <th name="Boost">
+                                                    <label>Boost</label>
+                                                </th>
+                                            </tr>
+                                            <tr class="tvRollPID">
+                                                <td>Roll</td>
+                                                <td><input type="text" name="p" step="1" min="0" max="255" /></td>
+                                                <td><input type="text" name="i" step="1" min="0" max="255" /></td>
+                                                <td><input type="text" name="d" step="1" min="0" max="255" /></td>
+                                                <td><input type="text" name="f" step="1" min="0" max="255" /></td>
+                                                <td><input type="text" name="b" step="1" min="0" max="255" /></td>
+                                            </tr>
+                                            <tr class="tvPitchPID">
+                                                <td>Pitch</td>
+                                                <td><input type="text" name="p" step="1" min="0" max="255" /></td>
+                                                <td><input type="text" name="i" step="1" min="0" max="255" /></td>
+                                                <td><input type="text" name="d" step="1" min="0" max="255" /></td>
+                                                <td><input type="text" name="f" step="1" min="0" max="255" /></td>
+                                                <td><input type="text" name="b" step="1" min="0" max="255" /></td>
+                                            </tr>
+                                            <tr class="tvYawPID">
+                                                <td>Yaw</td>
+                                                <td><input type="text" name="p" step="1" min="0" max="255" /></td>
+                                                <td><input type="text" name="i" step="1" min="0" max="255" /></td>
+                                                <td><input type="text" name="d" step="1" min="0" max="255" /></td>
+                                                <td><input type="text" name="f" step="1" min="0" max="255" /></td>
+                                                <td><input type="text" name="b" step="1" min="0" max="255" /></td>
+                                            </tr>
+                                        </table>
+
+                                        <div class="gain_scaling">
+                                            <table class="parameter cf">
+                                                <thead>
+                                                    <tr>
+                                                        <th scope="row" colspan="8">Effective PID Values (centre stick)</th>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>Axis</td>
+                                                        <td>Master</td>
+                                                        <td>Curve</td>
+                                                        <td>P</td>
+                                                        <td>I</td>
+                                                        <td>D</td>
+                                                        <td>F</td>
+                                                        <td>B</td>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                </tbody>
+                                            </table>
+                                            <p class="gain_scaling_note">Main loop P, D, F and B are also scaled in flight by throttle (TPA) and GPS speed (SPA) attenuation. The thrust vector loop has neither.</p>
+                                        </div>
+
                                         <table id="pid_gov_header" class="parameter cf">
                                             <thead>
                                                 <tr>
