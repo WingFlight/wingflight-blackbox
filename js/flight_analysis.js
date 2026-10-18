@@ -918,7 +918,7 @@ var FlightAnalysis = (function() {
     function analyzeThrustVectorLab(ctx) {
         var haveTv = false;
         for (var a = 0; a < 3; a++) if (ctx.columns["tvAxisP[" + a + "]"]) haveTv = true;
-        if (!haveTv) return insufficient("No Thrust Vector data was logged for this flight (feature not enabled, or this firmware doesn't log it yet).");
+        if (!haveTv) return insufficient("No Thrust Vector data was logged for this flight (no mixer rule uses a TV input, the THRUST_VECTOR feature was off on older firmware, or this firmware doesn't log it yet).");
         if (ctx.stable.stableSampleCount < MIN_STABLE_SAMPLES) return insufficient(ctx.stable.reason);
 
         var idx = ctx.stable.stableIndexes;
