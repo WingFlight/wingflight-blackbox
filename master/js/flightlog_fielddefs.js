@@ -394,7 +394,8 @@ var
     // Same bit layout as FLIGHT_LOG_FEATURES_RF_4_3 -- wingflight-firmware kept
     // the old FEATURE_GOVERNOR bit reserved as FEATURE_UNUSED_26 rather than
     // renumbering (src/main/config/feature.h), so this must stay positional.
-    // Bit 24 was also repurposed, from unused to FEATURE_THRUST_VECTOR.
+    // Bit 24 was also repurposed, from unused to FEATURE_THRUST_VECTOR, and is unused
+    // again since Thrust Vector became always available. The name stays for older logs.
     FLIGHT_LOG_FEATURES_WF = makeReadOnly([
         'RX_PPM',
         'UNUSED1',
