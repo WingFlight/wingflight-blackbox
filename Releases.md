@@ -1,3 +1,7 @@
+# 0.0.36
+
+Show the Thrust Vector PIDs and an Effective PID Values table for both loops in the log header dialog, for logs from 0.0.36 firmware.
+
 # 0.0.35
 
 Version bump for release alignment; no blackbox-relevant changes this cycle.
