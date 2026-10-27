@@ -1,3 +1,7 @@
+# 0.0.38
+
+Version bump for release alignment; no blackbox-relevant changes this cycle.
+
 # 0.0.37
 
 Explain a log with no Thrust Vector data the 0.0.37 firmware's way: Thrust Vector terms are logged when a mixer rule uses a Thrust Vector input.
