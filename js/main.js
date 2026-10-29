@@ -1493,7 +1493,7 @@ function BlackboxLogViewer() {
         });
 
         $(".open-header-dialog").click(function(e) {
-            headerDialog.show(flightLog.getSysConfig());
+            headerDialog.show(flightLog.getSysConfig(), flightLog.getBankSwitchesAtTime(currentBlackboxTime), flightLog.getMinTime());
             e.preventDefault();
         });
 
@@ -2062,7 +2062,7 @@ function BlackboxLogViewer() {
 
                     case "H".charCodeAt(0):
                         if(!(shifted)) {
-                            headerDialog.show(flightLog.getSysConfig());
+                            headerDialog.show(flightLog.getSysConfig(), flightLog.getBankSwitchesAtTime(currentBlackboxTime), flightLog.getMinTime());
                             e.preventDefault();
                         }
                         break;
