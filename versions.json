@@ -140,6 +140,17 @@
       "type": "snapshot",
       "name": "0.0.11",
       "path": "./snapshot/0.0.11/"
+    },
+    {
+      "type": "pr",
+      "name": "35",
+      "path": "./pr/35/",
+      "branch": "header-bank-notice",
+      "date": "2026-10-29T01:13:04Z",
+      "number": 35,
+      "title": "Show active bank in the log header dialog",
+      "url": "https://github.com/WingFlight/wingflight-blackbox/pull/35",
+      "draft": false
     }
   ]
 }
