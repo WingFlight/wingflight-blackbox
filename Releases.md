@@ -1,3 +1,7 @@
+# 0.0.39
+
+Version bump for release alignment; no blackbox-relevant changes this cycle.
+
 # 0.0.38
 
 Version bump for release alignment; no blackbox-relevant changes this cycle.
