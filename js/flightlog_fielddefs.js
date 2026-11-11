@@ -292,6 +292,7 @@ var
         'THRUSTVECTOR',
         'TVHOLD',
         'TRADITIONAL',
+        'AUTOGAIN',
     ]),
 
     FLIGHT_LOG_FEATURES = [],
@@ -959,6 +960,8 @@ var
         "GAIN_ATTEN",
         "SNAP_RELAX",
         "PROP_HANG",
+        "FBUS",
+        "AUTO_GAIN",
     ]),
 
     SUPER_EXPO_YAW = makeReadOnly([

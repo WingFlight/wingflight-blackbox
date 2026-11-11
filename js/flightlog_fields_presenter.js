@@ -746,6 +746,16 @@ function FlightLogFieldPresenter() {
             'debug[4]':'Altitude Estimate',
             'debug[5]':'Rate Flight',
         },
+        // Wingflight auto gain: P and D of an axis scaled down while it oscillates
+        'AUTO_GAIN' : {
+            'debug[all]':'Auto Gain',
+            'debug[0]':'Roll Gain',
+            'debug[1]':'Pitch Gain',
+            'debug[2]':'Yaw Gain',
+            'debug[3]':'Roll Feedback',
+            'debug[4]':'Pitch Feedback',
+            'debug[5]':'Yaw Feedback',
+        },
     };
 
     let DEBUG_FRIENDLY_FIELD_NAMES = null;
@@ -1536,6 +1546,17 @@ function FlightLogFieldPresenter() {
                             return value ? 'Yes' : 'No';
                         case 'debug[5]':
                             return value ? 'Rate' : 'Leveling/hold';
+                    }
+                    break;
+                case 'AUTO_GAIN':
+                    switch (fieldName) {
+                        case 'debug[0]': // gain scale x1000
+                        case 'debug[1]':
+                        case 'debug[2]':
+                        case 'debug[3]': // high-passed P + D x1000, 1000 = full surface travel
+                        case 'debug[4]':
+                        case 'debug[5]':
+                            return (value / 10).toFixed(1) + "%";
                     }
                     break;
             }
