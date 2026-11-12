@@ -959,6 +959,7 @@ var
         "GAIN_ATTEN",
         "SNAP_RELAX",
         "PROP_HANG",
+        "FBUS",
     ]),
 
     SUPER_EXPO_YAW = makeReadOnly([
