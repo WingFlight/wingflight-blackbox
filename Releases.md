@@ -1,3 +1,7 @@
+# 0.0.42
+
+Add the FBUS debug mode name.
+
 # 0.0.41
 
 Version bump for release alignment; no blackbox-relevant changes this cycle.
