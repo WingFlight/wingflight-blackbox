@@ -1,3 +1,8 @@
+# 0.0.43
+
+Add opening a shared log from a link (?log=<url>&cli=<url>), as the "Open in Blackbox Explorer" button on logs.rotorflight.org and logs.wingflight.org does, with download progress.
+Fix CLI dump lines and log header field names being inserted as HTML; they are shown as text.
+
 # 0.0.42
 
 Add the FBUS debug mode name.
