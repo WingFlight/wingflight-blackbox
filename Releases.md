@@ -1,3 +1,7 @@
+# 0.0.44
+
+Version bump for release alignment; no blackbox-relevant changes this cycle.
+
 # 0.0.43
 
 Add opening a shared log from a link (?log=<url>&cli=<url>), as the "Open in Blackbox Explorer" button on logs.rotorflight.org and logs.wingflight.org does, with download progress.
